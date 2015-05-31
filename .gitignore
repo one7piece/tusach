@@ -1,0 +1,6 @@
+server/pkg/*
+server/library/books
+server/library/parser
+client/GTusach/gwt-unitCache
+client/GTusach/war/WEB-INF
+
