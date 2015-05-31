@@ -14,6 +14,7 @@ type Configuration struct {
 	ServerBindAddress string `json:serverBindAddress`
 	ServerBindPort    int    `json:serverBindPort`
 	MaxActionBooks    int    `json:maxActiveBooks`
+	SupportedSites    string `json:supportedSites`
 }
 
 var configFile string

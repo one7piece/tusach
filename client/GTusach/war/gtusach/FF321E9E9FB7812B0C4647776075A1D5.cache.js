@@ -3,7 +3,7 @@ var __gwtModuleFunction = $wnd.gtusach;
 var $sendStats = __gwtModuleFunction.__sendStats;
 $sendStats('moduleStartup', 'moduleEvalStart');
 var $gwt_version = "2.7.0";
-var $strongName = '75E0C99ABE92118D51171C9BCD1F0097';
+var $strongName = 'FF321E9E9FB7812B0C4647776075A1D5';
 var $gwt = {};
 var $doc = $wnd.document;
 var $moduleName, $moduleBase;
@@ -22,7 +22,7 @@ var $stats = $wnd.__gwtStatsEvent ? function(a) {
 return $wnd.__gwtStatsEvent && $wnd.__gwtStatsEvent(a);
 } : null;
 var $sessionId = $wnd.__gwtStatsSessionId ? $wnd.__gwtStatsSessionId : null;
-var $intern_0 = 2147483647, $intern_1 = {30:1, 198:1}, $intern_2 = 4194303, $intern_3 = 1048575, $intern_4 = {3:1, 6:1}, $intern_5 = {25:1, 32:1, 77:1}, $intern_6 = {3:1}, $intern_7 = {20:1, 12:1, 18:1, 17:1, 21:1, 13:1, 11:1}, $intern_8 = {194:1, 30:1}, $intern_9 = {155:1, 30:1}, $intern_10 = {191:1, 30:1}, $intern_11 = {193:1, 30:1}, $intern_12 = 3.141592653589793, $intern_13 = {3:1, 9:1}, $intern_14 = {3:1, 8:1, 9:1}, $intern_15 = {3:1, 8:1, 10:1, 9:1}, $intern_16 = {3:1, 6:1, 510:1}, $intern_17 = 65535, $intern_18 = {16:1, 7:1, 3:1, 5:1, 4:1}, $intern_19 = {22:1, 7:1, 3:1, 5:1, 4:1}, $intern_20 = {7:1, 60:1, 3:1, 5:1, 4:1}, $intern_21 = {7:1, 61:1, 3:1, 5:1, 4:1}, $intern_22 = {7:1, 62:1, 3:1, 5:1, 4:1}, $intern_23 = {35:1, 3:1, 5:1, 4:1}, $intern_24 = {7:1, 98:1, 3:1, 5:1, 4:1}, $intern_25 = {7:1, 52:1, 3:1, 5:1, 4:1}, $intern_26 = {12:1}, $intern_27 = {82:1, 3:1, 8:1, 10:1, 9:1}, $intern_28 = 524288, $intern_29 = 4194304, $intern_30 = 17592186044416, $intern_31 = -9223372036854775808, $intern_32 = 1000000000, $intern_33 = -2147483648, $intern_34 = {3:1, 6:1, 192:1}, $intern_35 = {128:1, 3:1}, $intern_36 = 65536, $intern_37 = 16777216, $intern_38 = 33554432, $intern_39 = 67108864, $intern_40 = {20:1, 12:1, 18:1, 17:1, 38:1, 21:1, 13:1, 11:1}, $intern_41 = {20:1, 12:1, 18:1, 17:1, 38:1, 21:1, 63:1, 13:1, 11:1}, $intern_42 = {27:1}, $intern_43 = {20:1, 12:1, 18:1, 17:1, 38:1, 21:1, 120:1, 13:1, 11:1}, $intern_44 = {59:1, 3:1, 5:1, 4:1}, $intern_45 = {23:1, 3:1, 5:1, 4:1}, $intern_46 = {48:1}, $intern_47 = {55:1}, $intern_48 = {29:1, 56:1}, $intern_49 = {24:1}, $intern_50 = {29:1, 19:1}, $intern_51 = {27:1, 53:1}, $intern_52 = 0.3010299956639812, $intern_53 = 4294967296, $intern_54 = 1073741824, $intern_55 = {3:1, 29:1, 19:1, 101:1}, $intern_56 = {3:1, 29:1, 56:1};
+var $intern_0 = 2147483647, $intern_1 = {30:1, 198:1}, $intern_2 = 4194303, $intern_3 = 1048575, $intern_4 = {3:1, 6:1}, $intern_5 = {25:1, 32:1, 77:1}, $intern_6 = {3:1}, $intern_7 = {20:1, 12:1, 18:1, 17:1, 21:1, 13:1, 11:1}, $intern_8 = {194:1, 30:1}, $intern_9 = {155:1, 30:1}, $intern_10 = {191:1, 30:1}, $intern_11 = {193:1, 30:1}, $intern_12 = 3.141592653589793, $intern_13 = {3:1, 9:1}, $intern_14 = {3:1, 8:1, 9:1}, $intern_15 = {3:1, 8:1, 10:1, 9:1}, $intern_16 = {3:1, 6:1, 510:1}, $intern_17 = 65535, $intern_18 = {16:1, 7:1, 3:1, 5:1, 4:1}, $intern_19 = {22:1, 7:1, 3:1, 5:1, 4:1}, $intern_20 = {7:1, 61:1, 3:1, 5:1, 4:1}, $intern_21 = {7:1, 62:1, 3:1, 5:1, 4:1}, $intern_22 = {7:1, 63:1, 3:1, 5:1, 4:1}, $intern_23 = {35:1, 3:1, 5:1, 4:1}, $intern_24 = {7:1, 98:1, 3:1, 5:1, 4:1}, $intern_25 = {7:1, 52:1, 3:1, 5:1, 4:1}, $intern_26 = {12:1}, $intern_27 = {82:1, 3:1, 8:1, 10:1, 9:1}, $intern_28 = 524288, $intern_29 = 4194304, $intern_30 = 17592186044416, $intern_31 = -9223372036854775808, $intern_32 = 1000000000, $intern_33 = -2147483648, $intern_34 = {3:1, 6:1, 192:1}, $intern_35 = {128:1, 3:1}, $intern_36 = 65536, $intern_37 = 16777216, $intern_38 = 33554432, $intern_39 = 67108864, $intern_40 = {20:1, 12:1, 18:1, 17:1, 38:1, 21:1, 13:1, 11:1}, $intern_41 = {20:1, 12:1, 18:1, 17:1, 38:1, 21:1, 64:1, 13:1, 11:1}, $intern_42 = {27:1}, $intern_43 = {20:1, 12:1, 18:1, 17:1, 38:1, 21:1, 120:1, 13:1, 11:1}, $intern_44 = {59:1, 3:1, 5:1, 4:1}, $intern_45 = {23:1, 3:1, 5:1, 4:1}, $intern_46 = {48:1}, $intern_47 = {55:1}, $intern_48 = {29:1, 56:1}, $intern_49 = {24:1}, $intern_50 = {29:1, 19:1}, $intern_51 = {27:1, 53:1}, $intern_52 = 0.3010299956639812, $intern_53 = 4294967296, $intern_54 = 1073741824, $intern_55 = {3:1, 29:1, 19:1, 101:1}, $intern_56 = {3:1, 29:1, 56:1};
 var _, initFnList_0, prototypesByTypeId_0 = {}, permutationId = -1;
 function typeMarkerFn(){
 }
@@ -157,7 +157,7 @@ _.toString = function(){
   return this.toString$();
 }
 ;
-stringCastMap = {3:1, 561:1, 5:1, 2:1};
+stringCastMap = {3:1, 563:1, 5:1, 2:1};
 modernizeBrowser();
 function canCast(src_0, dstId){
   return isJavaString(src_0) && !!stringCastMap[dstId] || src_0.castableTypeMap$ && !!src_0.castableTypeMap$[dstId];
@@ -369,7 +369,7 @@ function maybeSetClassLiteral(typeId, clazz){
   prototype_0.___clazz$ = clazz;
 }
 
-defineClass(115, 1, {115:1, 573:1}, Class);
+defineClass(115, 1, {115:1, 575:1}, Class);
 _.createClassLiteralForArray = function createClassLiteralForArray(dimensions){
   var clazz;
   clazz = new Class;
@@ -628,7 +628,7 @@ _.onError = function onError(request, ex){
 _.onResponseReceived = function onResponseReceived(request, response){
   var bean, ex, user;
   try {
-    if (response.xmlHttpRequest.status == 200) {
+    if ($getStatusCode(response) == 200) {
       $info_0(($clinit_BookServiceImpl() , log_1), 'getUser response: ' + response.xmlHttpRequest.responseText);
       bean = decode(this.this$01.factory, Lcom_dv_gtusach_client_model_IUser_2_classLit, response.xmlHttpRequest.responseText);
       user = new User_1(dynamicCast(bean.as(), 57));
@@ -678,7 +678,7 @@ _.onError = function onError_0(request, ex){
 _.onResponseReceived = function onResponseReceived_0(request, response){
   var bean, ex, user;
   try {
-    if (response.xmlHttpRequest.status == 200) {
+    if ($getStatusCode(response) == 200) {
       $info_0(($clinit_BookServiceImpl() , log_1), 'login response: ' + response.xmlHttpRequest.responseText);
       bean = decode(this.this$01.factory, Lcom_dv_gtusach_client_model_IUser_2_classLit, response.xmlHttpRequest.responseText);
       user = new User_1(dynamicCast(bean.as(), 57));
@@ -690,7 +690,7 @@ _.onResponseReceived = function onResponseReceived_0(request, response){
     }
      else {
       $warning_0(($clinit_BookServiceImpl() , log_1), 'Error: ' + response.xmlHttpRequest.statusText);
-      new Exception(response.xmlHttpRequest.statusText + '(' + response.xmlHttpRequest.status + ')');
+      new Exception(response.xmlHttpRequest.statusText + '(' + $getStatusCode(response) + ')');
       $fireEvent_0(($clinit_PropertyChangeEvent$EventTypeEnum() , Authentication), currentUser);
     }
   }
@@ -719,7 +719,7 @@ _.onError = function onError_1(request, ex){
 _.onResponseReceived = function onResponseReceived_1(request, response){
   var bean, ex;
   try {
-    if (response.xmlHttpRequest.status == 200) {
+    if ($getStatusCode(response) == 200) {
       $info_0(($clinit_BookServiceImpl() , log_1), 'logout response: ' + response.xmlHttpRequest.responseText);
       bean = decode(this.this$01.factory, Lcom_dv_gtusach_client_model_IMapData_2_classLit, response.xmlHttpRequest.responseText);
       throwClassCastExceptionUnlessNull(bean.as()).nullMethod().nullMethod();
@@ -752,7 +752,7 @@ _.onError = function onError_2(request, ex){
 _.onResponseReceived = function onResponseReceived_2(request, response){
   var bean, ex;
   try {
-    if (response.xmlHttpRequest.status == 200) {
+    if ($getStatusCode(response) == 200) {
       $info_0(($clinit_BookServiceImpl() , log_1), 'validateSession response: ' + response.xmlHttpRequest.responseText);
       bean = decode(this.this$01.factory, Lcom_dv_gtusach_client_model_IMapData_2_classLit, response.xmlHttpRequest.responseText);
       throwClassCastExceptionUnlessNull(bean.as()).nullMethod().nullMethod();
@@ -787,7 +787,7 @@ _.onError = function onError_3(request, ex){
 _.onResponseReceived = function onResponseReceived_3(request, response){
   var bean, ex, info;
   try {
-    if (response.xmlHttpRequest.status == 200) {
+    if ($getStatusCode(response) == 200) {
       $info_0(($clinit_BookServiceImpl() , log_1), 'SystemInfo response: ' + response.xmlHttpRequest.responseText);
       bean = decode(this.this$01.factory, Lcom_dv_gtusach_client_model_ISystemInfo_2_classLit, response.xmlHttpRequest.responseText);
       info = new SystemInfo(dynamicCast(bean.as(), 78));
@@ -796,7 +796,7 @@ _.onResponseReceived = function onResponseReceived_3(request, response){
     }
      else {
       $warning_0(($clinit_BookServiceImpl() , log_1), 'Error: ' + response.xmlHttpRequest.statusText);
-      new Exception(response.xmlHttpRequest.statusText + '(' + response.xmlHttpRequest.status + ')');
+      new Exception(response.xmlHttpRequest.statusText + '(' + $getStatusCode(response) + ')');
     }
   }
    catch ($e0) {
@@ -826,7 +826,7 @@ _.onResponseReceived = function onResponseReceived_4(request, response){
   list = new ArrayList;
   error = null;
   try {
-    if (response.xmlHttpRequest.status == 200) {
+    if ($getStatusCode(response) == 200) {
       jsonResponse = '{"books": ' + response.xmlHttpRequest.responseText + '}';
       $info_0(($clinit_BookServiceImpl() , log_1), 'getBooks response: +++' + jsonResponse + '+++');
       bean = decode(this.this$01.factory, Lcom_dv_gtusach_client_model_IBookList_2_classLit, jsonResponse);
@@ -837,7 +837,7 @@ _.onResponseReceived = function onResponseReceived_4(request, response){
       }
     }
      else {
-      throw new Exception(response.xmlHttpRequest.statusText + '(' + response.xmlHttpRequest.status + ')');
+      throw new Exception(response.xmlHttpRequest.statusText + '(' + $getStatusCode(response) + ')');
     }
   }
    catch ($e0) {
@@ -866,7 +866,7 @@ _.onError = function onError_5(request, ex){
 _.onResponseReceived = function onResponseReceived_5(request, response){
   var bean, book, ex;
   try {
-    if (response.xmlHttpRequest.status == 200) {
+    if ($getStatusCode(response) == 200) {
       $info_0(($clinit_BookServiceImpl() , log_1), 'create response: ' + response.xmlHttpRequest.responseText);
       bean = decode(this.this$01.factory, Lcom_dv_gtusach_client_model_IBook_2_classLit, response.xmlHttpRequest.responseText);
       book = new Book_1(dynamicCast(bean.as(), 36));
@@ -875,7 +875,7 @@ _.onResponseReceived = function onResponseReceived_5(request, response){
     }
      else {
       $warning_0(($clinit_BookServiceImpl() , log_1), 'Error: ' + response.xmlHttpRequest.statusText);
-      $onFailure(this.val$callback2, new Exception(response.xmlHttpRequest.statusText + '(' + response.xmlHttpRequest.status + ')'));
+      $onFailure(this.val$callback2, new Exception(response.xmlHttpRequest.statusText + '(' + $getStatusCode(response) + ')'));
     }
   }
    catch ($e0) {
@@ -904,13 +904,13 @@ _.onError = function onError_6(request, ex){
 _.onResponseReceived = function onResponseReceived_6(request, response){
   var ex;
   try {
-    if (response.xmlHttpRequest.status == 200) {
+    if ($getStatusCode(response) == 200) {
       $info_0(($clinit_BookServiceImpl() , log_1), this.val$url2 + ' - response: ' + response.xmlHttpRequest.responseText);
       this.val$callback3.onSuccess(null);
     }
      else {
       $warning_0(($clinit_BookServiceImpl() , log_1), 'Error: ' + response.xmlHttpRequest.statusText);
-      this.val$callback3.onFailure(new Exception(response.xmlHttpRequest.statusText + '(' + response.xmlHttpRequest.status + ')'));
+      this.val$callback3.onFailure(new Exception(response.xmlHttpRequest.statusText + '(' + $getStatusCode(response) + ')'));
     }
   }
    catch ($e0) {
@@ -1016,8 +1016,8 @@ function $maybeInitializeEnumMap(this$static){
   }
 }
 
-defineClass(553, 1, {});
-var Lcom_google_web_bindery_autobean_gwt_client_impl_AbstractAutoBeanFactory_2_classLit = createForClass('com.google.web.bindery.autobean.gwt.client.impl', 'AbstractAutoBeanFactory', 553);
+defineClass(554, 1, {});
+var Lcom_google_web_bindery_autobean_gwt_client_impl_AbstractAutoBeanFactory_2_classLit = createForClass('com.google.web.bindery.autobean.gwt.client.impl', 'AbstractAutoBeanFactory', 554);
 function $getConstructors_com_dv_gtusach_client_model_IBook(){
   return [function(factory){
     return new IBookAutoBean(factory);
@@ -1092,8 +1092,8 @@ function $initializeCreatorMap(map_0){
 function MyAutoBeanFactoryImpl(){
 }
 
-defineClass(441, 553, {}, MyAutoBeanFactoryImpl);
-var Lcom_dv_gtusach_client_MyAutoBeanFactoryImpl_2_classLit = createForClass('com.dv.gtusach.client', 'MyAutoBeanFactoryImpl', 441);
+defineClass(442, 554, {}, MyAutoBeanFactoryImpl);
+var Lcom_dv_gtusach_client_MyAutoBeanFactoryImpl_2_classLit = createForClass('com.dv.gtusach.client', 'MyAutoBeanFactoryImpl', 442);
 defineClass(535, 1, {});
 _.onStop = function onStop(){
 }
@@ -1283,7 +1283,7 @@ function MainActivity$2(this$0){
   this.this$01 = this$0;
 }
 
-defineClass(427, 1, {568:1, 30:1}, MainActivity$2);
+defineClass(427, 1, {570:1, 30:1}, MainActivity$2);
 var Lcom_dv_gtusach_client_activity_MainActivity$2_2_classLit = createForClass('com.dv.gtusach.client.activity', 'MainActivity/2', 427);
 function $onFailure(this$static, caught){
   var errorMsg;
@@ -1507,7 +1507,7 @@ function PropertyChangeEvent(eventType, name_0, value_0, errorMessage){
 
 defineClass(125, 514, {}, PropertyChangeEvent);
 _.dispatch_0 = function dispatch_0(handler){
-  $dispatch(this, dynamicCast(handler, 568));
+  $dispatch(this, dynamicCast(handler, 570));
 }
 ;
 _.getAssociatedType_0 = function getAssociatedType_0(){
@@ -1877,7 +1877,7 @@ function IBookAutoBean_0(factory, wrapped){
   $$init_0(this);
 }
 
-defineClass(557, 32, $intern_5, IBookAutoBean, IBookAutoBean_0);
+defineClass(559, 32, $intern_5, IBookAutoBean, IBookAutoBean_0);
 _.as = function as_0(){
   return this.shim;
 }
@@ -1937,7 +1937,7 @@ _.traverseProperties = function traverseProperties(visitor, ctx){
   visitor.visitValueProperty('lastUpdatedTime', value_0, propertyContext);
 }
 ;
-var Lcom_dv_gtusach_client_model_IBookAutoBean_2_classLit = createForClass('com.dv.gtusach.client.model', 'IBookAutoBean', 557);
+var Lcom_dv_gtusach_client_model_IBookAutoBean_2_classLit = createForClass('com.dv.gtusach.client.model', 'IBookAutoBean', 559);
 function $getAuthor(this$static){
   var toReturn;
   toReturn = dynamicCast($getWrapped(this$static.this$01), 36).getAuthor();
@@ -2184,7 +2184,7 @@ function IBookListAutoBean_0(factory, wrapped){
   $$init_1(this);
 }
 
-defineClass(558, 32, $intern_5, IBookListAutoBean, IBookListAutoBean_0);
+defineClass(560, 32, $intern_5, IBookListAutoBean, IBookListAutoBean_0);
 _.as = function as_1(){
   return this.shim;
 }
@@ -2205,7 +2205,7 @@ _.traverseProperties = function traverseProperties_0(visitor, ctx){
   visitor.visitReferenceProperty('books', bean, propertyContext) && !!bean && $traverse(bean, visitor, ctx);
 }
 ;
-var Lcom_dv_gtusach_client_model_IBookListAutoBean_2_classLit = createForClass('com.dv.gtusach.client.model', 'IBookListAutoBean', 558);
+var Lcom_dv_gtusach_client_model_IBookListAutoBean_2_classLit = createForClass('com.dv.gtusach.client.model', 'IBookListAutoBean', 560);
 function $getBooks_0(this$static){
   var toReturn;
   toReturn = dynamicCast($getWrapped(this$static.this$01), 114).getBooks();
@@ -2261,7 +2261,7 @@ function ISystemInfoAutoBean_0(factory, wrapped){
   $$init_2(this);
 }
 
-defineClass(559, 32, $intern_5, ISystemInfoAutoBean, ISystemInfoAutoBean_0);
+defineClass(561, 32, $intern_5, ISystemInfoAutoBean, ISystemInfoAutoBean_0);
 _.as = function as_2(){
   return this.shim;
 }
@@ -2288,7 +2288,7 @@ _.traverseProperties = function traverseProperties_1(visitor, ctx){
   visitor.visitValueProperty('systemUpTime', value_0, propertyContext);
 }
 ;
-var Lcom_dv_gtusach_client_model_ISystemInfoAutoBean_2_classLit = createForClass('com.dv.gtusach.client.model', 'ISystemInfoAutoBean', 559);
+var Lcom_dv_gtusach_client_model_ISystemInfoAutoBean_2_classLit = createForClass('com.dv.gtusach.client.model', 'ISystemInfoAutoBean', 561);
 function $getBookLastUpdateTime(this$static){
   var toReturn;
   toReturn = dynamicCast($getWrapped(this$static.this$01), 78).getBookLastUpdateTime();
@@ -2371,7 +2371,7 @@ function IUserAutoBean_0(factory, wrapped){
   $$init_3(this);
 }
 
-defineClass(560, 32, $intern_5, IUserAutoBean, IUserAutoBean_0);
+defineClass(562, 32, $intern_5, IUserAutoBean, IUserAutoBean_0);
 _.as = function as_3(){
   return this.shim;
 }
@@ -2404,7 +2404,7 @@ _.traverseProperties = function traverseProperties_2(visitor, ctx){
   visitor.visitValueProperty('lastLogonTime', value_0, propertyContext);
 }
 ;
-var Lcom_dv_gtusach_client_model_IUserAutoBean_2_classLit = createForClass('com.dv.gtusach.client.model', 'IUserAutoBean', 560);
+var Lcom_dv_gtusach_client_model_IUserAutoBean_2_classLit = createForClass('com.dv.gtusach.client.model', 'IUserAutoBean', 562);
 function $getLastLogonTime(this$static){
   var toReturn;
   toReturn = dynamicCast($getWrapped(this$static.this$01), 57).getLastLogonTime();
@@ -2586,7 +2586,7 @@ function User_2(){
   this.role = '';
 }
 
-defineClass(66, 1, {57:1}, User_0, User_1, User_2);
+defineClass(60, 1, {57:1}, User_0, User_1, User_2);
 _.getLastLogonTime = function getLastLogonTime_1(){
   return this.lastLogonTime;
 }
@@ -2612,7 +2612,7 @@ _.toString$ = function toString_10(){
 }
 ;
 _.sessionId = '';
-var Lcom_dv_gtusach_client_model_User_2_classLit = createForClass('com.dv.gtusach.client.model', 'User', 66);
+var Lcom_dv_gtusach_client_model_User_2_classLit = createForClass('com.dv.gtusach.client.model', 'User', 60);
 function $getActivity(place){
   if (instanceOf(place, 69))
     return new MainActivity(dynamicCast(place, 69));
@@ -2689,12 +2689,12 @@ var Lcom_dv_gtusach_client_place_LogonPlace_2_classLit = createForClass('com.dv.
 function LogonPlace$Tokenizer(){
 }
 
-defineClass(333, 1, {}, LogonPlace$Tokenizer);
+defineClass(332, 1, {}, LogonPlace$Tokenizer);
 _.getPlace = function getPlace(token){
   return new LogonPlace(token);
 }
 ;
-var Lcom_dv_gtusach_client_place_LogonPlace$Tokenizer_2_classLit = createForClass('com.dv.gtusach.client.place', 'LogonPlace/Tokenizer', 333);
+var Lcom_dv_gtusach_client_place_LogonPlace$Tokenizer_2_classLit = createForClass('com.dv.gtusach.client.place', 'LogonPlace/Tokenizer', 332);
 function MainPlace(token){
   $clinit_Place();
   this.name_0 = token;
@@ -3121,6 +3121,7 @@ function $createNewBook(this$static){
   newBook.title_0 = title_0;
   newBook.maxNumPages = numPages;
   newBook.startPageUrl = url_0;
+  $setCreatedBy(newBook, (this$static.listener?($clinit_BookServiceImpl() , currentUser):new User_0).name_0);
   $create_1(this$static.listener, newBook);
   $setText_2(this$static.textURL, '');
   $setText_2(this$static.textTitle, '');
@@ -3316,7 +3317,7 @@ function $updateBook(this$static, row, book){
     $setText_0(this$static.bookListTable, row, 1, book.title_0);
     $setText_0(this$static.bookListTable, row, 2, book.status_0?$name(book.status_0):$name(NONE));
     $setText_0(this$static.bookListTable, row, 3, (pageStr = book.currentPageNo + '/' , book.maxNumPages > 0?(pageStr += book.maxNumPages):(pageStr += 'end') , pageStr));
-    book.lastUpdatedTime?$setText_0(this$static.bookListTable, row, 4, $toString_3(book.lastUpdatedTime)):$setText_0(this$static.bookListTable, row, 4, '');
+    book.lastUpdatedTime?$setText_0(this$static.bookListTable, row, 4, book.createdBy + '/' + $toString_3(book.lastUpdatedTime)):$setText_0(this$static.bookListTable, row, 4, book.createdBy + '/?');
     $setText_0(this$static.bookListTable, row, 5, book.errorMsg);
     $setText_0(this$static.bookListTable, row, 6, book.currentPageUrl);
   }
@@ -3372,7 +3373,7 @@ function GTusachViewImpl(){
   user = this.listener?($clinit_BookServiceImpl() , currentUser):new User_0;
   !user || user.sessionId != null && user.sessionId.length > 0?$setVisible(this.createPanel, false):$setVisible(this.createPanel, false);
   $initScriptPanel(this);
-  $setValue(this.showBookDetails, ($clinit_Boolean() , $clinit_Boolean() , FALSE));
+  $setValue_0(this.showBookDetails, ($clinit_Boolean() , $clinit_Boolean() , FALSE));
   $addDomHandler(this.showBookDetails, this, ($clinit_ClickEvent() , $clinit_ClickEvent() , TYPE_0));
   $setHeight(this.bookListTable, '30px');
   $setText_0(this.bookListTable, 0, 0, '');
@@ -3383,7 +3384,7 @@ function GTusachViewImpl(){
   $setWidth_1(this.bookListTable.columnFormatter, 2, '50px');
   $setText_0(this.bookListTable, 0, 3, '#Pages');
   $setWidth_1(this.bookListTable.columnFormatter, 3, '50px');
-  $setText_0(this.bookListTable, 0, 4, 'Date');
+  $setText_0(this.bookListTable, 0, 4, 'CreatedBy/Date');
   $setText_0(this.bookListTable, 0, 5, 'Error Message');
   $setText_0(this.bookListTable, 0, 6, 'Current Page URL');
   $setPropertyInt(this.bookListTable.tableElem, 'cellPadding', 5);
@@ -3888,7 +3889,7 @@ function ActivityManager(eventBus){
   this.stopperedEventBus = new ResettableEventBus(eventBus);
 }
 
-defineClass(195, 1, {30:1, 512:1, 563:1}, ActivityManager);
+defineClass(195, 1, {30:1, 512:1, 565:1}, ActivityManager);
 _.onPlaceChange = function onPlaceChange(event_0){
   var caughtOnCancel, caughtOnStart, caughtOnStop, causes, nextActivity;
   nextActivity = $getNextActivity(this, event_0);
@@ -4108,8 +4109,8 @@ function $cancelAnimationFrame(this$static, requestId){
 
 function $updateAnimations(this$static){
   var curAnimations, duration, requestId, requestId$index, requestId$max;
-  curAnimations = initDim(Lcom_google_gwt_animation_client_AnimationSchedulerImplTimer$AnimationHandleImpl_2_classLit, {567:1, 3:1, 6:1}, 144, this$static.animationRequests.array.length, 0, 1);
-  curAnimations = dynamicCast($toArray_1(this$static.animationRequests, curAnimations), 567);
+  curAnimations = initDim(Lcom_google_gwt_animation_client_AnimationSchedulerImplTimer$AnimationHandleImpl_2_classLit, {569:1, 3:1, 6:1}, 144, this$static.animationRequests.array.length, 0, 1);
+  curAnimations = dynamicCast($toArray_1(this$static.animationRequests, curAnimations), 569);
   duration = new Duration;
   for (requestId$index = 0 , requestId$max = curAnimations.length; requestId$index < requestId$max; ++requestId$index) {
     requestId = curAnimations[requestId$index];
@@ -5171,6 +5172,12 @@ function $touchGetSubPixelPageY(touch){
   return touch.pageY || 0;
 }
 
+function $createHtmlEvent(doc, type_0, canBubble, cancelable){
+  var evt = doc.createEvent('HTMLEvents');
+  evt.initEvent(type_0, canBubble, cancelable);
+  return evt;
+}
+
 function $dispatchEvent(target, evt){
   target.dispatchEvent(evt);
 }
@@ -5332,110 +5339,110 @@ function Style$Cursor$1(){
   Style$Cursor.call(this, 'DEFAULT', 0);
 }
 
-defineClass(345, 16, $intern_18, Style$Cursor$1);
-var Lcom_google_gwt_dom_client_Style$Cursor$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/1', 345, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(344, 16, $intern_18, Style$Cursor$1);
+var Lcom_google_gwt_dom_client_Style$Cursor$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/1', 344, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$10(){
   Style$Cursor.call(this, 'SE_RESIZE', 9);
 }
 
-defineClass(354, 16, $intern_18, Style$Cursor$10);
-var Lcom_google_gwt_dom_client_Style$Cursor$10_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/10', 354, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(353, 16, $intern_18, Style$Cursor$10);
+var Lcom_google_gwt_dom_client_Style$Cursor$10_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/10', 353, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$11(){
   Style$Cursor.call(this, 'SW_RESIZE', 10);
 }
 
-defineClass(355, 16, $intern_18, Style$Cursor$11);
-var Lcom_google_gwt_dom_client_Style$Cursor$11_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/11', 355, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(354, 16, $intern_18, Style$Cursor$11);
+var Lcom_google_gwt_dom_client_Style$Cursor$11_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/11', 354, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$12(){
   Style$Cursor.call(this, 'S_RESIZE', 11);
 }
 
-defineClass(356, 16, $intern_18, Style$Cursor$12);
-var Lcom_google_gwt_dom_client_Style$Cursor$12_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/12', 356, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(355, 16, $intern_18, Style$Cursor$12);
+var Lcom_google_gwt_dom_client_Style$Cursor$12_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/12', 355, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$13(){
   Style$Cursor.call(this, 'W_RESIZE', 12);
 }
 
-defineClass(357, 16, $intern_18, Style$Cursor$13);
-var Lcom_google_gwt_dom_client_Style$Cursor$13_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/13', 357, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(356, 16, $intern_18, Style$Cursor$13);
+var Lcom_google_gwt_dom_client_Style$Cursor$13_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/13', 356, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$14(){
   Style$Cursor.call(this, 'TEXT', 13);
 }
 
-defineClass(358, 16, $intern_18, Style$Cursor$14);
-var Lcom_google_gwt_dom_client_Style$Cursor$14_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/14', 358, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(357, 16, $intern_18, Style$Cursor$14);
+var Lcom_google_gwt_dom_client_Style$Cursor$14_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/14', 357, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$15(){
   Style$Cursor.call(this, 'WAIT', 14);
 }
 
-defineClass(359, 16, $intern_18, Style$Cursor$15);
-var Lcom_google_gwt_dom_client_Style$Cursor$15_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/15', 359, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(358, 16, $intern_18, Style$Cursor$15);
+var Lcom_google_gwt_dom_client_Style$Cursor$15_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/15', 358, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$16(){
   Style$Cursor.call(this, 'HELP', 15);
 }
 
-defineClass(360, 16, $intern_18, Style$Cursor$16);
-var Lcom_google_gwt_dom_client_Style$Cursor$16_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/16', 360, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(359, 16, $intern_18, Style$Cursor$16);
+var Lcom_google_gwt_dom_client_Style$Cursor$16_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/16', 359, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$17(){
   Style$Cursor.call(this, 'COL_RESIZE', 16);
 }
 
-defineClass(361, 16, $intern_18, Style$Cursor$17);
-var Lcom_google_gwt_dom_client_Style$Cursor$17_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/17', 361, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(360, 16, $intern_18, Style$Cursor$17);
+var Lcom_google_gwt_dom_client_Style$Cursor$17_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/17', 360, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$18(){
   Style$Cursor.call(this, 'ROW_RESIZE', 17);
 }
 
-defineClass(362, 16, $intern_18, Style$Cursor$18);
-var Lcom_google_gwt_dom_client_Style$Cursor$18_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/18', 362, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(361, 16, $intern_18, Style$Cursor$18);
+var Lcom_google_gwt_dom_client_Style$Cursor$18_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/18', 361, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$2(){
   Style$Cursor.call(this, 'AUTO', 1);
 }
 
-defineClass(346, 16, $intern_18, Style$Cursor$2);
-var Lcom_google_gwt_dom_client_Style$Cursor$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/2', 346, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(345, 16, $intern_18, Style$Cursor$2);
+var Lcom_google_gwt_dom_client_Style$Cursor$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/2', 345, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$3(){
   Style$Cursor.call(this, 'CROSSHAIR', 2);
 }
 
-defineClass(347, 16, $intern_18, Style$Cursor$3);
-var Lcom_google_gwt_dom_client_Style$Cursor$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/3', 347, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(346, 16, $intern_18, Style$Cursor$3);
+var Lcom_google_gwt_dom_client_Style$Cursor$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/3', 346, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$4(){
   Style$Cursor.call(this, 'POINTER', 3);
 }
 
-defineClass(348, 16, $intern_18, Style$Cursor$4);
-var Lcom_google_gwt_dom_client_Style$Cursor$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/4', 348, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(347, 16, $intern_18, Style$Cursor$4);
+var Lcom_google_gwt_dom_client_Style$Cursor$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/4', 347, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$5(){
   Style$Cursor.call(this, 'MOVE', 4);
 }
 
-defineClass(349, 16, $intern_18, Style$Cursor$5);
-var Lcom_google_gwt_dom_client_Style$Cursor$5_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/5', 349, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(348, 16, $intern_18, Style$Cursor$5);
+var Lcom_google_gwt_dom_client_Style$Cursor$5_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/5', 348, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$6(){
   Style$Cursor.call(this, 'E_RESIZE', 5);
 }
 
-defineClass(350, 16, $intern_18, Style$Cursor$6);
-var Lcom_google_gwt_dom_client_Style$Cursor$6_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/6', 350, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(349, 16, $intern_18, Style$Cursor$6);
+var Lcom_google_gwt_dom_client_Style$Cursor$6_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/6', 349, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$7(){
   Style$Cursor.call(this, 'NE_RESIZE', 6);
 }
 
-defineClass(351, 16, $intern_18, Style$Cursor$7);
-var Lcom_google_gwt_dom_client_Style$Cursor$7_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/7', 351, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(350, 16, $intern_18, Style$Cursor$7);
+var Lcom_google_gwt_dom_client_Style$Cursor$7_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/7', 350, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$8(){
   Style$Cursor.call(this, 'NW_RESIZE', 7);
 }
 
-defineClass(352, 16, $intern_18, Style$Cursor$8);
-var Lcom_google_gwt_dom_client_Style$Cursor$8_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/8', 352, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(351, 16, $intern_18, Style$Cursor$8);
+var Lcom_google_gwt_dom_client_Style$Cursor$8_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/8', 351, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function Style$Cursor$9(){
   Style$Cursor.call(this, 'N_RESIZE', 8);
 }
 
-defineClass(353, 16, $intern_18, Style$Cursor$9);
-var Lcom_google_gwt_dom_client_Style$Cursor$9_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/9', 353, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
+defineClass(352, 16, $intern_18, Style$Cursor$9);
+var Lcom_google_gwt_dom_client_Style$Cursor$9_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Cursor/9', 352, Lcom_google_gwt_dom_client_Style$Cursor_2_classLit, null);
 function $clinit_Style$Display(){
   $clinit_Style$Display = emptyMethod;
   NONE_0 = new Style$Display$1;
@@ -5473,104 +5480,104 @@ function Style$Display$1(){
   Style$Display.call(this, 'NONE', 0);
 }
 
-defineClass(363, 22, $intern_19, Style$Display$1);
-var Lcom_google_gwt_dom_client_Style$Display$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/1', 363, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(362, 22, $intern_19, Style$Display$1);
+var Lcom_google_gwt_dom_client_Style$Display$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/1', 362, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$10(){
   Style$Display.call(this, 'TABLE_COLUMN_GROUP', 9);
 }
 
-defineClass(372, 22, $intern_19, Style$Display$10);
-var Lcom_google_gwt_dom_client_Style$Display$10_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/10', 372, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(371, 22, $intern_19, Style$Display$10);
+var Lcom_google_gwt_dom_client_Style$Display$10_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/10', 371, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$11(){
   Style$Display.call(this, 'TABLE_HEADER_GROUP', 10);
 }
 
-defineClass(373, 22, $intern_19, Style$Display$11);
-var Lcom_google_gwt_dom_client_Style$Display$11_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/11', 373, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(372, 22, $intern_19, Style$Display$11);
+var Lcom_google_gwt_dom_client_Style$Display$11_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/11', 372, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$12(){
   Style$Display.call(this, 'TABLE_FOOTER_GROUP', 11);
 }
 
-defineClass(374, 22, $intern_19, Style$Display$12);
-var Lcom_google_gwt_dom_client_Style$Display$12_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/12', 374, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(373, 22, $intern_19, Style$Display$12);
+var Lcom_google_gwt_dom_client_Style$Display$12_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/12', 373, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$13(){
   Style$Display.call(this, 'TABLE_ROW_GROUP', 12);
 }
 
-defineClass(375, 22, $intern_19, Style$Display$13);
-var Lcom_google_gwt_dom_client_Style$Display$13_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/13', 375, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(374, 22, $intern_19, Style$Display$13);
+var Lcom_google_gwt_dom_client_Style$Display$13_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/13', 374, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$14(){
   Style$Display.call(this, 'TABLE_CELL', 13);
 }
 
-defineClass(376, 22, $intern_19, Style$Display$14);
-var Lcom_google_gwt_dom_client_Style$Display$14_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/14', 376, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(375, 22, $intern_19, Style$Display$14);
+var Lcom_google_gwt_dom_client_Style$Display$14_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/14', 375, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$15(){
   Style$Display.call(this, 'TABLE_COLUMN', 14);
 }
 
-defineClass(377, 22, $intern_19, Style$Display$15);
-var Lcom_google_gwt_dom_client_Style$Display$15_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/15', 377, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(376, 22, $intern_19, Style$Display$15);
+var Lcom_google_gwt_dom_client_Style$Display$15_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/15', 376, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$16(){
   Style$Display.call(this, 'TABLE_ROW', 15);
 }
 
-defineClass(378, 22, $intern_19, Style$Display$16);
-var Lcom_google_gwt_dom_client_Style$Display$16_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/16', 378, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(377, 22, $intern_19, Style$Display$16);
+var Lcom_google_gwt_dom_client_Style$Display$16_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/16', 377, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$17(){
   Style$Display.call(this, 'INITIAL', 16);
 }
 
-defineClass(379, 22, $intern_19, Style$Display$17);
-var Lcom_google_gwt_dom_client_Style$Display$17_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/17', 379, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(378, 22, $intern_19, Style$Display$17);
+var Lcom_google_gwt_dom_client_Style$Display$17_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/17', 378, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$2(){
   Style$Display.call(this, 'BLOCK', 1);
 }
 
-defineClass(364, 22, $intern_19, Style$Display$2);
-var Lcom_google_gwt_dom_client_Style$Display$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/2', 364, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(363, 22, $intern_19, Style$Display$2);
+var Lcom_google_gwt_dom_client_Style$Display$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/2', 363, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$3(){
   Style$Display.call(this, 'INLINE', 2);
 }
 
-defineClass(365, 22, $intern_19, Style$Display$3);
-var Lcom_google_gwt_dom_client_Style$Display$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/3', 365, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(364, 22, $intern_19, Style$Display$3);
+var Lcom_google_gwt_dom_client_Style$Display$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/3', 364, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$4(){
   Style$Display.call(this, 'INLINE_BLOCK', 3);
 }
 
-defineClass(366, 22, $intern_19, Style$Display$4);
-var Lcom_google_gwt_dom_client_Style$Display$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/4', 366, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(365, 22, $intern_19, Style$Display$4);
+var Lcom_google_gwt_dom_client_Style$Display$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/4', 365, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$5(){
   Style$Display.call(this, 'INLINE_TABLE', 4);
 }
 
-defineClass(367, 22, $intern_19, Style$Display$5);
-var Lcom_google_gwt_dom_client_Style$Display$5_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/5', 367, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(366, 22, $intern_19, Style$Display$5);
+var Lcom_google_gwt_dom_client_Style$Display$5_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/5', 366, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$6(){
   Style$Display.call(this, 'LIST_ITEM', 5);
 }
 
-defineClass(368, 22, $intern_19, Style$Display$6);
-var Lcom_google_gwt_dom_client_Style$Display$6_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/6', 368, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(367, 22, $intern_19, Style$Display$6);
+var Lcom_google_gwt_dom_client_Style$Display$6_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/6', 367, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$7(){
   Style$Display.call(this, 'RUN_IN', 6);
 }
 
-defineClass(369, 22, $intern_19, Style$Display$7);
-var Lcom_google_gwt_dom_client_Style$Display$7_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/7', 369, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(368, 22, $intern_19, Style$Display$7);
+var Lcom_google_gwt_dom_client_Style$Display$7_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/7', 368, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$8(){
   Style$Display.call(this, 'TABLE', 7);
 }
 
-defineClass(370, 22, $intern_19, Style$Display$8);
-var Lcom_google_gwt_dom_client_Style$Display$8_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/8', 370, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(369, 22, $intern_19, Style$Display$8);
+var Lcom_google_gwt_dom_client_Style$Display$8_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/8', 369, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function Style$Display$9(){
   Style$Display.call(this, 'TABLE_CAPTION', 8);
 }
 
-defineClass(371, 22, $intern_19, Style$Display$9);
-var Lcom_google_gwt_dom_client_Style$Display$9_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/9', 371, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
+defineClass(370, 22, $intern_19, Style$Display$9);
+var Lcom_google_gwt_dom_client_Style$Display$9_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Display/9', 370, Lcom_google_gwt_dom_client_Style$Display_2_classLit, null);
 function $clinit_Style$Overflow(){
   $clinit_Style$Overflow = emptyMethod;
   VISIBLE = new Style$Overflow$1;
@@ -5585,36 +5592,36 @@ function Style$Overflow(enum$name, enum$ordinal){
 
 function values_5(){
   $clinit_Style$Overflow();
-  return initValues(getClassLiteralForArray(Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, 1), $intern_4, 60, 0, [VISIBLE, HIDDEN_0, SCROLL, AUTO_0]);
+  return initValues(getClassLiteralForArray(Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, 1), $intern_4, 61, 0, [VISIBLE, HIDDEN_0, SCROLL, AUTO_0]);
 }
 
-defineClass(60, 4, $intern_20);
+defineClass(61, 4, $intern_20);
 var AUTO_0, HIDDEN_0, SCROLL, VISIBLE;
-var Lcom_google_gwt_dom_client_Style$Overflow_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow', 60, Ljava_lang_Enum_2_classLit, values_5);
+var Lcom_google_gwt_dom_client_Style$Overflow_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow', 61, Ljava_lang_Enum_2_classLit, values_5);
 function Style$Overflow$1(){
   Style$Overflow.call(this, 'VISIBLE', 0);
 }
 
-defineClass(380, 60, $intern_20, Style$Overflow$1);
-var Lcom_google_gwt_dom_client_Style$Overflow$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow/1', 380, Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, null);
+defineClass(379, 61, $intern_20, Style$Overflow$1);
+var Lcom_google_gwt_dom_client_Style$Overflow$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow/1', 379, Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, null);
 function Style$Overflow$2(){
   Style$Overflow.call(this, 'HIDDEN', 1);
 }
 
-defineClass(381, 60, $intern_20, Style$Overflow$2);
-var Lcom_google_gwt_dom_client_Style$Overflow$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow/2', 381, Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, null);
+defineClass(380, 61, $intern_20, Style$Overflow$2);
+var Lcom_google_gwt_dom_client_Style$Overflow$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow/2', 380, Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, null);
 function Style$Overflow$3(){
   Style$Overflow.call(this, 'SCROLL', 2);
 }
 
-defineClass(382, 60, $intern_20, Style$Overflow$3);
-var Lcom_google_gwt_dom_client_Style$Overflow$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow/3', 382, Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, null);
+defineClass(381, 61, $intern_20, Style$Overflow$3);
+var Lcom_google_gwt_dom_client_Style$Overflow$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow/3', 381, Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, null);
 function Style$Overflow$4(){
   Style$Overflow.call(this, 'AUTO', 3);
 }
 
-defineClass(383, 60, $intern_20, Style$Overflow$4);
-var Lcom_google_gwt_dom_client_Style$Overflow$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow/4', 383, Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, null);
+defineClass(382, 61, $intern_20, Style$Overflow$4);
+var Lcom_google_gwt_dom_client_Style$Overflow$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Overflow/4', 382, Lcom_google_gwt_dom_client_Style$Overflow_2_classLit, null);
 function $clinit_Style$Position(){
   $clinit_Style$Position = emptyMethod;
   STATIC = new Style$Position$1;
@@ -5629,36 +5636,36 @@ function Style$Position(enum$name, enum$ordinal){
 
 function values_6(){
   $clinit_Style$Position();
-  return initValues(getClassLiteralForArray(Lcom_google_gwt_dom_client_Style$Position_2_classLit, 1), $intern_4, 61, 0, [STATIC, RELATIVE, ABSOLUTE, FIXED]);
+  return initValues(getClassLiteralForArray(Lcom_google_gwt_dom_client_Style$Position_2_classLit, 1), $intern_4, 62, 0, [STATIC, RELATIVE, ABSOLUTE, FIXED]);
 }
 
-defineClass(61, 4, $intern_21);
+defineClass(62, 4, $intern_21);
 var ABSOLUTE, FIXED, RELATIVE, STATIC;
-var Lcom_google_gwt_dom_client_Style$Position_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position', 61, Ljava_lang_Enum_2_classLit, values_6);
+var Lcom_google_gwt_dom_client_Style$Position_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position', 62, Ljava_lang_Enum_2_classLit, values_6);
 function Style$Position$1(){
   Style$Position.call(this, 'STATIC', 0);
 }
 
-defineClass(384, 61, $intern_21, Style$Position$1);
-var Lcom_google_gwt_dom_client_Style$Position$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position/1', 384, Lcom_google_gwt_dom_client_Style$Position_2_classLit, null);
+defineClass(383, 62, $intern_21, Style$Position$1);
+var Lcom_google_gwt_dom_client_Style$Position$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position/1', 383, Lcom_google_gwt_dom_client_Style$Position_2_classLit, null);
 function Style$Position$2(){
   Style$Position.call(this, 'RELATIVE', 1);
 }
 
-defineClass(385, 61, $intern_21, Style$Position$2);
-var Lcom_google_gwt_dom_client_Style$Position$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position/2', 385, Lcom_google_gwt_dom_client_Style$Position_2_classLit, null);
+defineClass(384, 62, $intern_21, Style$Position$2);
+var Lcom_google_gwt_dom_client_Style$Position$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position/2', 384, Lcom_google_gwt_dom_client_Style$Position_2_classLit, null);
 function Style$Position$3(){
   Style$Position.call(this, 'ABSOLUTE', 2);
 }
 
-defineClass(386, 61, $intern_21, Style$Position$3);
-var Lcom_google_gwt_dom_client_Style$Position$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position/3', 386, Lcom_google_gwt_dom_client_Style$Position_2_classLit, null);
+defineClass(385, 62, $intern_21, Style$Position$3);
+var Lcom_google_gwt_dom_client_Style$Position$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position/3', 385, Lcom_google_gwt_dom_client_Style$Position_2_classLit, null);
 function Style$Position$4(){
   Style$Position.call(this, 'FIXED', 3);
 }
 
-defineClass(387, 61, $intern_21, Style$Position$4);
-var Lcom_google_gwt_dom_client_Style$Position$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position/4', 387, Lcom_google_gwt_dom_client_Style$Position_2_classLit, null);
+defineClass(386, 62, $intern_21, Style$Position$4);
+var Lcom_google_gwt_dom_client_Style$Position$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Position/4', 386, Lcom_google_gwt_dom_client_Style$Position_2_classLit, null);
 function $clinit_Style$TextAlign(){
   $clinit_Style$TextAlign = emptyMethod;
   CENTER = new Style$TextAlign$1;
@@ -5673,36 +5680,36 @@ function Style$TextAlign(enum$name, enum$ordinal){
 
 function values_7(){
   $clinit_Style$TextAlign();
-  return initValues(getClassLiteralForArray(Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, 1), $intern_4, 62, 0, [CENTER, JUSTIFY, LEFT, RIGHT]);
+  return initValues(getClassLiteralForArray(Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, 1), $intern_4, 63, 0, [CENTER, JUSTIFY, LEFT, RIGHT]);
 }
 
-defineClass(62, 4, $intern_22);
+defineClass(63, 4, $intern_22);
 var CENTER, JUSTIFY, LEFT, RIGHT;
-var Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign', 62, Ljava_lang_Enum_2_classLit, values_7);
+var Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign', 63, Ljava_lang_Enum_2_classLit, values_7);
 function Style$TextAlign$1(){
   Style$TextAlign.call(this, 'CENTER', 0);
 }
 
-defineClass(388, 62, $intern_22, Style$TextAlign$1);
-var Lcom_google_gwt_dom_client_Style$TextAlign$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign/1', 388, Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, null);
+defineClass(387, 63, $intern_22, Style$TextAlign$1);
+var Lcom_google_gwt_dom_client_Style$TextAlign$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign/1', 387, Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, null);
 function Style$TextAlign$2(){
   Style$TextAlign.call(this, 'JUSTIFY', 1);
 }
 
-defineClass(389, 62, $intern_22, Style$TextAlign$2);
-var Lcom_google_gwt_dom_client_Style$TextAlign$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign/2', 389, Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, null);
+defineClass(388, 63, $intern_22, Style$TextAlign$2);
+var Lcom_google_gwt_dom_client_Style$TextAlign$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign/2', 388, Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, null);
 function Style$TextAlign$3(){
   Style$TextAlign.call(this, 'LEFT', 2);
 }
 
-defineClass(390, 62, $intern_22, Style$TextAlign$3);
-var Lcom_google_gwt_dom_client_Style$TextAlign$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign/3', 390, Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, null);
+defineClass(389, 63, $intern_22, Style$TextAlign$3);
+var Lcom_google_gwt_dom_client_Style$TextAlign$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign/3', 389, Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, null);
 function Style$TextAlign$4(){
   Style$TextAlign.call(this, 'RIGHT', 3);
 }
 
-defineClass(391, 62, $intern_22, Style$TextAlign$4);
-var Lcom_google_gwt_dom_client_Style$TextAlign$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign/4', 391, Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, null);
+defineClass(390, 63, $intern_22, Style$TextAlign$4);
+var Lcom_google_gwt_dom_client_Style$TextAlign$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/TextAlign/4', 390, Lcom_google_gwt_dom_client_Style$TextAlign_2_classLit, null);
 function $clinit_Style$Unit(){
   $clinit_Style$Unit = emptyMethod;
   PX = new Style$Unit$1;
@@ -5732,92 +5739,92 @@ function Style$Unit$1(){
   Style$Unit.call(this, 'PX', 0);
 }
 
-defineClass(336, 35, $intern_23, Style$Unit$1);
+defineClass(335, 35, $intern_23, Style$Unit$1);
 _.getType_0 = function getType_3(){
   return 'px';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/1', 336, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/1', 335, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function Style$Unit$2(){
   Style$Unit.call(this, 'PCT', 1);
 }
 
-defineClass(337, 35, $intern_23, Style$Unit$2);
+defineClass(336, 35, $intern_23, Style$Unit$2);
 _.getType_0 = function getType_4(){
   return '%';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/2', 337, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/2', 336, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function Style$Unit$3(){
   Style$Unit.call(this, 'EM', 2);
 }
 
-defineClass(338, 35, $intern_23, Style$Unit$3);
+defineClass(337, 35, $intern_23, Style$Unit$3);
 _.getType_0 = function getType_5(){
   return 'em';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/3', 338, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/3', 337, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function Style$Unit$4(){
   Style$Unit.call(this, 'EX', 3);
 }
 
-defineClass(339, 35, $intern_23, Style$Unit$4);
+defineClass(338, 35, $intern_23, Style$Unit$4);
 _.getType_0 = function getType_6(){
   return 'ex';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/4', 339, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/4', 338, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function Style$Unit$5(){
   Style$Unit.call(this, 'PT', 4);
 }
 
-defineClass(340, 35, $intern_23, Style$Unit$5);
+defineClass(339, 35, $intern_23, Style$Unit$5);
 _.getType_0 = function getType_7(){
   return 'pt';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$5_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/5', 340, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$5_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/5', 339, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function Style$Unit$6(){
   Style$Unit.call(this, 'PC', 5);
 }
 
-defineClass(341, 35, $intern_23, Style$Unit$6);
+defineClass(340, 35, $intern_23, Style$Unit$6);
 _.getType_0 = function getType_8(){
   return 'pc';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$6_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/6', 341, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$6_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/6', 340, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function Style$Unit$7(){
   Style$Unit.call(this, 'IN', 6);
 }
 
-defineClass(342, 35, $intern_23, Style$Unit$7);
+defineClass(341, 35, $intern_23, Style$Unit$7);
 _.getType_0 = function getType_9(){
   return 'in';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$7_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/7', 342, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$7_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/7', 341, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function Style$Unit$8(){
   Style$Unit.call(this, 'CM', 7);
 }
 
-defineClass(343, 35, $intern_23, Style$Unit$8);
+defineClass(342, 35, $intern_23, Style$Unit$8);
 _.getType_0 = function getType_10(){
   return 'cm';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$8_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/8', 343, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$8_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/8', 342, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function Style$Unit$9(){
   Style$Unit.call(this, 'MM', 8);
 }
 
-defineClass(344, 35, $intern_23, Style$Unit$9);
+defineClass(343, 35, $intern_23, Style$Unit$9);
 _.getType_0 = function getType_11(){
   return 'mm';
 }
 ;
-var Lcom_google_gwt_dom_client_Style$Unit$9_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/9', 344, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
+var Lcom_google_gwt_dom_client_Style$Unit$9_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Unit/9', 343, Lcom_google_gwt_dom_client_Style$Unit_2_classLit, null);
 function $clinit_Style$Visibility(){
   $clinit_Style$Visibility = emptyMethod;
   VISIBLE_0 = new Style$Visibility$1;
@@ -5840,14 +5847,14 @@ function Style$Visibility$1(){
   Style$Visibility.call(this, 'VISIBLE', 0);
 }
 
-defineClass(392, 98, $intern_24, Style$Visibility$1);
-var Lcom_google_gwt_dom_client_Style$Visibility$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Visibility/1', 392, Lcom_google_gwt_dom_client_Style$Visibility_2_classLit, null);
+defineClass(391, 98, $intern_24, Style$Visibility$1);
+var Lcom_google_gwt_dom_client_Style$Visibility$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Visibility/1', 391, Lcom_google_gwt_dom_client_Style$Visibility_2_classLit, null);
 function Style$Visibility$2(){
   Style$Visibility.call(this, 'HIDDEN', 1);
 }
 
-defineClass(393, 98, $intern_24, Style$Visibility$2);
-var Lcom_google_gwt_dom_client_Style$Visibility$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Visibility/2', 393, Lcom_google_gwt_dom_client_Style$Visibility_2_classLit, null);
+defineClass(392, 98, $intern_24, Style$Visibility$2);
+var Lcom_google_gwt_dom_client_Style$Visibility$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/Visibility/2', 392, Lcom_google_gwt_dom_client_Style$Visibility_2_classLit, null);
 function $clinit_Style$WhiteSpace(){
   $clinit_Style$WhiteSpace = emptyMethod;
   NORMAL = new Style$WhiteSpace$1;
@@ -5873,32 +5880,32 @@ function Style$WhiteSpace$1(){
   Style$WhiteSpace.call(this, 'NORMAL', 0);
 }
 
-defineClass(394, 52, $intern_25, Style$WhiteSpace$1);
-var Lcom_google_gwt_dom_client_Style$WhiteSpace$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/1', 394, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
+defineClass(393, 52, $intern_25, Style$WhiteSpace$1);
+var Lcom_google_gwt_dom_client_Style$WhiteSpace$1_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/1', 393, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
 function Style$WhiteSpace$2(){
   Style$WhiteSpace.call(this, 'NOWRAP', 1);
 }
 
-defineClass(395, 52, $intern_25, Style$WhiteSpace$2);
-var Lcom_google_gwt_dom_client_Style$WhiteSpace$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/2', 395, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
+defineClass(394, 52, $intern_25, Style$WhiteSpace$2);
+var Lcom_google_gwt_dom_client_Style$WhiteSpace$2_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/2', 394, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
 function Style$WhiteSpace$3(){
   Style$WhiteSpace.call(this, 'PRE', 2);
 }
 
-defineClass(396, 52, $intern_25, Style$WhiteSpace$3);
-var Lcom_google_gwt_dom_client_Style$WhiteSpace$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/3', 396, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
+defineClass(395, 52, $intern_25, Style$WhiteSpace$3);
+var Lcom_google_gwt_dom_client_Style$WhiteSpace$3_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/3', 395, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
 function Style$WhiteSpace$4(){
   Style$WhiteSpace.call(this, 'PRE_LINE', 3);
 }
 
-defineClass(397, 52, $intern_25, Style$WhiteSpace$4);
-var Lcom_google_gwt_dom_client_Style$WhiteSpace$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/4', 397, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
+defineClass(396, 52, $intern_25, Style$WhiteSpace$4);
+var Lcom_google_gwt_dom_client_Style$WhiteSpace$4_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/4', 396, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
 function Style$WhiteSpace$5(){
   Style$WhiteSpace.call(this, 'PRE_WRAP', 4);
 }
 
-defineClass(398, 52, $intern_25, Style$WhiteSpace$5);
-var Lcom_google_gwt_dom_client_Style$WhiteSpace$5_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/5', 398, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
+defineClass(397, 52, $intern_25, Style$WhiteSpace$5);
+var Lcom_google_gwt_dom_client_Style$WhiteSpace$5_2_classLit = createForEnum('com.google.gwt.dom.client', 'Style/WhiteSpace/5', 397, Lcom_google_gwt_dom_client_Style$WhiteSpace_2_classLit, null);
 function $clinit_StyleInjector(){
   $clinit_StyleInjector = emptyMethod;
   toInject = [];
@@ -5913,19 +5920,19 @@ function flush(){
   toReturn = null;
   if (toInjectAtStart.length != 0) {
     css = toInjectAtStart.join('');
-    maybeReturn = $injectStyleSheetAtStart(($clinit_StyleInjector$StyleInjectorImpl() , IMPL), css);
+    maybeReturn = $injectStyleSheetAtStart(($clinit_StyleInjector$StyleInjectorImpl() , css));
     !toInjectAtStart && (toReturn = maybeReturn);
     $setLength(toInjectAtStart, 0);
   }
   if (toInject.length != 0) {
     css = toInject.join('');
-    maybeReturn = $injectStyleSheet(($clinit_StyleInjector$StyleInjectorImpl() , IMPL), css);
+    maybeReturn = $injectStyleSheet(($clinit_StyleInjector$StyleInjectorImpl() , css));
     !toInject && (toReturn = maybeReturn);
     $setLength(toInject, 0);
   }
   if (toInjectAtEnd.length != 0) {
     css = toInjectAtEnd.join('');
-    maybeReturn = $injectStyleSheet(($clinit_StyleInjector$StyleInjectorImpl() , IMPL), css);
+    maybeReturn = $injectStyleSheetAtEnd(($clinit_StyleInjector$StyleInjectorImpl() , css));
     !toInjectAtEnd && (toReturn = maybeReturn);
     $setLength(toInjectAtEnd, 0);
   }
@@ -5958,46 +5965,72 @@ _.execute_1 = function execute_3(){
 var Lcom_google_gwt_dom_client_StyleInjector$1_2_classLit = createForClass('com.google.gwt.dom.client', 'StyleInjector/1', 449);
 function $clinit_StyleInjector$StyleInjectorImpl(){
   $clinit_StyleInjector$StyleInjectorImpl = emptyMethod;
-  IMPL = new StyleInjector$StyleInjectorImpl;
+  $clinit_StyleInjector$StyleInjectorImplIE();
 }
 
-function $createElement(contents){
+function $clinit_StyleInjector$StyleInjectorImplIE(){
+  $clinit_StyleInjector$StyleInjectorImplIE = emptyMethod;
+  $clinit_StyleInjector$StyleInjectorImpl();
+  styleSheetLengths = initDim(I_classLit, $intern_6, 0, 31, 7, 1);
+}
+
+function $appendToStyleSheet(idx, contents, append){
   var style;
-  style = $doc.createElement('style');
-  $setPropertyString(style, 'language', 'text/css');
-  $setInnerText(style, contents);
+  style = $doc.styleSheets[idx];
+  append?(style.cssText += contents , undefined):(style.cssText = contents + style.cssText , undefined);
   return style;
 }
 
-function $getHead(this$static){
-  var elt;
-  if (!this$static.head) {
-    elt = $doc.getElementsByTagName('head')[0];
-    this$static.head = elt;
+function $createNewStyleSheet(contents){
+  var style;
+  style = $doc.createStyleSheet();
+  style.cssText = contents;
+  return style;
+}
+
+function $injectStyleSheet(contents){
+  var i, len, numStyles, shortestIdx, shortestLen;
+  numStyles = getDocumentStyleCount();
+  if (numStyles < 31) {
+    return $createNewStyleSheet(contents);
   }
-  return this$static.head;
+   else {
+    shortestLen = $intern_0;
+    shortestIdx = -1;
+    for (i = 0; i < 31; i++) {
+      len = styleSheetLengths[i];
+      len == 0 && (len = styleSheetLengths[i] = $doc.styleSheets[i].cssText.length);
+      if (len <= shortestLen) {
+        shortestLen = len;
+        shortestIdx = i;
+      }
+    }
+    styleSheetLengths[shortestIdx] += contents.length;
+    return $appendToStyleSheet(shortestIdx, contents, true);
+  }
 }
 
-function $injectStyleSheet(this$static, contents){
-  var style;
-  style = $createElement(contents);
-  $appendChild($getHead(this$static), style);
-  return style;
+function $injectStyleSheetAtEnd(contents){
+  var documentStyleCount;
+  documentStyleCount = getDocumentStyleCount();
+  if (documentStyleCount == 0) {
+    return $createNewStyleSheet(contents);
+  }
+  return $appendToStyleSheet(documentStyleCount - 1, contents, true);
 }
 
-function $injectStyleSheetAtStart(this$static, contents){
-  var style;
-  style = $createElement(contents);
-  $insertBefore($getHead(this$static), style, this$static.head.firstChild);
-  return style;
+function $injectStyleSheetAtStart(contents){
+  if (getDocumentStyleCount() == 0) {
+    return $createNewStyleSheet(contents);
+  }
+  return $appendToStyleSheet(0, contents, false);
 }
 
-function StyleInjector$StyleInjectorImpl(){
+function getDocumentStyleCount(){
+  return $doc.styleSheets.length;
 }
 
-defineClass(448, 1, {}, StyleInjector$StyleInjectorImpl);
-var IMPL;
-var Lcom_google_gwt_dom_client_StyleInjector$StyleInjectorImpl_2_classLit = createForClass('com.google.gwt.dom.client', 'StyleInjector/StyleInjectorImpl', 448);
+var styleSheetLengths;
 function $setNativeEvent(this$static, nativeEvent){
   this$static.nativeEvent = nativeEvent;
 }
@@ -6103,9 +6136,9 @@ function PrivateMap(){
 
 defineClass(403, 1, {}, PrivateMap);
 var Lcom_google_gwt_event_dom_client_PrivateMap_2_classLit = createForClass('com.google.gwt.event.dom.client', 'PrivateMap', 403);
-defineClass(556, 547, {});
+defineClass(558, 547, {});
 var impl;
-var Lcom_google_gwt_event_dom_client_TouchEvent_2_classLit = createForClass('com.google.gwt.event.dom.client', 'TouchEvent', 556);
+var Lcom_google_gwt_event_dom_client_TouchEvent_2_classLit = createForClass('com.google.gwt.event.dom.client', 'TouchEvent', 558);
 function $clinit_TouchCancelEvent(){
   $clinit_TouchCancelEvent = emptyMethod;
   TYPE_1 = new DomEvent$Type('touchcancel', new TouchCancelEvent);
@@ -6114,9 +6147,9 @@ function $clinit_TouchCancelEvent(){
 function TouchCancelEvent(){
 }
 
-defineClass(467, 556, {}, TouchCancelEvent);
+defineClass(467, 558, {}, TouchCancelEvent);
 _.dispatch_0 = function dispatch_2(handler){
-  $onTouchEnd(dynamicCast(handler, 572).this$01);
+  $onTouchEnd(dynamicCast(handler, 574).this$01);
 }
 ;
 _.getAssociatedType_1 = function getAssociatedType_3(){
@@ -6133,9 +6166,9 @@ function $clinit_TouchEndEvent(){
 function TouchEndEvent(){
 }
 
-defineClass(466, 556, {}, TouchEndEvent);
+defineClass(466, 558, {}, TouchEndEvent);
 _.dispatch_0 = function dispatch_3(handler){
-  $onTouchEnd(dynamicCast(handler, 571).this$01);
+  $onTouchEnd(dynamicCast(handler, 573).this$01);
 }
 ;
 _.getAssociatedType_1 = function getAssociatedType_4(){
@@ -6167,9 +6200,9 @@ function $dispatch_0(this$static, handler){
 function TouchMoveEvent(){
 }
 
-defineClass(465, 556, {}, TouchMoveEvent);
+defineClass(465, 558, {}, TouchMoveEvent);
 _.dispatch_0 = function dispatch_4(handler){
-  $dispatch_0(this, dynamicCast(handler, 570));
+  $dispatch_0(this, dynamicCast(handler, 572));
 }
 ;
 _.getAssociatedType_1 = function getAssociatedType_5(){
@@ -6190,9 +6223,9 @@ function $dispatch_1(this$static, handler){
 function TouchStartEvent(){
 }
 
-defineClass(462, 556, {}, TouchStartEvent);
+defineClass(462, 558, {}, TouchStartEvent);
 _.dispatch_0 = function dispatch_5(handler){
-  $dispatch_1(this, dynamicCast(handler, 569));
+  $dispatch_1(this, dynamicCast(handler, 571));
 }
 ;
 _.getAssociatedType_1 = function getAssociatedType_6(){
@@ -6219,7 +6252,7 @@ function fire_0(source, attached){
 
 defineClass(402, 514, {}, AttachEvent);
 _.dispatch_0 = function dispatch_6(handler){
-  $dispatch_2(this, dynamicCast(handler, 566));
+  $dispatch_2(this, dynamicCast(handler, 568));
 }
 ;
 _.getAssociatedType_0 = function getAssociatedType_7(){
@@ -6313,9 +6346,9 @@ function fire_4(source, value_0){
   }
 }
 
-defineClass(399, 514, {}, ValueChangeEvent);
+defineClass(398, 514, {}, ValueChangeEvent);
 _.dispatch_0 = function dispatch_10(handler){
-  $dispatch_3(this, dynamicCast(handler, 564));
+  $dispatch_3(this, dynamicCast(handler, 566));
 }
 ;
 _.getAssociatedType_0 = function getAssociatedType_11(){
@@ -6323,7 +6356,7 @@ _.getAssociatedType_0 = function getAssociatedType_11(){
 }
 ;
 var TYPE_9;
-var Lcom_google_gwt_event_logical_shared_ValueChangeEvent_2_classLit = createForClass('com.google.gwt.event.logical.shared', 'ValueChangeEvent', 399);
+var Lcom_google_gwt_event_logical_shared_ValueChangeEvent_2_classLit = createForClass('com.google.gwt.event.logical.shared', 'ValueChangeEvent', 398);
 defineClass(534, 1, {});
 var Lcom_google_web_bindery_event_shared_EventBus_2_classLit = createForClass('com.google.web.bindery.event.shared', 'EventBus', 534);
 function $castFireEvent(this$static, event_0){
@@ -6539,7 +6572,7 @@ function LegacyHandlerWrapper(real){
   this.real = real;
 }
 
-defineClass(296, 1, {565:1, 154:1}, LegacyHandlerWrapper);
+defineClass(296, 1, {567:1, 154:1}, LegacyHandlerWrapper);
 _.removeHandler = function removeHandler_0(){
   $removeHandler(this.real);
 }
@@ -6662,7 +6695,7 @@ function $fireOnResponseReceived(this$static, callback){
   $cancel(this$static.timer);
   xhr = this$static.xmlHttpRequest;
   this$static.xmlHttpRequest = null;
-  response = new ResponseImpl(xhr);
+  response = new Request$RequestImplIE8And9$1(xhr);
   callback.onResponseReceived(this$static, response);
 }
 
@@ -6699,12 +6732,28 @@ function Request$1(this$0){
   Timer.call(this);
 }
 
-defineClass(438, 93, {}, Request$1);
+defineClass(439, 93, {}, Request$1);
 _.run = function run_4(){
   $fireOnTimeout(this.this$01);
 }
 ;
-var Lcom_google_gwt_http_client_Request$1_2_classLit = createForClass('com.google.gwt.http.client', 'Request/1', 438);
+var Lcom_google_gwt_http_client_Request$1_2_classLit = createForClass('com.google.gwt.http.client', 'Request/1', 439);
+defineClass(553, 1, {});
+var Lcom_google_gwt_http_client_Response_2_classLit = createForClass('com.google.gwt.http.client', 'Response', 553);
+defineClass(437, 553, {});
+var Lcom_google_gwt_http_client_ResponseImpl_2_classLit = createForClass('com.google.gwt.http.client', 'ResponseImpl', 437);
+function $getStatusCode(this$static){
+  var statusCode;
+  statusCode = this$static.xmlHttpRequest.status;
+  return statusCode == 1223?204:statusCode;
+}
+
+function Request$RequestImplIE8And9$1($anonymous0){
+  this.xmlHttpRequest = $anonymous0;
+}
+
+defineClass(438, 437, {}, Request$RequestImplIE8And9$1);
+var Lcom_google_gwt_http_client_Request$RequestImplIE8And9$1_2_classLit = createForClass('com.google.gwt.http.client', 'Request/RequestImplIE8And9/1', 438);
 function $clinit_RequestBuilder(){
   $clinit_RequestBuilder = emptyMethod;
   new RequestBuilder$Method('DELETE');
@@ -6825,22 +6874,14 @@ function RequestPermissionException(url_0){
   RequestException.call(this, 'The URL ' + url_0 + ' is invalid or violates the same-origin security restriction');
 }
 
-defineClass(439, 113, $intern_14, RequestPermissionException);
-var Lcom_google_gwt_http_client_RequestPermissionException_2_classLit = createForClass('com.google.gwt.http.client', 'RequestPermissionException', 439);
+defineClass(440, 113, $intern_14, RequestPermissionException);
+var Lcom_google_gwt_http_client_RequestPermissionException_2_classLit = createForClass('com.google.gwt.http.client', 'RequestPermissionException', 440);
 function RequestTimeoutException(timeoutMillis){
   RequestException.call(this, 'A request timeout has expired after ' + timeoutMillis + ' ms');
 }
 
 defineClass(468, 113, $intern_14, RequestTimeoutException);
 var Lcom_google_gwt_http_client_RequestTimeoutException_2_classLit = createForClass('com.google.gwt.http.client', 'RequestTimeoutException', 468);
-defineClass(552, 1, {});
-var Lcom_google_gwt_http_client_Response_2_classLit = createForClass('com.google.gwt.http.client', 'Response', 552);
-function ResponseImpl(xmlHttpRequest){
-  this.xmlHttpRequest = xmlHttpRequest;
-}
-
-defineClass(437, 552, {}, ResponseImpl);
-var Lcom_google_gwt_http_client_ResponseImpl_2_classLit = createForClass('com.google.gwt.http.client', 'ResponseImpl', 437);
 function throwIfEmptyOrNull(name_0, value_0){
   throwIfNull(name_0, value_0);
   if (0 == $trim(value_0).length) {
@@ -7208,7 +7249,7 @@ function values_11(){
 defineClass(15, 4, {15:1, 3:1, 5:1, 4:1}, DateTimeFormat$PredefinedFormat);
 var DATE_FULL, DATE_LONG, DATE_MEDIUM, DATE_SHORT, DATE_TIME_FULL, DATE_TIME_LONG, DATE_TIME_MEDIUM, DATE_TIME_SHORT, DAY, HOUR24_MINUTE, HOUR24_MINUTE_SECOND, HOUR_MINUTE, HOUR_MINUTE_SECOND, ISO_8601, MINUTE_SECOND, MONTH, MONTH_ABBR, MONTH_ABBR_DAY, MONTH_DAY, MONTH_NUM_DAY, MONTH_WEEKDAY_DAY, RFC_2822, TIME_FULL, TIME_LONG, TIME_MEDIUM, TIME_SHORT, YEAR, YEAR_MONTH, YEAR_MONTH_ABBR, YEAR_MONTH_ABBR_DAY, YEAR_MONTH_DAY, YEAR_MONTH_NUM, YEAR_MONTH_NUM_DAY, YEAR_MONTH_WEEKDAY_DAY, YEAR_QUARTER, YEAR_QUARTER_ABBR;
 var Lcom_google_gwt_i18n_client_DateTimeFormat$PredefinedFormat_2_classLit = createForEnum('com.google.gwt.i18n.client', 'DateTimeFormat/PredefinedFormat', 15, Ljava_lang_Enum_2_classLit, values_11);
-defineClass(549, 1, {});
+defineClass(550, 1, {});
 _.dateFormatFull = function dateFormatFull(){
   return 'y MMMM d, EEEE';
 }
@@ -7301,9 +7342,9 @@ _.timeFormatShort = function timeFormatShort(){
   return 'HH:mm';
 }
 ;
-var Lcom_google_gwt_i18n_shared_DefaultDateTimeFormatInfo_2_classLit = createForClass('com.google.gwt.i18n.shared', 'DefaultDateTimeFormatInfo', 549);
-defineClass(550, 549, {});
-var Lcom_google_gwt_i18n_client_DefaultDateTimeFormatInfo_2_classLit = createForClass('com.google.gwt.i18n.client', 'DefaultDateTimeFormatInfo', 550);
+var Lcom_google_gwt_i18n_shared_DefaultDateTimeFormatInfo_2_classLit = createForClass('com.google.gwt.i18n.shared', 'DefaultDateTimeFormatInfo', 550);
+defineClass(551, 550, {});
+var Lcom_google_gwt_i18n_client_DefaultDateTimeFormatInfo_2_classLit = createForClass('com.google.gwt.i18n.client', 'DefaultDateTimeFormatInfo', 551);
 function $clinit_HasDirection$Direction(){
   $clinit_HasDirection$Direction = emptyMethod;
   RTL = new HasDirection$Direction('RTL', 0);
@@ -7342,12 +7383,12 @@ var Lcom_google_gwt_i18n_client_LocaleInfo_2_classLit = createForClass('com.goog
 function DateTimeFormatInfoImpl(){
 }
 
-defineClass(400, 550, {}, DateTimeFormatInfoImpl);
-var Lcom_google_gwt_i18n_client_impl_cldr_DateTimeFormatInfoImpl_2_classLit = createForClass('com.google.gwt.i18n.client.impl.cldr', 'DateTimeFormatInfoImpl', 400);
+defineClass(399, 551, {}, DateTimeFormatInfoImpl);
+var Lcom_google_gwt_i18n_client_impl_cldr_DateTimeFormatInfoImpl_2_classLit = createForClass('com.google.gwt.i18n.client.impl.cldr', 'DateTimeFormatInfoImpl', 399);
 function DateTimeFormatInfoImpl_en(){
 }
 
-defineClass(401, 400, {}, DateTimeFormatInfoImpl_en);
+defineClass(400, 399, {}, DateTimeFormatInfoImpl_en);
 _.dateFormatFull = function dateFormatFull_0(){
   return 'EEEE, MMMM d, y';
 }
@@ -7440,7 +7481,7 @@ _.timeFormatShort = function timeFormatShort_0(){
   return 'h:mm a';
 }
 ;
-var Lcom_google_gwt_i18n_client_impl_cldr_DateTimeFormatInfoImpl_1en_2_classLit = createForClass('com.google.gwt.i18n.client.impl.cldr', 'DateTimeFormatInfoImpl_en', 401);
+var Lcom_google_gwt_i18n_client_impl_cldr_DateTimeFormatInfoImpl_1en_2_classLit = createForClass('com.google.gwt.i18n.client.impl.cldr', 'DateTimeFormatInfoImpl_en', 400);
 function DateTimeFormat$PatternPart(txt, cnt){
   this.text_0 = txt;
   this.count = cnt;
@@ -7877,7 +7918,7 @@ function fromInt(value_0){
   var rebase, result;
   if (value_0 > -129 && value_0 < 128) {
     rebase = value_0 + 128;
-    boxedValues == null && (boxedValues = initDim(Lcom_google_gwt_lang_LongLibBase$LongEmul_2_classLit, $intern_4, 582, 256, 0, 1));
+    boxedValues == null && (boxedValues = initDim(Lcom_google_gwt_lang_LongLibBase$LongEmul_2_classLit, $intern_4, 584, 256, 0, 1));
     result = boxedValues[rebase];
     !result && (result = boxedValues[rebase] = create_0(value_0));
     return result;
@@ -8252,7 +8293,7 @@ function $layout(this$static, duration, callback){
       l.bottomUnit = l.targetBottomUnit;
       l.widthUnit = l.targetWidthUnit;
       l.heightUnit = l.targetHeightUnit;
-      $layout_0(l);
+      $layout_0(this$static.impl, l);
     }
     return;
   }
@@ -8273,7 +8314,7 @@ function $removeChild_0(this$static, layer){
 }
 
 function Layout(parent_0){
-  this.impl = new LayoutImpl;
+  this.impl = new LayoutImplIE8;
   this.layers = new ArrayList;
   this.parentElem = parent_0;
   $initParent(this.impl, parent_0);
@@ -8308,8 +8349,8 @@ _.onUpdate = function onUpdate(progress){
     l.setTargetBottom && (l.bottom = l.sourceBottom + (l.targetBottom - l.sourceBottom) * progress);
     l.setTargetWidth && (l.width_0 = l.sourceWidth + (l.targetWidth - l.sourceWidth) * progress);
     l.setTargetHeight && (l.height_0 = l.sourceHeight + (l.targetHeight - l.sourceHeight) * progress);
-    $layout_0(l);
-    !!this.val$callback2 && (child = l.userObject , instanceOf(child, 63) && dynamicCast(child, 63).onResize_0() , undefined);
+    $layout_0(this.this$01.impl, l);
+    !!this.val$callback2 && (child = l.userObject , instanceOf(child, 64) && dynamicCast(child, 64).onResize_0() , undefined);
   }
 }
 ;
@@ -8469,29 +8510,6 @@ function $initParent(this$static, parent_0){
   $appendChild(parent_0, this$static.relativeRuler = createRuler(($clinit_Style$Unit() , EM), EX));
 }
 
-function $layout_0(layer){
-  var style;
-  style = layer.container.style;
-  layer.visible?$setPropertyImpl(style, 'display', ''):$setPropertyImpl(style, 'display', ($clinit_Style$Display() , 'none'));
-  style['left'] = layer.setLeft?layer.left + 'px':'';
-  style['top'] = layer.setTop?layer.top_0 + 'px':'';
-  style['right'] = layer.setRight?layer.right + 'px':'';
-  style['bottom'] = layer.setBottom?layer.bottom + 'px':'';
-  style['width'] = layer.setWidth?layer.width_0 + 'px':'';
-  style['height'] = layer.setHeight?layer.height_0 + 'px':'';
-  style = layer.child.style;
-  switch (2) {
-    case 2:
-      $setPropertyImpl(style, 'left', ($clinit_Style$Unit() , '0.0px'));
-      $setPropertyImpl(style, 'right', '0.0px');
-  }
-  switch (2) {
-    case 2:
-      $setPropertyImpl(style, 'top', ($clinit_Style$Unit() , '0.0px'));
-      $setPropertyImpl(style, 'bottom', '0.0px');
-  }
-}
-
 function $removeChild_1(container, child){
   var style;
   $removeFromParent_0(container);
@@ -8502,10 +8520,6 @@ function $removeChild_1(container, child){
   $setPropertyImpl(style, 'top', '');
   $setPropertyImpl(style, 'width', '');
   $setPropertyImpl(style, 'height', '');
-}
-
-function LayoutImpl(){
-  $clinit_LayoutImpl();
 }
 
 function createRuler(widthUnit, heightUnit){
@@ -8523,9 +8537,81 @@ function createRuler(widthUnit, heightUnit){
   return ruler;
 }
 
-defineClass(332, 1, {}, LayoutImpl);
+defineClass(549, 1, {});
 var fixedRuler;
-var Lcom_google_gwt_layout_client_LayoutImpl_2_classLit = createForClass('com.google.gwt.layout.client', 'LayoutImpl', 332);
+var Lcom_google_gwt_layout_client_LayoutImpl_2_classLit = createForClass('com.google.gwt.layout.client', 'LayoutImpl', 549);
+function $layout_0(this$static, layer){
+  var oldDisplay, style;
+  style = layer.container.style;
+  setLayer(layer.container, layer);
+  if (layer.visible) {
+    oldDisplay = style['display'];
+    $setPropertyImpl(style, 'display', '');
+    oldDisplay.length > 0 && $updateVisibility(this$static, layer.container);
+  }
+   else {
+    $setPropertyImpl(style, 'display', ($clinit_Style$Display() , 'none'));
+  }
+  layer.setLeft?$setValue(this$static, layer, 'left', layer.left, layer.leftUnit, false, false):$setPropertyImpl(style, 'left', '');
+  layer.setRight?$setValue(this$static, layer, 'right', layer.right, layer.rightUnit, false, false):$setPropertyImpl(style, 'right', '');
+  layer.setTop?$setValue(this$static, layer, 'top', layer.top_0, layer.topUnit, true, false):$setPropertyImpl(style, 'top', '');
+  layer.setBottom?$setValue(this$static, layer, 'bottom', layer.bottom, layer.bottomUnit, true, false):$setPropertyImpl(style, 'bottom', '');
+  layer.setWidth?$setValue(this$static, layer, 'width', layer.width_0, layer.widthUnit, false, true):$setPropertyImpl(style, 'width', '');
+  layer.setHeight?$setValue(this$static, layer, 'height', layer.height_0, layer.heightUnit, true, true):$setPropertyImpl(style, 'height', '');
+  style = layer.child.style;
+  switch (2) {
+    case 2:
+      $setPropertyImpl(style, 'left', ($clinit_Style$Unit() , '0.0px'));
+      $setPropertyImpl(style, 'right', '0.0px');
+  }
+  switch (2) {
+    case 2:
+      $setPropertyImpl(style, 'top', ($clinit_Style$Unit() , '0.0px'));
+      $setPropertyImpl(style, 'bottom', '0.0px');
+  }
+}
+
+function $removeLayerRefs(parent_0){
+  for (var i = 0; i < parent_0.childNodes.length; ++i) {
+    var container = parent_0.childNodes[i];
+    container.__layer && (container.__layer = null);
+  }
+}
+
+function $setValue(this$static, layer, prop, value_0, unit, vertical, noNegative){
+  switch (unit.ordinal) {
+    case 0:
+    case 1:
+      break;
+    default:value_0 = value_0 * $getUnitSizeInPixels(this$static, layer.container, unit, vertical);
+      value_0 = round_int(value_0 + 0.5);
+      $clinit_Style$Unit();
+  }
+  noNegative && value_0 < 0 && (value_0 = 0);
+  $setPropertyImpl(layer.container.style, prop, value_0 + 'px');
+}
+
+function $updateVisibility(this$static, container){
+  var i, layer, node, nodes;
+  layer = container.__layer;
+  !!layer && $layout_0(this$static, layer);
+  nodes = container.childNodes;
+  for (i = 0; i < nodes.length; ++i) {
+    node = nodes[i];
+    node.nodeType == 1 && $updateVisibility(this$static, node);
+  }
+}
+
+function LayoutImplIE8(){
+  $clinit_LayoutImpl();
+}
+
+function setLayer(container, layer){
+  container.__layer = layer;
+}
+
+defineClass(401, 549, {}, LayoutImplIE8);
+var Lcom_google_gwt_layout_client_LayoutImplIE8_2_classLit = createForClass('com.google.gwt.layout.client', 'LayoutImplIE8', 401);
 function $getLevel(this$static){
   if (this$static.level) {
     return this$static.level;
@@ -8851,7 +8937,7 @@ function PlaceChangeRequestEvent(){
 
 defineClass(225, 514, {}, PlaceChangeRequestEvent);
 _.dispatch_0 = function dispatch_12(handler){
-  $dispatch_4(this, dynamicCast(handler, 563));
+  $dispatch_4(this, dynamicCast(handler, 565));
 }
 ;
 _.getAssociatedType_0 = function getAssociatedType_13(){
@@ -8898,7 +8984,7 @@ function PlaceController$1(this$0){
   this.this$01 = this$0;
 }
 
-defineClass(216, 1, {30:1, 562:1}, PlaceController$1);
+defineClass(216, 1, {30:1, 564:1}, PlaceController$1);
 var Lcom_google_gwt_place_shared_PlaceController$1_2_classLit = createForClass('com.google.gwt.place.shared', 'PlaceController/1', 216);
 function $addWindowClosingHandler(handler){
   return maybeInitializeCloseHandlers() , addHandler(($clinit_Window$ClosingEvent() , $clinit_Window$ClosingEvent() , TYPE_13), handler);
@@ -8967,7 +9053,7 @@ function PlaceHistoryHandler$2(this$0){
   this.this$01 = this$0;
 }
 
-defineClass(227, 1, {564:1, 30:1}, PlaceHistoryHandler$2);
+defineClass(227, 1, {566:1, 30:1}, PlaceHistoryHandler$2);
 var Lcom_google_gwt_place_shared_PlaceHistoryHandler$2_2_classLit = createForClass('com.google.gwt.place.shared', 'PlaceHistoryHandler/2', 227);
 function PlaceHistoryHandler$3(this$0, val$placeReg, val$historyReg){
   this.this$01 = this$0;
@@ -9095,8 +9181,8 @@ function $clinit_UriUtils(){
   new RegExp('%5D', 'g');
 }
 
-defineClass(551, 1, {});
-var Lcom_google_gwt_text_shared_AbstractRenderer_2_classLit = createForClass('com.google.gwt.text.shared', 'AbstractRenderer', 551);
+defineClass(552, 1, {});
+var Lcom_google_gwt_text_shared_AbstractRenderer_2_classLit = createForClass('com.google.gwt.text.shared', 'AbstractRenderer', 552);
 function PassthroughParser(){
 }
 
@@ -9106,7 +9192,7 @@ var Lcom_google_gwt_text_shared_testing_PassthroughParser_2_classLit = createFor
 function PassthroughRenderer(){
 }
 
-defineClass(405, 551, {}, PassthroughRenderer);
+defineClass(405, 552, {}, PassthroughRenderer);
 var INSTANCE_1;
 var Lcom_google_gwt_text_shared_testing_PassthroughRenderer_2_classLit = createForClass('com.google.gwt.text.shared.testing', 'PassthroughRenderer', 405);
 function $calcNewVelocity(initialVelocity, decelFactor, oldVelocity, minDecel){
@@ -9397,7 +9483,7 @@ function $setTargetWidget(this$static, widget){
   }
   $cancelAll(this$static);
   for (reg$iterator = new AbstractList$IteratorImpl(this$static.handlerRegs); reg$iterator.i < reg$iterator.this$01_0.size_1();) {
-    reg = (checkCriticalElement(reg$iterator.i < reg$iterator.this$01_0.size_1()) , dynamicCast(reg$iterator.this$01_0.get_3(reg$iterator.last = reg$iterator.i++), 565));
+    reg = (checkCriticalElement(reg$iterator.i < reg$iterator.this$01_0.size_1()) , dynamicCast(reg$iterator.this$01_0.get_3(reg$iterator.last = reg$iterator.i++), 567));
     $removeHandler(reg.real);
   }
   this$static.handlerRegs.array = initDim(Ljava_lang_Object_2_classLit, $intern_4, 1, 0, 3, 1);
@@ -9441,31 +9527,31 @@ function TouchScroller$1(this$0){
   this.this$01 = this$0;
 }
 
-defineClass(455, 1, {566:1, 30:1}, TouchScroller$1);
+defineClass(455, 1, {568:1, 30:1}, TouchScroller$1);
 var Lcom_google_gwt_touch_client_TouchScroller$1_2_classLit = createForClass('com.google.gwt.touch.client', 'TouchScroller/1', 455);
 function TouchScroller$2(this$0){
   this.this$01 = this$0;
 }
 
-defineClass(456, 1, {569:1, 30:1}, TouchScroller$2);
+defineClass(456, 1, {571:1, 30:1}, TouchScroller$2);
 var Lcom_google_gwt_touch_client_TouchScroller$2_2_classLit = createForClass('com.google.gwt.touch.client', 'TouchScroller/2', 456);
 function TouchScroller$3(this$0){
   this.this$01 = this$0;
 }
 
-defineClass(457, 1, {570:1, 30:1}, TouchScroller$3);
+defineClass(457, 1, {572:1, 30:1}, TouchScroller$3);
 var Lcom_google_gwt_touch_client_TouchScroller$3_2_classLit = createForClass('com.google.gwt.touch.client', 'TouchScroller/3', 457);
 function TouchScroller$4(this$0){
   this.this$01 = this$0;
 }
 
-defineClass(458, 1, {571:1, 30:1}, TouchScroller$4);
+defineClass(458, 1, {573:1, 30:1}, TouchScroller$4);
 var Lcom_google_gwt_touch_client_TouchScroller$4_2_classLit = createForClass('com.google.gwt.touch.client', 'TouchScroller/4', 458);
 function TouchScroller$5(this$0){
   this.this$01 = this$0;
 }
 
-defineClass(459, 1, {572:1, 30:1}, TouchScroller$5);
+defineClass(459, 1, {574:1, 30:1}, TouchScroller$5);
 var Lcom_google_gwt_touch_client_TouchScroller$5_2_classLit = createForClass('com.google.gwt.touch.client', 'TouchScroller/5', 459);
 function TouchScroller$6(this$0){
   this.this$01 = this$0;
@@ -9990,7 +10076,7 @@ function Window$ClosingEvent(){
 
 defineClass(217, 514, {}, Window$ClosingEvent);
 _.dispatch_0 = function dispatch_14(handler){
-  $maybeGoTo(dynamicCast(handler, 562).this$01, $clinit_Place());
+  $maybeGoTo(dynamicCast(handler, 564).this$01, $clinit_Place());
 }
 ;
 _.getAssociatedType_0 = function getAssociatedType_15(){
@@ -10302,17 +10388,17 @@ function getIndex(elem){
   return index_0 == null?-1:index_0;
 }
 
-defineClass(334, 1, {}, ElementMapperImpl);
+defineClass(333, 1, {}, ElementMapperImpl);
 _.freeList = null;
-var Lcom_google_gwt_user_client_impl_ElementMapperImpl_2_classLit = createForClass('com.google.gwt.user.client.impl', 'ElementMapperImpl', 334);
+var Lcom_google_gwt_user_client_impl_ElementMapperImpl_2_classLit = createForClass('com.google.gwt.user.client.impl', 'ElementMapperImpl', 333);
 function ElementMapperImpl$FreeNode(index_0, next){
   this.index_0 = index_0;
   this.next = next;
 }
 
-defineClass(335, 1, {}, ElementMapperImpl$FreeNode);
+defineClass(334, 1, {}, ElementMapperImpl$FreeNode);
 _.index_0 = 0;
-var Lcom_google_gwt_user_client_impl_ElementMapperImpl$FreeNode_2_classLit = createForClass('com.google.gwt.user.client.impl', 'ElementMapperImpl/FreeNode', 335);
+var Lcom_google_gwt_user_client_impl_ElementMapperImpl$FreeNode_2_classLit = createForClass('com.google.gwt.user.client.impl', 'ElementMapperImpl/FreeNode', 334);
 function foreach_0(map_0, fn){
   for (var e in map_0) {
     map_0.hasOwnProperty(e) && fn(e, map_0[e]);
@@ -10357,7 +10443,7 @@ _.doDetachChildren = function doDetachChildren_0(){
 var Lcom_google_gwt_user_client_ui_Panel_2_classLit = createForClass('com.google.gwt.user.client.ui', 'Panel', 533);
 function $add(this$static, child, container){
   $removeFromParent(child);
-  $add_7(this$static.children, child);
+  $add_7(this$static.children_0, child);
   $clinit_DOM();
   $appendChild(container, resolve(child.element));
   $setParent(child, this$static);
@@ -10374,18 +10460,18 @@ function $remove(this$static, w){
    finally {
     elem = ($clinit_DOM() , w.element);
     $removeChild((null , $getParentElement(elem)), elem);
-    $remove_4(this$static.children, w);
+    $remove_4(this$static.children_0, w);
   }
   return true;
 }
 
 function ComplexPanel(){
-  this.children = new WidgetCollection(this);
+  this.children_0 = new WidgetCollection(this);
 }
 
 defineClass(91, 533, $intern_40);
 _.iterator = function iterator_0(){
-  return new WidgetCollection$WidgetIterator(this.children);
+  return new WidgetCollection$WidgetIterator(this.children_0);
 }
 ;
 _.remove = function remove_0(w){
@@ -10566,7 +10652,7 @@ function $getValue(this$static){
   return this$static.attached?($clinit_Boolean() , $isChecked(this$static.inputElem)?TRUE:FALSE):($clinit_Boolean() , $isDefaultChecked(this$static.inputElem)?TRUE:FALSE);
 }
 
-function $setValue(this$static, value_0){
+function $setValue_0(this$static, value_0){
   var oldValue;
   !value_0 && (value_0 = ($clinit_Boolean() , FALSE));
   oldValue = this$static.attached?($clinit_Boolean() , $isChecked(this$static.inputElem)?TRUE:FALSE):($clinit_Boolean() , $isDefaultChecked(this$static.inputElem)?TRUE:FALSE);
@@ -10610,7 +10696,7 @@ _.onLoad = function onLoad_1(){
 _.onUnload = function onUnload_0(){
   $clinit_DOM();
   setEventListener_0(this.inputElem, null);
-  $setValue(this, this.attached?($clinit_Boolean() , $isChecked(this.inputElem)?TRUE:FALSE):($clinit_Boolean() , $isDefaultChecked(this.inputElem)?TRUE:FALSE));
+  $setValue_0(this, this.attached?($clinit_Boolean() , $isChecked(this.inputElem)?TRUE:FALSE):($clinit_Boolean() , $isDefaultChecked(this.inputElem)?TRUE:FALSE));
 }
 ;
 _.setTabIndex = function setTabIndex_1(index_0){
@@ -10913,7 +10999,7 @@ function $doLayout(this$static){
   top_0 = 0;
   right = 0;
   bottom = 0;
-  for (child$iterator = new WidgetCollection$WidgetIterator(this$static.children); child$iterator.index_0 < child$iterator.this$01.size_0;) {
+  for (child$iterator = new WidgetCollection$WidgetIterator(this$static.children_0); child$iterator.index_0 < child$iterator.this$01.size_0;) {
     child = $next_1(child$iterator);
     data_0 = dynamicCast(child.layoutData, 123);
     layer = data_0.layer;
@@ -10963,7 +11049,7 @@ function $getResolvedDirection(direction){
 function $insert(this$static, widget, direction, size_0){
   var children, data_0, layer;
   $removeFromParent(widget);
-  children = this$static.children;
+  children = this$static.children_0;
   $insert_1(children, widget, children.size_0);
   direction == ($clinit_DockLayoutPanel$Direction() , CENTER_0) && (this$static.center = widget);
   layer = $attachChild(this$static.layout, ($clinit_DOM() , widget.element), widget);
@@ -10988,13 +11074,14 @@ _.onAttach = function onAttach_2(){
 ;
 _.onDetach = function onDetach_1(){
   $onDetach(this);
+  $removeLayerRefs(this.layout.parentElem);
 }
 ;
 _.onResize_0 = function onResize_2(){
   var child, child$iterator;
-  for (child$iterator = new WidgetCollection$WidgetIterator(this.children); child$iterator.index_0 < child$iterator.this$01.size_0;) {
+  for (child$iterator = new WidgetCollection$WidgetIterator(this.children_0); child$iterator.index_0 < child$iterator.this$01.size_0;) {
     child = $next_1(child$iterator);
-    instanceOf(child, 63) && dynamicCast(child, 63).onResize_0();
+    instanceOf(child, 64) && dynamicCast(child, 64).onResize_0();
   }
 }
 ;
@@ -11086,7 +11173,7 @@ _.size_0 = 0;
 var Lcom_google_gwt_user_client_ui_DockLayoutPanel$LayoutData_2_classLit = createForClass('com.google.gwt.user.client.ui', 'DockLayoutPanel/LayoutData', 123);
 function $addCells(tbody, row, num){
   var i, rowElem, tdElement;
-  rowElem = tbody.rows[row];
+  rowElem = tbody.children[row];
   for (i = 0; i < num; i++) {
     tdElement = $doc.createElement('td');
     rowElem.appendChild(tdElement);
@@ -11110,16 +11197,16 @@ function $cleanCell(this$static, row, column, clearInnerHTML){
 
 function $getDOMCellCount(tableBody, row){
   var rowElement;
-  rowElement = tableBody.rows[row];
-  return rowElement.cells.length;
+  rowElement = tableBody.children[row];
+  return rowElement.children.length;
 }
 
 function $getDOMRowCount(this$static){
-  return ($clinit_DOM() , this$static.bodyElem).rows.length;
+  return ($clinit_DOM() , this$static.bodyElem).children.length;
 }
 
 function $getDOMRowCount_0(tbody){
-  return ($clinit_DOM() , tbody).rows.length;
+  return ($clinit_DOM() , tbody).children.length;
 }
 
 function $internalClearCell(this$static, td, clearInnerHTML){
@@ -11263,7 +11350,7 @@ function $addStyleName_0(this$static){
 }
 
 function $getCellElement(tbody, row, col){
-  return tbody.rows[row].cells[col];
+  return $getCells(tbody.children[row])[col];
 }
 
 function $getRawElement(this$static, row, column){
@@ -11306,7 +11393,7 @@ function $addAndReplaceElement(this$static, widget, toReplace){
   }
   $removeFromParent(widget);
   toRemove = null;
-  children = new WidgetCollection$WidgetIterator(this$static.children);
+  children = new WidgetCollection$WidgetIterator(this$static.children_0);
   while (children.index_0 < children.this$01.size_0) {
     next = $next_1(children);
     if (isOrHasChildImpl(toReplace, next.element)) {
@@ -11317,7 +11404,7 @@ function $addAndReplaceElement(this$static, widget, toReplace){
       $remove_5(children);
     }
   }
-  $add_7(this$static.children, widget);
+  $add_7(this$static.children_0, widget);
   if (!toRemove) {
     $replaceChild(toReplace.parentNode, widget.element, toReplace);
   }
@@ -11417,6 +11504,10 @@ function HTMLTable$ColumnFormatter(this$0){
 
 defineClass(324, 1, {}, HTMLTable$ColumnFormatter);
 var Lcom_google_gwt_user_client_ui_HTMLTable$ColumnFormatter_2_classLit = createForClass('com.google.gwt.user.client.ui', 'HTMLTable/ColumnFormatter', 324);
+function $getCells(row){
+  return row.children;
+}
+
 function $addStyleName_1(this$static){
   setStyleName(($prepareRow(this$static.this$01, 0) , $clinit_DOM() , $getRow(this$static.this$01.bodyElem, 0)), 'bookListHeader', true);
 }
@@ -11426,7 +11517,7 @@ function $getRow(tbody, row){
 }
 
 function $getRow_0(tbody, row){
-  return $clinit_DOM() , tbody.rows[row];
+  return $clinit_DOM() , tbody.children[row];
 }
 
 function HTMLTable$RowFormatter(this$0){
@@ -11537,7 +11628,7 @@ function Image$State$1(this$1, val$image){
 
 defineClass(282, 1, {}, Image$State$1);
 _.execute_1 = function execute_11(){
-  var evt, evt_0;
+  var evt;
   if (this.val$image2.state != this.this$11 || this != this.this$11.syntheticEventCommand) {
     return;
   }
@@ -11546,7 +11637,7 @@ _.execute_1 = function execute_11(){
     $setPropertyString($getImageElement(this.val$image2), '__gwtLastUnhandledEvent', 'load');
     return;
   }
-  evt = (evt_0 = $doc.createEvent('HTMLEvents') , evt_0.initEvent('load', false, false) , evt_0);
+  evt = $createHtmlEvent($doc, 'load', false, false);
   $dispatchEvent($getImageElement(this.val$image2), evt);
 }
 ;
@@ -11622,13 +11713,13 @@ function LayoutCommand$1(){
 defineClass(305, 1, {}, LayoutCommand$1);
 var Lcom_google_gwt_user_client_ui_LayoutCommand$1_2_classLit = createForClass('com.google.gwt.user.client.ui', 'LayoutCommand/1', 305);
 function $add_5(this$static, widget){
-  $insert_0(this$static, widget, this$static.children.size_0);
+  $insert_0(this$static, widget, this$static.children_0.size_0);
 }
 
 function $insert_0(this$static, widget, beforeIndex){
   var layer;
   $removeFromParent(widget);
-  $insert_1(this$static.children, widget, beforeIndex);
+  $insert_1(this$static.children_0, widget, beforeIndex);
   layer = $attachChild(this$static.layout, ($clinit_DOM() , widget.element), widget);
   widget.layoutData = layer;
   $setParent(widget, this$static);
@@ -11637,9 +11728,9 @@ function $insert_0(this$static, widget, beforeIndex){
 
 function $onResize(this$static){
   var child, child$iterator;
-  for (child$iterator = new WidgetCollection$WidgetIterator(this$static.children); child$iterator.index_0 < child$iterator.this$01.size_0;) {
+  for (child$iterator = new WidgetCollection$WidgetIterator(this$static.children_0); child$iterator.index_0 < child$iterator.this$01.size_0;) {
     child = $next_1(child$iterator);
-    instanceOf(child, 63) && dynamicCast(child, 63).onResize_0();
+    instanceOf(child, 64) && dynamicCast(child, 64).onResize_0();
   }
 }
 
@@ -11650,6 +11741,7 @@ _.onAttach = function onAttach_3(){
 ;
 _.onDetach = function onDetach_2(){
   $onDetach(this);
+  $removeLayerRefs(this.layout.parentElem);
 }
 ;
 _.onResize_0 = function onResize_3(){
@@ -11742,14 +11834,14 @@ function TextBox_0(element, styleName){
   $setClassName(($clinit_DOM() , this.element), styleName);
 }
 
-defineClass(65, 176, $intern_7, TextBox);
-var Lcom_google_gwt_user_client_ui_TextBox_2_classLit = createForClass('com.google.gwt.user.client.ui', 'TextBox', 65);
+defineClass(66, 176, $intern_7, TextBox);
+var Lcom_google_gwt_user_client_ui_TextBox_2_classLit = createForClass('com.google.gwt.user.client.ui', 'TextBox', 66);
 function PasswordTextBox(){
   $clinit_TextBoxBase();
   TextBox_0.call(this, $createInputElement($doc, 'password'), 'gwt-PasswordTextBox');
 }
 
-defineClass(177, 65, $intern_7, PasswordTextBox);
+defineClass(177, 66, $intern_7, PasswordTextBox);
 var Lcom_google_gwt_user_client_ui_PasswordTextBox_2_classLit = createForClass('com.google.gwt.user.client.ui', 'PasswordTextBox', 177);
 function $clinit_PotentialElement(){
   $clinit_PotentialElement = emptyMethod;
@@ -11914,23 +12006,60 @@ function $getMinimumHorizontalScrollPosition(scrollable){
   return $isRtl(scrollable)?(scrollable.clientWidth | 0) - ($getSubPixelScrollWidth(scrollable) | 0):0;
 }
 
-function $isRtl(scrollable){
-  var computedStyle = $doc.defaultView.getComputedStyle(scrollable, null);
-  return computedStyle.getPropertyValue('direction') == 'rtl';
-}
-
-function ScrollImpl(){
-}
-
-defineClass(151, 1, {}, ScrollImpl);
+defineClass(557, 1, {});
 var impl_1;
-var Lcom_google_gwt_user_client_ui_ScrollImpl_2_classLit = createForClass('com.google.gwt.user.client.ui', 'ScrollImpl', 151);
+var Lcom_google_gwt_user_client_ui_ScrollImpl_2_classLit = createForClass('com.google.gwt.user.client.ui', 'ScrollImpl', 557);
+function $initialize(scrollable, container){
+  scrollable.__lastScrollTop = scrollable.__lastScrollLeft = 0;
+  scrollable.attachEvent('onscroll', scrollHandler);
+  scrollable.attachEvent('onresize', resizeHandler);
+  container.attachEvent('onresize', resizeHandler);
+  container.__isScrollContainer = true;
+}
+
+function $isRtl(scrollable){
+  return scrollable.currentStyle.direction == 'rtl';
+}
+
+function ScrollImpl$ScrollImplTrident(){
+  initStaticHandlers();
+}
+
+function initStaticHandlers(){
+  scrollHandler = function(){
+    var scrollableElem = $wnd.event.srcElement;
+    scrollableElem.__lastScrollTop = scrollableElem.scrollTop;
+    scrollableElem.__lastScrollLeft = scrollableElem.scrollLeft;
+  }
+  ;
+  resizeHandler = function(){
+    var scrollableElem = $wnd.event.srcElement;
+    scrollableElem.__isScrollContainer && (scrollableElem = scrollableElem.parentNode);
+    setTimeout($entry(function(){
+      if (scrollableElem.scrollTop != scrollableElem.__lastScrollTop || scrollableElem.scrollLeft != scrollableElem.__lastScrollLeft) {
+        scrollableElem.__lastScrollTop = scrollableElem.scrollTop;
+        scrollableElem.__lastScrollLeft = scrollableElem.scrollLeft;
+        triggerScrollEvent(scrollableElem);
+      }
+    }
+    ), 1);
+  }
+  ;
+}
+
+function triggerScrollEvent(elem){
+  $dispatchEvent(elem, $createHtmlEvent($doc, 'scroll', false, false));
+}
+
+defineClass(151, 557, {}, ScrollImpl$ScrollImplTrident);
+var resizeHandler, scrollHandler;
+var Lcom_google_gwt_user_client_ui_ScrollImpl$ScrollImplTrident_2_classLit = createForClass('com.google.gwt.user.client.ui', 'ScrollImpl/ScrollImplTrident', 151);
 function $getHorizontalScrollPosition(this$static){
   return $getScrollLeft(($clinit_DOM() , this$static.scrollableElem));
 }
 
 function $getMaximumHorizontalScrollPosition_0(this$static){
-  return $getMaximumHorizontalScrollPosition((!impl_1 && (impl_1 = new ScrollImpl) , $clinit_DOM() , this$static.scrollableElem));
+  return $getMaximumHorizontalScrollPosition((!impl_1 && (impl_1 = new ScrollImpl$ScrollImplTrident) , $clinit_DOM() , this$static.scrollableElem));
 }
 
 function $getMaximumVerticalScrollPosition(this$static){
@@ -11938,7 +12067,7 @@ function $getMaximumVerticalScrollPosition(this$static){
 }
 
 function $getMinimumHorizontalScrollPosition_0(this$static){
-  return $getMinimumHorizontalScrollPosition((!impl_1 && (impl_1 = new ScrollImpl) , $clinit_DOM() , this$static.scrollableElem));
+  return $getMinimumHorizontalScrollPosition((!impl_1 && (impl_1 = new ScrollImpl$ScrollImplTrident) , $clinit_DOM() , this$static.scrollableElem));
 }
 
 function $getVerticalScrollPosition(this$static){
@@ -11973,7 +12102,8 @@ function ScrollPanel(){
   $setPropertyImpl(this.scrollableElem.style, 'zoom', '1');
   $setPropertyImpl(this.containerElem.style, 'zoom', '1');
   $setTouchScrollingDisabled(this);
-  !impl_1 && (impl_1 = new ScrollImpl);
+  !impl_1 && (impl_1 = new ScrollImpl$ScrollImplTrident);
+  $initialize(this.scrollableElem, this.containerElem);
 }
 
 defineClass(178, 102, $intern_41, ScrollPanel);
@@ -11994,7 +12124,7 @@ _.onDetach = function onDetach_3(){
 _.onResize_0 = function onResize_5(){
   var child;
   child = this.widget;
-  !!child && instanceOf(child, 63) && dynamicCast(child, 63).onResize_0();
+  !!child && instanceOf(child, 64) && dynamicCast(child, 64).onResize_0();
 }
 ;
 var Lcom_google_gwt_user_client_ui_ScrollPanel_2_classLit = createForClass('com.google.gwt.user.client.ui', 'ScrollPanel', 178);
@@ -12278,7 +12408,7 @@ var Lcom_google_gwt_user_client_ui_WidgetIterators$1_2_classLit = createForClass
 function assertCompileTimeUserAgent(){
   var runtimeValue;
   runtimeValue = $getRuntimeValue();
-  if (!$equals('ie10', runtimeValue)) {
+  if (!$equals('ie9', runtimeValue)) {
     throw new UserAgentAsserter$UserAgentAssertionError(runtimeValue);
   }
 }
@@ -12292,7 +12422,7 @@ var Ljava_lang_Error_2_classLit = createForClass('java.lang', 'Error', 129);
 defineClass(45, 129, $intern_13);
 var Ljava_lang_AssertionError_2_classLit = createForClass('java.lang', 'AssertionError', 45);
 function UserAgentAsserter$UserAgentAssertionError(runtimeValue){
-  Error_0.call(this, '' + ('Possible problem with your *.gwt.xml module file.\nThe compile time user.agent value (ie10) does not match the runtime user.agent value (' + runtimeValue + ').\n' + 'Expect more errors.'), instanceOf('Possible problem with your *.gwt.xml module file.\nThe compile time user.agent value (ie10) does not match the runtime user.agent value (' + runtimeValue + ').\n' + 'Expect more errors.', 9)?dynamicCast('Possible problem with your *.gwt.xml module file.\nThe compile time user.agent value (ie10) does not match the runtime user.agent value (' + runtimeValue + ').\n' + 'Expect more errors.', 9):null);
+  Error_0.call(this, '' + ('Possible problem with your *.gwt.xml module file.\nThe compile time user.agent value (ie9) does not match the runtime user.agent value (' + runtimeValue + ').\n' + 'Expect more errors.'), instanceOf('Possible problem with your *.gwt.xml module file.\nThe compile time user.agent value (ie9) does not match the runtime user.agent value (' + runtimeValue + ').\n' + 'Expect more errors.', 9)?dynamicCast('Possible problem with your *.gwt.xml module file.\nThe compile time user.agent value (ie9) does not match the runtime user.agent value (' + runtimeValue + ').\n' + 'Expect more errors.', 9):null);
 }
 
 defineClass(202, 45, $intern_13, UserAgentAsserter$UserAgentAssertionError);
@@ -12748,7 +12878,7 @@ function getAutoBean(delegate){
   return !delegate?null:dynamicCast(get_0(delegate, ($ensureNamesAreInitialized(Lcom_google_web_bindery_autobean_shared_AutoBean_2_classLit) , Lcom_google_web_bindery_autobean_shared_AutoBean_2_classLit.typeName)), 25);
 }
 
-defineClass(555, 1, {});
+defineClass(556, 1, {});
 _.endVisit = function endVisit(bean, ctx){
 }
 ;
@@ -12764,12 +12894,12 @@ _.visitValueProperty = function visitValueProperty(propertyName, value_0, ctx){
   return true;
 }
 ;
-var Lcom_google_web_bindery_autobean_shared_AutoBeanVisitor_2_classLit = createForClass('com.google.web.bindery.autobean.shared', 'AutoBeanVisitor', 555);
-defineClass(554, 1, {});
+var Lcom_google_web_bindery_autobean_shared_AutoBeanVisitor_2_classLit = createForClass('com.google.web.bindery.autobean.shared', 'AutoBeanVisitor', 556);
+defineClass(555, 1, {});
 _.endVisitType = function endVisitType(type_0){
 }
 ;
-var Lcom_google_web_bindery_autobean_shared_AutoBeanVisitor$ParameterizationVisitor_2_classLit = createForClass('com.google.web.bindery.autobean.shared', 'AutoBeanVisitor/ParameterizationVisitor', 554);
+var Lcom_google_web_bindery_autobean_shared_AutoBeanVisitor$ParameterizationVisitor_2_classLit = createForClass('com.google.web.bindery.autobean.shared', 'AutoBeanVisitor/ParameterizationVisitor', 555);
 function $clinit_Splittable(){
   $clinit_Splittable = emptyMethod;
   NULL = ($clinit_NullSplittable() , INSTANCE_2);
@@ -13219,7 +13349,7 @@ function AutoBeanCodexImpl$CoderCreator(){
   this.stack_0 = new Stack;
 }
 
-defineClass(185, 554, {}, AutoBeanCodexImpl$CoderCreator);
+defineClass(185, 555, {}, AutoBeanCodexImpl$CoderCreator);
 _.endVisitType = function endVisitType_0(type_0){
   Ljava_util_List_2_classLit == type_0 || Ljava_util_Set_2_classLit == type_0?$push_1(this.stack_0, ($clinit_AutoBeanCodexImpl() , new AutoBeanCodexImpl$CollectionCoder(type_0, dynamicCast($pop(this.stack_0), 48)))):Ljava_util_Map_2_classLit == type_0?$push_1(this.stack_0, ($clinit_AutoBeanCodexImpl() , new AutoBeanCodexImpl$MapCoder(dynamicCast($pop(this.stack_0), 48), dynamicCast($pop(this.stack_0), 48)))):Lcom_google_web_bindery_autobean_shared_Splittable_2_classLit == type_0?$push_1(this.stack_0, ($clinit_AutoBeanCodexImpl() , $clinit_AutoBeanCodexImpl$SplittableCoder() , INSTANCE_3)):$getEnumConstants(type_0) != null?$push_1(this.stack_0, enumCoder(type_0)):canDecode(type_0)?$push_1(this.stack_0, valueCoder_0(type_0)):$push_1(this.stack_0, objectCoder(type_0));
 }
@@ -13285,7 +13415,7 @@ function AutoBeanCodexImpl$EnumCoder(type_0){
   this.type_0 = type_0;
 }
 
-defineClass(442, 1, $intern_46, AutoBeanCodexImpl$EnumCoder);
+defineClass(443, 1, $intern_46, AutoBeanCodexImpl$EnumCoder);
 _.decode_0 = function decode_17(state, data_0){
   return $getEnum(state.enumMap, this.type_0, asString__Ljava_lang_String___devirtual$(data_0));
 }
@@ -13302,7 +13432,7 @@ _.extractSplittable = function extractSplittable_0(state, value_0){
   return split_1(escapeValue($getToken(state.enumMap, dynamicCast(value_0, 4))));
 }
 ;
-var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$EnumCoder_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/EnumCoder', 442);
+var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$EnumCoder_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/EnumCoder', 443);
 function AutoBeanCodexImpl$HaltException(cause){
   this.detailMessage = $toString(cause);
   this.cause = cause;
@@ -13320,7 +13450,7 @@ function AutoBeanCodexImpl$MapCoder(valueDecoder, keyDecoder){
   this.valueDecoder = valueDecoder;
 }
 
-defineClass(443, 1, $intern_46, AutoBeanCodexImpl$MapCoder);
+defineClass(444, 1, $intern_46, AutoBeanCodexImpl$MapCoder);
 _.decode_0 = function decode_18(state, data_0){
   var toReturn;
   (hasJavaObjectVirtualDispatch(data_0)?data_0.isIndexed():$isIndexed(data_0))?(toReturn = new SplittableComplexMap(data_0, this.keyDecoder, this.valueDecoder, state)):(toReturn = new SplittableSimpleMap(data_0, this.keyDecoder, this.valueDecoder, state));
@@ -13373,12 +13503,12 @@ _.extractSplittable = function extractSplittable_1(state, value_0){
   return tryExtractSplittable(value_0);
 }
 ;
-var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$MapCoder_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/MapCoder', 443);
+var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$MapCoder_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/MapCoder', 444);
 function AutoBeanCodexImpl$ObjectCoder(type_0){
   this.type_0 = type_0;
 }
 
-defineClass(444, 1, $intern_46, AutoBeanCodexImpl$ObjectCoder);
+defineClass(445, 1, $intern_46, AutoBeanCodexImpl$ObjectCoder);
 _.decode_0 = function decode_19(state, data_0){
   var bean;
   bean = doDecode(state, this.type_0, data_0);
@@ -13397,7 +13527,7 @@ _.extractSplittable = function extractSplittable_2(state, value_0){
   return tryExtractSplittable(value_0);
 }
 ;
-var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$ObjectCoder_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/ObjectCoder', 444);
+var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$ObjectCoder_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/ObjectCoder', 445);
 function $maybeCreateCoder(this$static, propertyName, ctx){
   var creator;
   creator = new AutoBeanCodexImpl$CoderCreator;
@@ -13408,7 +13538,7 @@ function $maybeCreateCoder(this$static, propertyName, ctx){
 function AutoBeanCodexImpl$PropertyCoderCreator(){
 }
 
-defineClass(445, 555, {}, AutoBeanCodexImpl$PropertyCoderCreator);
+defineClass(446, 556, {}, AutoBeanCodexImpl$PropertyCoderCreator);
 _.visit = function visit_0(bean, ctx){
   this.bean = bean;
   return true;
@@ -13424,7 +13554,7 @@ _.visitValueProperty = function visitValueProperty_0(propertyName, value_0, ctx)
   return false;
 }
 ;
-var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$PropertyCoderCreator_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/PropertyCoderCreator', 445);
+var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$PropertyCoderCreator_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/PropertyCoderCreator', 446);
 function $encodeProperty(this$static, propertyName, value_0, ctx){
   var decoder, pd;
   pd = new AutoBeanCodexImpl$CoderCreator;
@@ -13440,7 +13570,7 @@ function AutoBeanCodexImpl$PropertyGetter(state){
   this.state = state;
 }
 
-defineClass(446, 555, {}, AutoBeanCodexImpl$PropertyGetter);
+defineClass(447, 556, {}, AutoBeanCodexImpl$PropertyGetter);
 _.endVisit = function endVisit_0(bean, ctx){
   $append_2(this.state.sb, '}');
   $pop(this.state.seen);
@@ -13466,7 +13596,7 @@ _.visitValueProperty = function visitValueProperty_1(propertyName, value_0, ctx)
 }
 ;
 _.first = true;
-var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$PropertyGetter_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/PropertyGetter', 446);
+var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$PropertyGetter_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/PropertyGetter', 447);
 function $clinit_AutoBeanCodexImpl$SplittableCoder(){
   $clinit_AutoBeanCodexImpl$SplittableCoder = emptyMethod;
   INSTANCE_3 = new AutoBeanCodexImpl$SplittableCoder;
@@ -13475,7 +13605,7 @@ function $clinit_AutoBeanCodexImpl$SplittableCoder(){
 function AutoBeanCodexImpl$SplittableCoder(){
 }
 
-defineClass(447, 1, $intern_46, AutoBeanCodexImpl$SplittableCoder);
+defineClass(448, 1, $intern_46, AutoBeanCodexImpl$SplittableCoder);
 _.decode_0 = function decode_20(state, data_0){
   return data_0;
 }
@@ -13493,7 +13623,7 @@ _.extractSplittable = function extractSplittable_3(state, value_0){
 }
 ;
 var INSTANCE_3;
-var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$SplittableCoder_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/SplittableCoder', 447);
+var Lcom_google_web_bindery_autobean_shared_impl_AutoBeanCodexImpl$SplittableCoder_2_classLit = createForClass('com.google.web.bindery.autobean.shared.impl', 'AutoBeanCodexImpl/SplittableCoder', 448);
 function AutoBeanCodexImpl$ValueCoder(type_0){
   this.type_0 = type_0;
 }
@@ -14546,8 +14676,8 @@ function __parseInt(s, radix){
   return parseInt(s, radix);
 }
 
-defineClass(64, 1, {3:1, 64:1});
-var Ljava_lang_Number_2_classLit = createForClass('java.lang', 'Number', 64);
+defineClass(65, 1, {3:1, 65:1});
+var Ljava_lang_Number_2_classLit = createForClass('java.lang', 'Number', 65);
 function $compareTo_1(this$static, b){
   return this$static.value_0 - b.value_0;
 }
@@ -14564,7 +14694,7 @@ function valueOf_1(b){
   return result;
 }
 
-defineClass(79, 64, {3:1, 79:1, 5:1, 64:1}, Byte);
+defineClass(79, 65, {3:1, 79:1, 5:1, 65:1}, Byte);
 _.compareTo = function compareTo_1(b){
   return $compareTo_1(this, dynamicCast(b, 79));
 }
@@ -14676,7 +14806,7 @@ function isNaN_0(x_0){
   return isNaN(x_0);
 }
 
-defineClass(80, 64, {3:1, 5:1, 80:1, 64:1}, Double);
+defineClass(80, 65, {3:1, 5:1, 80:1, 65:1}, Double);
 _.compareTo = function compareTo_3(b){
   return $compareTo_3(this, dynamicCast(b, 80));
 }
@@ -14703,7 +14833,7 @@ function Float(value_0){
   this.value_0 = value_0;
 }
 
-defineClass(81, 64, {3:1, 5:1, 81:1, 64:1}, Float);
+defineClass(81, 65, {3:1, 5:1, 81:1, 65:1}, Float);
 _.compareTo = function compareTo_4(b){
   return $compareTo_4(this, dynamicCast(b, 81));
 }
@@ -14810,7 +14940,7 @@ function valueOf_3(i){
   return new Integer(i);
 }
 
-defineClass(49, 64, {3:1, 5:1, 49:1, 64:1}, Integer);
+defineClass(49, 65, {3:1, 5:1, 49:1, 65:1}, Integer);
 _.compareTo = function compareTo_5(b){
   return $compareTo_5(this, dynamicCast(b, 49));
 }
@@ -14858,7 +14988,7 @@ function valueOf_4(i){
   return new Long(i);
 }
 
-defineClass(71, 64, {3:1, 5:1, 71:1, 64:1}, Long);
+defineClass(71, 65, {3:1, 5:1, 71:1, 65:1}, Long);
 _.compareTo = function compareTo_6(b){
   return $compareTo_6(this, dynamicCast(b, 71));
 }
@@ -14956,7 +15086,7 @@ function valueOf_5(s){
   return new Short(s);
 }
 
-defineClass(72, 64, {3:1, 5:1, 64:1, 72:1}, Short);
+defineClass(72, 65, {3:1, 5:1, 65:1, 72:1}, Short);
 _.compareTo = function compareTo_7(b){
   return $compareTo_7(this, dynamicCast(b, 72));
 }
@@ -15240,7 +15370,7 @@ function StringBuilder_1(s){
   AbstractStringBuilder.call(this, s);
 }
 
-defineClass(31, 130, {561:1}, StringBuilder, StringBuilder_0, StringBuilder_1);
+defineClass(31, 130, {563:1}, StringBuilder, StringBuilder_0, StringBuilder_1);
 var Ljava_lang_StringBuilder_2_classLit = createForClass('java.lang', 'StringBuilder', 31);
 function StringIndexOutOfBoundsException(index_0){
   IndexOutOfBoundsException_0.call(this, 'String index out of range: ' + index_0);
@@ -15519,7 +15649,7 @@ function parseUnscaled(str){
   }
 }
 
-defineClass(50, 64, {3:1, 5:1, 64:1, 50:1}, BigDecimal, BigDecimal_0);
+defineClass(50, 65, {3:1, 5:1, 65:1, 50:1}, BigDecimal, BigDecimal_0);
 _.compareTo = function compareTo_9(val){
   return $compareTo_8(this, dynamicCast(val, 50));
 }
@@ -15857,7 +15987,7 @@ function valueOf_10(val){
     return lte(val, {l:10, m:0, h:0})?SMALL_VALUES[toInt(val)]:new BigInteger_2(1, val);
 }
 
-defineClass(14, 64, {3:1, 5:1, 64:1, 14:1}, BigInteger, BigInteger_0, BigInteger_1, BigInteger_2, BigInteger_3, BigInteger_4);
+defineClass(14, 65, {3:1, 5:1, 65:1, 14:1}, BigInteger, BigInteger_0, BigInteger_1, BigInteger_2, BigInteger_3, BigInteger_4);
 _.compareTo = function compareTo_10(val){
   return $compareTo_9(this, dynamicCast(val, 14));
 }
@@ -16939,7 +17069,7 @@ _.remove_0 = function remove_31(){
 }
 ;
 var Ljava_util_AbstractMap$2$1_2_classLit = createForClass('java.util', 'AbstractMap/2/1', 211);
-function $setValue_0(this$static, value_0){
+function $setValue_1(this$static, value_0){
   var oldValue;
   oldValue = this$static.value_0;
   this$static.value_0 = value_0;
@@ -16969,7 +17099,7 @@ _.hashCode$ = function hashCode_28(){
 }
 ;
 _.setValue = function setValue_1(value_0){
-  return $setValue_0(this, value_0);
+  return $setValue_1(this, value_0);
 }
 ;
 _.toString$ = function toString_37(){
@@ -17567,14 +17697,14 @@ var NATURAL;
 function Comparators$1(){
 }
 
-defineClass(440, 1, {}, Comparators$1);
+defineClass(441, 1, {}, Comparators$1);
 _.compare = function compare_4(o1, o2){
   checkNotNull(o1);
   checkNotNull(o2);
   return compareTo_Ljava_lang_Object__I__devirtual$(dynamicCast(o1, 5), o2);
 }
 ;
-var Ljava_util_Comparators$1_2_classLit = createForClass('java.util', 'Comparators/1', 440);
+var Ljava_util_Comparators$1_2_classLit = createForClass('java.util', 'Comparators/1', 441);
 function checkStructuralChange(host, iterator){
   if (iterator._gwt_modCount != host._gwt_modCount) {
     throw new ConcurrentModificationException;
@@ -18248,7 +18378,7 @@ _.put = function put_6(key_0, value_0){
     return null;
   }
    else {
-    oldValue = $setValue_0(old, value_0);
+    oldValue = $setValue_1(old, value_0);
     $recordAccess(this, old);
     return oldValue;
   }
@@ -18695,7 +18825,7 @@ var I_classLit = createForPrimitive('int', 'I'), Z_classLit = createForPrimitive
 var $entry = registerEntry();
 var gwtOnLoad = gwtOnLoad = gwtOnLoad_0;
 addInitFunctions(init);
-setGwtProperty('permProps', [[['locale', 'default'], ['user.agent', 'ie10']]]);
+setGwtProperty('permProps', [[['locale', 'default'], ['user.agent', 'ie9']]]);
 $sendStats('moduleStartup', 'moduleEvalEnd');
 gwtOnLoad(__gwtModuleFunction.__errFn, __gwtModuleFunction.__moduleName, __gwtModuleFunction.__moduleBase, __gwtModuleFunction.__softPermutationId,__gwtModuleFunction.__computePropValue);
 $sendStats('moduleStartup', 'end');

@@ -40,6 +40,12 @@
 		font-weight: bold;
 		font-size: 20px;
 	}
+
+	.siteLinks {
+		color: blue;
+		font-style: italic;
+		font-size: 16px;
+	}
 	
 	.floatLeft {
 		float: left;
@@ -83,7 +89,11 @@
 			
 			<g:HorizontalPanel>
 				<g:Image url="images/logo.png"/>
-				<g:Label text="TU SACH KIEM HIEP" styleName="{style.title}"/>
+				<g:VerticalPanel>
+					<g:Label text="TU SACH KIEM HIEP" styleName="{style.title}"/>
+					<g:FlowPanel ui:field="siteLinks" styleName="{style.siteLinks}">
+					</g:FlowPanel>
+				</g:VerticalPanel>
 			</g:HorizontalPanel>
 					
 			<g:FlowPanel>

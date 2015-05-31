@@ -77,6 +77,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 	
 	@UiField Label messageLabel;
 	@UiField CheckBox showBookDetails;
+	@UiField FlowPanel siteLinks;
 	
 	Button createBookButton = new Button("Create");
 	Button logInOutButton = new Button("");
@@ -267,7 +268,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		bookListTable.setText(0, 3, "#Pages");		
 		bookListTable.getColumnFormatter().setWidth(3, "50px");
 		
-		bookListTable.setText(0, 4, "Date");
+		bookListTable.setText(0, 4, "CreatedBy/Date");
 		bookListTable.setText(0, 5, "Error Message");
 		bookListTable.setText(0, 6, "Current Page URL");			
 
@@ -314,9 +315,9 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			bookListTable.setText(row, 2, book.getStatus());
 			bookListTable.setText(row, 3, book.getPages());
 			if (book.getLastUpdatedTime() != null) {
-				bookListTable.setText(row, 4, book.getLastUpdatedTime().toString());
+				bookListTable.setText(row, 4, book.getCreatedBy() + "/" + book.getLastUpdatedTime().toString());
 			} else {
-				bookListTable.setText(row, 4, "");			
+				bookListTable.setText(row, 4, book.getCreatedBy() + "/?");			
 			}
 			bookListTable.setText(row, 5, book.getErrorMsg());
 			bookListTable.setText(row, 6, book.getCurrentPageUrl());					
@@ -601,7 +602,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		newBook.setTitle(title);
 		newBook.setMaxNumPages(numPages);
 		newBook.setStartPageUrl(url);
-		
+		newBook.setCreatedBy(getUser().getName());
 		try {
 			listener.create(newBook);
 			textURL.setText("");

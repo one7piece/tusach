@@ -73,6 +73,7 @@ func GetBookSite(url string) BookSite {
 			site.Parser = name
 			site.BatchSize, _ = strconv.Atoi(m["batchSsize"])
 			site.BatchDelaySec, _ = strconv.Atoi(m["batchDelaySec"])
+			site.NumTries = 2
 			break
 		}
 	}

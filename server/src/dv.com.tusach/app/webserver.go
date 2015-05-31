@@ -52,6 +52,7 @@ func main() {
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
 		&rest.Route{"GET", "/systeminfo", GetSystemInfo},
+		&rest.Route{"GET", "/sites", GetSites},
 		&rest.Route{"GET", "/books/:id", GetBooks},
 		&rest.Route{"POST", "/book/:cmd", UpdateBook},
 		&rest.Route{"POST", "/login", Login},
@@ -134,6 +135,10 @@ func downloadBook(w http.ResponseWriter, r *http.Request) {
 
 func GetSystemInfo(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteJson(maker.GetSystemInfo())
+}
+
+func GetSites(w rest.ResponseWriter, r *rest.Request) {
+	w.WriteJson(map[string]string{"sites": util.GetConfiguration().SupportedSites})
 }
 
 func Login(w rest.ResponseWriter, r *rest.Request) {
