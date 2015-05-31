@@ -163,7 +163,3 @@ func getNextPageUrl(rawHtml string, html string) (string, error) {
 	}
 	return nextPageUrl, nil
 }
-
-func extractNodeText(s *goquery.Selection, buffer *bytes.Buffer) {
-
-}

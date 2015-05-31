@@ -43,7 +43,7 @@ func main() {
 }
 
 func Validate(url string) (string, error) {
-	if strings.Contains(url, "tangthuvien") {
+	if strings.Contains(url, "truyen2.hixx") {
 		return "\n***validated=true", nil
 	}
 	return "\n***validated=false", nil
@@ -87,37 +87,26 @@ func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	title1 := ""
 	*chapterTitle = ""
 	var buffer bytes.Buffer
-	doc.Find(".content").Each(func(i int, s *goquery.Selection) {
-		nodeHtml, err := s.Html()
-		if err == nil {
-			if strings.Index(nodeHtml, "post_message") != -1 {
-				buffer.WriteString("<br>")
-				nodeText := s.Text()
-				// replace \n with <br>
-				nodeText = strings.Replace(nodeText, "\n", "<br>", -1)
-				buffer.WriteString(nodeText)
-				buffer.WriteString("<br><br><br>")
-				// add new page
-
-				str := parser.GetChapterTitle(nodeHtml)
-				if str != "" {
-					if title1 == "" {
-						title1 = str
-						*chapterTitle = title1
-					} else {
-						*chapterTitle = title1 + "/" + str
-					}
+	doc.Find("body").Find("td").Each(func(i int, td *goquery.Selection) {
+		clazz, _ := td.Attr("class")
+		if clazz == "chi_tiet" {
+			td.Contents().Each(func(i int, s *goquery.Selection) {
+				if s.Text() != "" {
+					buffer.WriteString("<br/>")
+					buffer.WriteString(s.Text())
 				}
-			}
+			})
 		}
+
 	})
 
 	chapterHtml := ""
 	textStr := buffer.String()
 	if textStr != "" {
+		*chapterTitle = parser.GetChapterTitle(textStr)
+
 		templateHtml := string(template)
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
@@ -126,33 +115,33 @@ func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	return chapterHtml, nil
 }
 
+func getIndexOf(source string, search string, offset int) int {
+	index := strings.Index(source[offset:], search)
+	if index != -1 {
+		index = index + offset
+	}
+	return index
+}
+
 func getNextPageUrl(rawHtml string, html string) (string, error) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(rawHtml))
-	if err != nil {
-		return "", err
-	}
-	nextPageUrl := ""
-	doc.Find("body").Find("a").Each(func(i int, s *goquery.Selection) {
-		rel, _ := s.Attr("rel")
-		if rel == "next" {
-			link, _ := s.Attr("href")
-			nextPageUrl = link
-			return
-		}
-	})
-	if nextPageUrl != "" {
-		if strings.HasPrefix(nextPageUrl, "showthread") {
-			nextPageUrl = "forum/" + nextPageUrl
-		} else if strings.HasPrefix(nextPageUrl, "/showthread") {
-			nextPageUrl = "/forum" + nextPageUrl
+	var buf bytes.Buffer
+	index := getIndexOf(rawHtml, "function page_next()", 0)
+	if index != -1 {
+		index1 := getIndexOf(rawHtml, "http://", index)
+		index2 := getIndexOf(rawHtml, "}", index)
+		if index1 != -1 && index1 < index2 {
+			for j := index1; j < index2; j++ {
+				c := rawHtml[j]
+				if c != '+' && c != '\'' && c != ' ' && c != ';' {
+					buf.WriteByte(c)
+				}
+				if c == ';' {
+					break
+				}
+			}
 		}
 	}
-	if !strings.HasPrefix(nextPageUrl, "http://www.tangthuvien.vn") {
-		if strings.HasPrefix(nextPageUrl, "/") {
-			nextPageUrl = "http://www.tangthuvien.vn" + nextPageUrl
-		} else {
-			nextPageUrl = "http://www.tangthuvien.vn/" + nextPageUrl
-		}
-	}
+	nextPageUrl := buf.String()
+
 	return nextPageUrl, nil
 }
