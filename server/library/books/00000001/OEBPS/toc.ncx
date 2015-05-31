@@ -1,0 +1,504 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<ncx version="2005-1" xmlns="http://www.daisy.org/z3986/2005/ncx/">
+  <head>
+    <meta name="dtb:UUID" content="49deff45-74b0-4657-a331-f47f12f47ee4" />
+    <meta name="dtb:generator" content="EPUBLib version 3.0" />
+    <meta name="dtb:depth" content="1" />
+    <meta name="dtb:totalPageCount" content="0" />
+    <meta name="dtb:maxPageNumber" content="0" />
+  </head><docTitle><text>Bat Bai Chien Than</text></docTitle>
+<docAuthor><text></text></docAuthor>
+<navMap>
+<navPoint id="navPoint-1" playOrder="1" class="chapter">
+<navLabel><text>Chương 1: Gã lưu ban siêu hạng/Chương 4: Biến cố</text></navLabel>
+<content src="chapter0001.html"/>
+</navPoint>
+<navPoint id="navPoint-2" playOrder="2" class="chapter">
+<navLabel><text>Chương 5: Đừng bỏ cuộc/Chương 9: Thẻ hồn tướng</text></navLabel>
+<content src="chapter0002.html"/>
+</navPoint>
+<navPoint id="navPoint-3" playOrder="3" class="chapter">
+<navLabel><text>Chương 10: Chuyển trường./Chương 14: Chuyên gia cận chiến.</text></navLabel>
+<content src="chapter0003.html"/>
+</navPoint>
+<navPoint id="navPoint-4" playOrder="4" class="chapter">
+<navLabel><text>Chương 15: Thư của Thiên Huệ/Chương 19: Học viện Thiên Tinh như nằm trên lưỡi đao</text></navLabel>
+<content src="chapter0004.html"/>
+</navPoint>
+<navPoint id="navPoint-5" playOrder="5" class="chapter">
+<navLabel><text>Chương 20: Ám chiêu/Chương 24: 【 Thiểm Điện Sát 】!</text></navLabel>
+<content src="chapter0005.html"/>
+</navPoint>
+<navPoint id="navPoint-6" playOrder="6" class="chapter">
+<navLabel><text>Chương 25: Bích Chiểu Trúc Hải /Chương 29: Thủy Bình Vũ Quỹ</text></navLabel>
+<content src="chapter0006.html"/>
+</navPoint>
+<navPoint id="navPoint-7" playOrder="7" class="chapter">
+<navLabel><text>Chương 30: Mở màn hoành tráng./Chương 34: Cho dù chết cũng phải thắng.</text></navLabel>
+<content src="chapter0007.html"/>
+</navPoint>
+<navPoint id="navPoint-8" playOrder="8" class="chapter">
+<navLabel><text>Chương 35: Vũ Nhân Địch Hàn/Chương 39: Hắc Hồn</text></navLabel>
+<content src="chapter0008.html"/>
+</navPoint>
+<navPoint id="navPoint-9" playOrder="9" class="chapter">
+<navLabel><text>Chương 40: Gặp lại Chu Bằng./Chương 44: Tinh Ngữ Hồn thạch.</text></navLabel>
+<content src="chapter0009.html"/>
+</navPoint>
+<navPoint id="navPoint-10" playOrder="10" class="chapter">
+<navLabel><text>Chương 45: Tiểu Băng Quyền vs Nhất Tự Pháo Quyền/Chương 49: Ngươi giết được ai?</text></navLabel>
+<content src="chapter0010.html"/>
+</navPoint>
+<navPoint id="navPoint-11" playOrder="11" class="chapter">
+<navLabel><text>Chương 50: Sắp chết, phản công./Chương 54: Sàn võ nhược điểm và thiếu niên như thần.</text></navLabel>
+<content src="chapter0011.html"/>
+</navPoint>
+<navPoint id="navPoint-12" playOrder="12" class="chapter">
+<navLabel><text>Chương 55: Lai lịch của Binh/Chương 59: Ngoại doanh Tỉnh Hào</text></navLabel>
+<content src="chapter0012.html"/>
+</navPoint>
+<navPoint id="navPoint-13" playOrder="13" class="chapter">
+<navLabel><text>Chương 60: Bưu ca đầu trọc/Chương 64: Lục Đàn Tí Viên.</text></navLabel>
+<content src="chapter0013.html"/>
+</navPoint>
+<navPoint id="navPoint-14" playOrder="14" class="chapter">
+<navLabel><text>Chương 65: Đấu pháp biến thái/Chương 69: Cửa hàng thẻ Sylar</text></navLabel>
+<content src="chapter0014.html"/>
+</navPoint>
+<navPoint id="navPoint-15" playOrder="15" class="chapter">
+<navLabel><text>Chương 70: Dụng cụ kiểm tra Sylar /Chương 74: Khe hở năng lượng.</text></navLabel>
+<content src="chapter0015.html"/>
+</navPoint>
+<navPoint id="navPoint-16" playOrder="16" class="chapter">
+<navLabel><text>Chương 75: Băng cướp Hùng Miêu(gấu mèo)/Chương 79: Cơ quan.</text></navLabel>
+<content src="chapter0016.html"/>
+</navPoint>
+<navPoint id="navPoint-17" playOrder="17" class="chapter">
+<navLabel><text>Chương 80: Ngọc thô hé lộ/Chương 84: Oan gia ngõ hẹp.</text></navLabel>
+<content src="chapter0017.html"/>
+</navPoint>
+<navPoint id="navPoint-18" playOrder="18" class="chapter">
+<navLabel><text>Chương 85: Bước chạy bất khả thi./Chương 89: Lửa bạc.</text></navLabel>
+<content src="chapter0018.html"/>
+</navPoint>
+<navPoint id="navPoint-19" playOrder="19" class="chapter">
+<navLabel><text>Chương 90: Trao đổi/Chương 94: Phòng Thập Bát Đồng Nhân.</text></navLabel>
+<content src="chapter0019.html"/>
+</navPoint>
+<navPoint id="navPoint-20" playOrder="20" class="chapter">
+<navLabel><text>Chương 95: Kẻ địch./Chương 99: Áp lực</text></navLabel>
+<content src="chapter0020.html"/>
+</navPoint>
+<navPoint id="navPoint-21" playOrder="21" class="chapter">
+<navLabel><text>Chương 100: Tỉnh Hào bị đùa bỡn/Chương 104 : Khổng Tước Khổng Tước</text></navLabel>
+<content src="chapter0021.html"/>
+</navPoint>
+<navPoint id="navPoint-22" playOrder="22" class="chapter">
+<navLabel><text>Chương 105: Tiền thúc, đã lâu không gặp./Chương 109: Biến hóa.</text></navLabel>
+<content src="chapter0022.html"/>
+</navPoint>
+<navPoint id="navPoint-23" playOrder="23" class="chapter">
+<navLabel><text>Chương 110: Gây sự/Chương 114: Viện quân.</text></navLabel>
+<content src="chapter0023.html"/>
+</navPoint>
+<navPoint id="navPoint-24" playOrder="24" class="chapter">
+<navLabel><text>Chương 115: Cách xử lý của Đường Thiên./Chương 119: Tỉnh lại.</text></navLabel>
+<content src="chapter0024.html"/>
+</navPoint>
+<navPoint id="navPoint-25" playOrder="25" class="chapter">
+<navLabel><text>Chương 120: Tập Quỷ Trảo!/Chương 124: Đề nghị của Binh.</text></navLabel>
+<content src="chapter0025.html"/>
+</navPoint>
+<navPoint id="navPoint-26" playOrder="26" class="chapter">
+<navLabel><text>Chương 125: Thiếu niên dưới hoàng hôn./Chương 129: Thành công</text></navLabel>
+<content src="chapter0026.html"/>
+</navPoint>
+<navPoint id="navPoint-27" playOrder="27" class="chapter">
+<navLabel><text>Chương 130: Sao Fillin  /Chương 134: Cố Vũ</text></navLabel>
+<content src="chapter0027.html"/>
+</navPoint>
+<navPoint id="navPoint-28" playOrder="28" class="chapter">
+<navLabel><text>Chương 135: Đánh tới điên rồi!/Chương 139: Lăng Húc đáng thương.</text></navLabel>
+<content src="chapter0028.html"/>
+</navPoint>
+<navPoint id="navPoint-29" playOrder="29" class="chapter">
+<navLabel><text>Chương 140: Lăng Húc tức giận/Chương 144: Nguy hiểm</text></navLabel>
+<content src="chapter0029.html"/>
+</navPoint>
+<navPoint id="navPoint-30" playOrder="30" class="chapter">
+<navLabel><text>Chương 145: Huyết mạch Goblin/Chương 149: Thanh Hồng Thập Tự liêm</text></navLabel>
+<content src="chapter0030.html"/>
+</navPoint>
+<navPoint id="navPoint-31" playOrder="31" class="chapter">
+<navLabel><text>Chương 150: Thu hoạch/Chương 154: Tượng đá tà mị.</text></navLabel>
+<content src="chapter0031.html"/>
+</navPoint>
+<navPoint id="navPoint-32" playOrder="32" class="chapter">
+<navLabel><text>Chương 155: Bạch Hạc Tuyền Qua/Chương 159: Kế hoạch</text></navLabel>
+<content src="chapter0032.html"/>
+</navPoint>
+<navPoint id="navPoint-33" playOrder="33" class="chapter">
+<navLabel><text>Chương 160: Đắc thủ./Chương 164: Cô bé thiên tài</text></navLabel>
+<content src="chapter0033.html"/>
+</navPoint>
+<navPoint id="navPoint-34" playOrder="34" class="chapter">
+<navLabel><text>Chương 165: Khuất nhục /Chương 169: Thắng lợi </text></navLabel>
+<content src="chapter0034.html"/>
+</navPoint>
+<navPoint id="navPoint-35" playOrder="35" class="chapter">
+<navLabel><text>Chương 170: Hổ lạc bầy dê /Chương 174: Thiếu niên, chiến đấu cho tốt nhé </text></navLabel>
+<content src="chapter0035.html"/>
+</navPoint>
+<navPoint id="navPoint-36" playOrder="36" class="chapter">
+<navLabel><text>Chương 175: Binh lính không chiến mà khuất phục người/Chương 179:  Đột phá </text></navLabel>
+<content src="chapter0036.html"/>
+</navPoint>
+<navPoint id="navPoint-37" playOrder="37" class="chapter">
+<navLabel><text>Chương 180: Bất Chu Sơn./Chương 184: Thiếu niên mặc giáp bạc</text></navLabel>
+<content src="chapter0037.html"/>
+</navPoint>
+<navPoint id="navPoint-38" playOrder="38" class="chapter">
+<navLabel><text>Chương 185: Công tử Ma Địch/Chương 189: Tương tư như cầu vồng </text></navLabel>
+<content src="chapter0038.html"/>
+</navPoint>
+<navPoint id="navPoint-39" playOrder="39" class="chapter">
+<navLabel><text>Chương 190: Cách tu luyện nhà quê/Chương 194: Quỷ Trảo trả lời. </text></navLabel>
+<content src="chapter0039.html"/>
+</navPoint>
+<navPoint id="navPoint-40" playOrder="40" class="chapter">
+<navLabel><text>Chương 195: Bánh từ trên trời rơi xuống. /Chương 199: Đơn đặt hàng lớn </text></navLabel>
+<content src="chapter0040.html"/>
+</navPoint>
+<navPoint id="navPoint-41" playOrder="41" class="chapter">
+<navLabel><text>Chương 200: Kim Cương./Chương 204: Thạch sa thú</text></navLabel>
+<content src="chapter0041.html"/>
+</navPoint>
+<navPoint id="navPoint-42" playOrder="42" class="chapter">
+<navLabel><text>Chương 205: Quân nhân là phải như vậy/Chương 209: Hỏa Liệt Điểu, xung phong! </text></navLabel>
+<content src="chapter0042.html"/>
+</navPoint>
+<navPoint id="navPoint-43" playOrder="43" class="chapter">
+<navLabel><text>Chương 210: Hỏa Nha Lẫm Đông /Chương 214: Bùng lên nào, Quỷ Vương Hỏa Lưu Huỳnh!</text></navLabel>
+<content src="chapter0043.html"/>
+</navPoint>
+<navPoint id="navPoint-44" playOrder="44" class="chapter">
+<navLabel><text>Chương 215: Hạc đưa tới cửa. /Chương 219:  Khả năng quán sát của thiếu niên như thần</text></navLabel>
+<content src="chapter0044.html"/>
+</navPoint>
+<navPoint id="navPoint-45" playOrder="45" class="chapter">
+<navLabel><text>Chương 220: Phiền toái của Sylar. /Chương 224: Giá trị của Ô Nha Kim </text></navLabel>
+<content src="chapter0045.html"/>
+</navPoint>
+<navPoint id="navPoint-46" playOrder="46" class="chapter">
+<navLabel><text>Chương 225: Khoản tiền lớn. /Chương 230: Lai lịch Ma Phong Kiếm </text></navLabel>
+<content src="chapter0046.html"/>
+</navPoint>
+<navPoint id="navPoint-47" playOrder="47" class="chapter">
+<navLabel><text>Chương 231: Mùa thu hoạch/Chương 235: Đài cao mười trượng mười vạn kiếm! </text></navLabel>
+<content src="chapter0047.html"/>
+</navPoint>
+<navPoint id="navPoint-48" playOrder="48" class="chapter">
+<navLabel><text>Chương 236: Hoang Kiếm Tùng và Đại Vô Kiếm/Chương 240: Lôi Tuyết </text></navLabel>
+<content src="chapter0048.html"/>
+</navPoint>
+<navPoint id="navPoint-49" playOrder="49" class="chapter">
+<navLabel><text>Chương 241: Thi đấu Thiên Tế /Chương 245: Tôi luyện võ hồn </text></navLabel>
+<content src="chapter0049.html"/>
+</navPoint>
+<navPoint id="navPoint-50" playOrder="50" class="chapter">
+<navLabel><text>Chương 246: Kẻ gây rối. /Chương 250: Nó tên là giáp hồn máy</text></navLabel>
+<content src="chapter0050.html"/>
+</navPoint>
+<navPoint id="navPoint-51" playOrder="51" class="chapter">
+<navLabel><text>Chương 251: Mộc Tử kinh hãi. /Chương 255: Thượng sĩ Đường Nhất </text></navLabel>
+<content src="chapter0051.html"/>
+</navPoint>
+<navPoint id="navPoint-52" playOrder="52" class="chapter">
+<navLabel><text>Chương 256: Xuất phát! Mục tiêu, chòm sao Sài Lang! /Chương 260: Hạc Chi Thế</text></navLabel>
+<content src="chapter0052.html"/>
+</navPoint>
+<navPoint id="navPoint-53" playOrder="53" class="chapter">
+<navLabel><text>Chương 261: Bàn tay màu xanh lam./Chương 265: Đường Nhất chất vấn </text></navLabel>
+<content src="chapter0053.html"/>
+</navPoint>
+<navPoint id="navPoint-54" playOrder="54" class="chapter">
+<navLabel><text>Chương 266: Kiểm tra Khổng Tước /Chương 270: Chuông gió sừng cừu</text></navLabel>
+<content src="chapter0054.html"/>
+</navPoint>
+<navPoint id="navPoint-55" playOrder="55" class="chapter">
+<navLabel><text>Chương 271: Dị biến /Chương 275: Cường công </text></navLabel>
+<content src="chapter0055.html"/>
+</navPoint>
+<navPoint id="navPoint-56" playOrder="56" class="chapter">
+<navLabel><text>Chương 276: Phong Sửu thiêu đốt! /Chương 280: Sợi chân lực nghịch ngu </text></navLabel>
+<content src="chapter0056.html"/>
+</navPoint>
+<navPoint id="navPoint-57" playOrder="57" class="chapter">
+<navLabel><text>Chương 281: Ngân hồn loa toàn kình /Chương 285: Tàn tật </text></navLabel>
+<content src="chapter0057.html"/>
+</navPoint>
+<navPoint id="navPoint-58" playOrder="58" class="chapter">
+<navLabel><text>Chương 286: Các tự xuất thủ /Chương 290: Lão Phí</text></navLabel>
+<content src="chapter0058.html"/>
+</navPoint>
+<navPoint id="navPoint-59" playOrder="59" class="chapter">
+<navLabel><text>Chương 291: Đại gia và lửa đen. /Chương 295: Xin chào đại gia </text></navLabel>
+<content src="chapter0059.html"/>
+</navPoint>
+<navPoint id="navPoint-60" playOrder="60" class="chapter">
+<navLabel><text>Chương 296: Lão Phí nước mắt như mưa! /Chương 300: Lão Mặc gian thương </text></navLabel>
+<content src="chapter0060.html"/>
+</navPoint>
+<navPoint id="navPoint-61" playOrder="61" class="chapter">
+<navLabel><text>Chương 301: Điên rồi/Chương 305: Khai chiến </text></navLabel>
+<content src="chapter0061.html"/>
+</navPoint>
+<navPoint id="navPoint-62" playOrder="62" class="chapter">
+<navLabel><text>Chương 306: Xích Đạo Bạch Kình /Chương 310: Các vị, ta tới đây</text></navLabel>
+<content src="chapter0062.html"/>
+</navPoint>
+<navPoint id="navPoint-63" playOrder="63" class="chapter">
+<navLabel><text>Chương 311: Hồn võ tướng cường đại /Chương 315: Dư âm </text></navLabel>
+<content src="chapter0063.html"/>
+</navPoint>
+<navPoint id="navPoint-64" playOrder="64" class="chapter">
+<navLabel><text>Chương 316: Mầm Mầm đáng thương /Chương 320: Sắp đặt của Binh </text></navLabel>
+<content src="chapter0064.html"/>
+</navPoint>
+<navPoint id="navPoint-65" playOrder="65" class="chapter">
+<navLabel><text>Chương 321: Đặc huấn tử vong/Chương 325: Quyết định của Tỉnh Hào</text></navLabel>
+<content src="chapter0065.html"/>
+</navPoint>
+<navPoint id="navPoint-66" playOrder="66" class="chapter">
+<navLabel><text>Chương 326: Mặc Vị Thiên chấn động/Chương 330: An bài của Binh </text></navLabel>
+<content src="chapter0066.html"/>
+</navPoint>
+<navPoint id="navPoint-67" playOrder="67" class="chapter">
+<navLabel><text>Chương 331: Ta phải thắng /Chương 335: Diệp Triều Ca khủng bố</text></navLabel>
+<content src="chapter0067.html"/>
+</navPoint>
+<navPoint id="navPoint-68" playOrder="68" class="chapter">
+<navLabel><text>Chương 336: Thương bạc rực lửa/Chương 340: Ngọn lửa của Đường Thiên </text></navLabel>
+<content src="chapter0068.html"/>
+</navPoint>
+<navPoint id="navPoint-69" playOrder="69" class="chapter">
+<navLabel><text>Chương 341:  Bình An kiếm  /Chương 345: Suy nghĩ và tìm tòi </text></navLabel>
+<content src="chapter0069.html"/>
+</navPoint>
+<navPoint id="navPoint-70" playOrder="70" class="chapter">
+<navLabel><text>Chương 346: Giai nhân Minh Nguyệt/Chương 350: Tuyến đường an toàn Quý Khâu</text></navLabel>
+<content src="chapter0070.html"/>
+</navPoint>
+<navPoint id="navPoint-71" playOrder="71" class="chapter">
+<navLabel><text>Chương 351: Kế hoạch thức tỉnh huyết mạch triệu người /Chương 355: Cấp bảy siêu cấp </text></navLabel>
+<content src="chapter0071.html"/>
+</navPoint>
+<navPoint id="navPoint-72" playOrder="72" class="chapter">
+<navLabel><text>Chương 356: Ander Lena  /Chương 360: Hợp tác </text></navLabel>
+<content src="chapter0072.html"/>
+</navPoint>
+<navPoint id="navPoint-73" playOrder="73" class="chapter">
+<navLabel><text>Chương 361: Giương đông kích tây /Chương 365: Tái ngộ </text></navLabel>
+<content src="chapter0073.html"/>
+</navPoint>
+<navPoint id="navPoint-74" playOrder="74" class="chapter">
+<navLabel><text>Chương 366: Giao thủ /Chương 370: Lĩnh ngộ trong đối kháng. </text></navLabel>
+<content src="chapter0074.html"/>
+</navPoint>
+<navPoint id="navPoint-75" playOrder="75" class="chapter">
+<navLabel><text>Chương 371: Đề nghị của Đường Sửu /Chương 375: Gặp mặt </text></navLabel>
+<content src="chapter0075.html"/>
+</navPoint>
+<navPoint id="navPoint-76" playOrder="76" class="chapter">
+<navLabel><text>Chương 376: Bị tập kích tại Dược Kiều/Chương 380: Ta là võ giả hoàng kim </text></navLabel>
+<content src="chapter0076.html"/>
+</navPoint>
+<navPoint id="navPoint-77" playOrder="77" class="chapter">
+<navLabel><text>Chương 381: Điện chủ điện thứ bảy, Đồ Tử Sơn /Chương 385: Đá mài kiếm </text></navLabel>
+<content src="chapter0077.html"/>
+</navPoint>
+<navPoint id="navPoint-78" playOrder="78" class="chapter">
+<navLabel><text>Chương 386: Tatton trở về /Chương 390: Ma Địch đệ tứ sát. </text></navLabel>
+<content src="chapter0078.html"/>
+</navPoint>
+<navPoint id="navPoint-79" playOrder="79" class="chapter">
+<navLabel><text>Chương 391: Chiến thuật số một /Chương 395: Adrian  </text></navLabel>
+<content src="chapter0079.html"/>
+</navPoint>
+<navPoint id="navPoint-80" playOrder="80" class="chapter">
+<navLabel><text>Chương 396: Đường Thiên đẩy cửa /Chương 400: Phản ứng của Sylar. </text></navLabel>
+<content src="chapter0080.html"/>
+</navPoint>
+<navPoint id="navPoint-81" playOrder="81" class="chapter">
+<navLabel><text>Chương 401: Đoan Mộc /Chương 406: KẾ hoạch Tiên Nữ</text></navLabel>
+<content src="chapter0081.html"/>
+</navPoint>
+<navPoint id="navPoint-82" playOrder="82" class="chapter">
+<navLabel><text>Chương 407: Thử thách của Tịch Lâm /Chương 412: Biển thỏ và mầm hồn tướng. </text></navLabel>
+<content src="chapter0082.html"/>
+</navPoint>
+<navPoint id="navPoint-83" playOrder="83" class="chapter">
+<navLabel><text>Chương 413: Mầm hồn tướng lợi hại chưa!/Chương 417: Thợ săn sau lưng</text></navLabel>
+<content src="chapter0083.html"/>
+</navPoint>
+<navPoint id="navPoint-84" playOrder="84" class="chapter">
+<navLabel><text>Chương 418: Bắt chúng lại./Chương 422: Quyết tâm của Hạc.</text></navLabel>
+<content src="chapter0084.html"/>
+</navPoint>
+<navPoint id="navPoint-85" playOrder="85" class="chapter">
+<navLabel><text>Chương 423: Khúc xương vàng kim/Chương 427: Thử nghiệm ngoài lẽ thường</text></navLabel>
+<content src="chapter0085.html"/>
+</navPoint>
+<navPoint id="navPoint-86" playOrder="86" class="chapter">
+<navLabel><text>Chương 428: Động viên/Chương 432: Hồn vực của Thiệu Đức</text></navLabel>
+<content src="chapter0086.html"/>
+</navPoint>
+<navPoint id="navPoint-87" playOrder="87" class="chapter">
+<navLabel><text>Chương 433: Đáp án rất lợi hại./Chương 440: Tư Mã nham hiểm</text></navLabel>
+<content src="chapter0087.html"/>
+</navPoint>
+<navPoint id="navPoint-88" playOrder="88" class="chapter">
+<navLabel><text>Chương 422: Cường hào mới /Chương 446: Trứng gấu siêu cấp</text></navLabel>
+<content src="chapter0088.html"/>
+</navPoint>
+<navPoint id="navPoint-89" playOrder="89" class="chapter">
+<navLabel><text>Chương 447: Ba hợp một /Chương 451: Hậu chiêu của Binh và thỉnh cầu của Tỉnh Hào</text></navLabel>
+<content src="chapter0089.html"/>
+</navPoint>
+<navPoint id="navPoint-90" playOrder="90" class="chapter">
+<navLabel><text>Chương 452: Đường Nhất xuất quan./Chương 456: Khói lửa nổi lên</text></navLabel>
+<content src="chapter0090.html"/>
+</navPoint>
+<navPoint id="navPoint-91" playOrder="91" class="chapter">
+<navLabel><text>Chương 457: Giặc cướp tung hoành/Chương 461: Chiến đấu</text></navLabel>
+<content src="chapter0091.html"/>
+</navPoint>
+<navPoint id="navPoint-92" playOrder="92" class="chapter">
+<navLabel><text>Chương 462: Lốc kiếm di động/Chương 466: Thế cục đổi thay</text></navLabel>
+<content src="chapter0092.html"/>
+</navPoint>
+<navPoint id="navPoint-93" playOrder="93" class="chapter">
+<navLabel><text>Chương 467: Thể chất không năng lượng/Chương 471: Âm thanh run rẩy</text></navLabel>
+<content src="chapter0093.html"/>
+</navPoint>
+<navPoint id="navPoint-94" playOrder="94" class="chapter">
+<navLabel><text>Chương 472: Hai trái tim/Chương 476: Ta biết như vậy không thể</text></navLabel>
+<content src="chapter0094.html"/>
+</navPoint>
+<navPoint id="navPoint-95" playOrder="95" class="chapter">
+<navLabel><text>Chương 477: Thành Diêu Quang/Chương 481: Võ tràng Thương Dương</text></navLabel>
+<content src="chapter0095.html"/>
+</navPoint>
+<navPoint id="navPoint-96" playOrder="96" class="chapter">
+<navLabel><text>Chương 482: Tất A Sửu/Chương 486: Tiểu Nhị, bung dù</text></navLabel>
+<content src="chapter0096.html"/>
+</navPoint>
+<navPoint id="navPoint-97" playOrder="97" class="chapter">
+<navLabel><text>Chương 487: Suy đoán của binh/Chương 493: Hạt đậu</text></navLabel>
+<content src="chapter0097.html"/>
+</navPoint>
+<navPoint id="navPoint-98" playOrder="98" class="chapter">
+<navLabel><text>Chương 494: Bí mật ngân hóa/Chương 498: Hồn trị</text></navLabel>
+<content src="chapter0098.html"/>
+</navPoint>
+<navPoint id="navPoint-99" playOrder="99" class="chapter">
+<navLabel><text>Chương 499: Vì ngươi nhiều tiền/Chương 503: Biến đổi của thế cuộc</text></navLabel>
+<content src="chapter0099.html"/>
+</navPoint>
+<navPoint id="navPoint-100" playOrder="100" class="chapter">
+<navLabel><text>Chương 504: Bố trí phòng ngự/Chương 508: Oan gia ngõ hẹp</text></navLabel>
+<content src="chapter0100.html"/>
+</navPoint>
+<navPoint id="navPoint-101" playOrder="101" class="chapter">
+<navLabel><text>Chương 509: Nghi hoặc và trả lời/Chương 513: Sát Sinh Anh</text></navLabel>
+<content src="chapter0101.html"/>
+</navPoint>
+<navPoint id="navPoint-102" playOrder="102" class="chapter">
+<navLabel><text>Chương 514: Phục Anh/Chương 520: Dịch Kiếm cùng Thánh Kiếm Ngục Hải</text></navLabel>
+<content src="chapter0102.html"/>
+</navPoint>
+<navPoint id="navPoint-103" playOrder="103" class="chapter">
+<navLabel><text>Chương 523: Lục Phân quy Hùng/Chương 527: Cứ điểm bí bảo</text></navLabel>
+<content src="chapter0103.html"/>
+</navPoint>
+<navPoint id="navPoint-104" playOrder="104" class="chapter">
+<navLabel><text>Chương 528: Phục kích/Chương 532: Bên trong Đoạt Xác Châu</text></navLabel>
+<content src="chapter0104.html"/>
+</navPoint>
+<navPoint id="navPoint-105" playOrder="105" class="chapter">
+<navLabel><text>Chương 533: Biến hóa của Phệ Hồn Diễm/Chương 537: Bá Vương Trảm Phong</text></navLabel>
+<content src="chapter0105.html"/>
+</navPoint>
+<navPoint id="navPoint-106" playOrder="106" class="chapter">
+<navLabel><text>Chương 538: Đánh giáp lá cà/Chương 542: Khắp nơi bàn tính</text></navLabel>
+<content src="chapter0106.html"/>
+</navPoint>
+<navPoint id="navPoint-107" playOrder="107" class="chapter">
+<navLabel><text>Chương 543: Ý tưởng to gan/Chương 547: Chấn động</text></navLabel>
+<content src="chapter0107.html"/>
+</navPoint>
+<navPoint id="navPoint-108" playOrder="108" class="chapter">
+<navLabel><text>Chương 548: Bữa tiệc/Chương 552: Kéo lên thuyền giặc.</text></navLabel>
+<content src="chapter0108.html"/>
+</navPoint>
+<navPoint id="navPoint-109" playOrder="109" class="chapter">
+<navLabel><text>Chương 553: Linh Vực/Chương 557: Người lùn xanh</text></navLabel>
+<content src="chapter0109.html"/>
+</navPoint>
+<navPoint id="navPoint-110" playOrder="110" class="chapter">
+<navLabel><text>Chương 558: Bão táp/Chương 562: Chiến thuật ếch nhảy</text></navLabel>
+<content src="chapter0110.html"/>
+</navPoint>
+<navPoint id="navPoint-111" playOrder="111" class="chapter">
+<navLabel><text>Chương 563: Tiểu Nhị và Mầm Mầm/Chương 567: Barbara</text></navLabel>
+<content src="chapter0111.html"/>
+</navPoint>
+<navPoint id="navPoint-112" playOrder="112" class="chapter">
+<navLabel><text>Chương 568: Đá đen trên bãi đất hoang/Chương 572: Ngư Long Biến</text></navLabel>
+<content src="chapter0112.html"/>
+</navPoint>
+<navPoint id="navPoint-113" playOrder="113" class="chapter">
+<navLabel><text>Chương 573: Thắng lợi tàn khốc/Chương 577: Minh ngộ</text></navLabel>
+<content src="chapter0113.html"/>
+</navPoint>
+<navPoint id="navPoint-114" playOrder="114" class="chapter">
+<navLabel><text>Chương 578: Đấu luyện ác mộng/Chương 585: Biến hóa của Ma Quỷ Hỏa</text></navLabel>
+<content src="chapter0114.html"/>
+</navPoint>
+<navPoint id="navPoint-115" playOrder="115" class="chapter">
+<navLabel><text>Chương 586: Lão binh bất tử/Chương 590: Không nghĩ ra</text></navLabel>
+<content src="chapter0115.html"/>
+</navPoint>
+<navPoint id="navPoint-116" playOrder="116" class="chapter">
+<navLabel><text>Chương 591: Ta nói ta không có tiền/Chương 595: Lại nổ</text></navLabel>
+<content src="chapter0116.html"/>
+</navPoint>
+<navPoint id="navPoint-117" playOrder="117" class="chapter">
+<navLabel><text>Chương 596: Xung kích/Chương 600: Chiến hạm Hắc Tiễn</text></navLabel>
+<content src="chapter0117.html"/>
+</navPoint>
+<navPoint id="navPoint-118" playOrder="118" class="chapter">
+<navLabel><text>Chương 601: Richard/Chương 605: Sao lại đuổi theo ta?</text></navLabel>
+<content src="chapter0118.html"/>
+</navPoint>
+<navPoint id="navPoint-119" playOrder="119" class="chapter">
+<navLabel><text>Chương 606: Không đánh ko quen/Chương 610: Cường hào mua binh đoàn</text></navLabel>
+<content src="chapter0119.html"/>
+</navPoint>
+<navPoint id="navPoint-120" playOrder="120" class="chapter">
+<navLabel><text>Chương 611: Kim Sắc Vi/Chương 615: Chặn giết cửa biển</text></navLabel>
+<content src="chapter0120.html"/>
+</navPoint>
+<navPoint id="navPoint-121" playOrder="121" class="chapter">
+<navLabel><text>Chương 616: Quần thể cứ điểm Sâm Lâm Kiếm Bảo/Chương 620: Binh đoàn tới</text></navLabel>
+<content src="chapter0121.html"/>
+</navPoint>
+<navPoint id="navPoint-122" playOrder="122" class="chapter">
+<navLabel><text>Chương 621: Di tích/Chương 627: Kinh biến</text></navLabel>
+<content src="chapter0122.html"/>
+</navPoint>
+<navPoint id="navPoint-123" playOrder="123" class="chapter">
+<navLabel><text>Chương 628: Thanh Châu Bá Kỵ</text></navLabel>
+<content src="chapter0123.html"/>
+</navPoint>
+</navMap></ncx>

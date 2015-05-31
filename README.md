@@ -1,2 +1,2 @@
-# gtusach
-Tusach (GWT/GO)
+# tusach
+TuSach implementation in GO/GWT
