@@ -30,6 +30,13 @@ var sessionTimeLeftSecs map[string]int
 const sessionExpiredTimeSec = 1 * 60
 
 func main() {
+	f, err := os.OpenFile("webserver.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal("error opening file: %v", err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+
 	loadData()
 
 	log.Println("Starting GO web server at " + util.GetConfiguration().ServerBindAddress +
@@ -258,6 +265,16 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 		}
 	} else {
 		switch op {
+		case "abort":
+			currentBook.Status = maker.STATUS_ABORTED
+			maker.SaveBook(currentBook)
+			for i := 0; i < len(books); i++ {
+				if books[i].ID == currentBook.ID {
+					books[i] = currentBook
+					break
+				}
+			}
+
 		case "update":
 			_, err = maker.SaveBook(updateBook)
 			if err == nil {
@@ -273,6 +290,13 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 			currentBook.Status = maker.STATUS_WORKING
 			_, err := maker.SaveBook(currentBook)
 			if err == nil {
+				for i := 0; i < len(books); i++ {
+					if books[i].ID == currentBook.ID {
+						books[i] = currentBook
+						break
+					}
+				}
+
 				// find parser
 				url := currentBook.CurrentPageUrl
 				if currentBook.CurrentPageNo <= 0 {

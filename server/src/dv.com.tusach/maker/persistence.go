@@ -280,6 +280,9 @@ func DeleteBook(bookId int) error {
 	// remove files
 	err = os.RemoveAll(util.GetBookPath(bookId))
 
+	systemInfo.BookLastUpdateTime = time.Now()
+	SaveSystemInfo(systemInfo)
+
 	return err
 }
 
