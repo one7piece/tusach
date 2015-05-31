@@ -462,7 +462,7 @@ func loadData() {
 	if err != nil {
 		panic("Error loading users! " + err.Error())
 	}
-	if len(users) != 2 {
+	if len(users) != 3 {
 		adminUser := maker.User{Name: "admin", Password: "spidey", Role: "administrator"}
 		err = maker.SaveUser(adminUser)
 		if err != nil {
@@ -473,7 +473,12 @@ func loadData() {
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		users = []maker.User{adminUser, dadUser}
+		guestUser := maker.User{Name: "guest", Password: "password", Role: "user"}
+		err = maker.SaveUser(guestUser)
+		if err != nil {
+			panic("Error saving user! " + err.Error())
+		}
+		users = []maker.User{adminUser, dadUser, guestUser}
 	}
 	log.Printf("found %d users\n", len(users))
 
