@@ -144,18 +144,17 @@ public class MainActivity extends AbstractActivity implements
 				String errorMsg = caught.getMessage();
 				tusachView.setErrorMessage(errorMsg);
 				validateSession();				
-				scheduleRefresh(1000);
 			}
 
 			@Override
 			public void onSuccess(Void v) {
 				tusachView.setErrorMessage("");
-				scheduleRefresh(1000);
 			}
 		};
 		Book book = new Book();
 		book.setId(Integer.parseInt(bookId));
 		clientFactory.getBookService().resumeBook(book, callback);
+		scheduleRefresh(1000);
 	}
 	
 	@Override
@@ -172,18 +171,17 @@ public class MainActivity extends AbstractActivity implements
 				String errorMsg = caught.getMessage();
 				tusachView.setErrorMessage(errorMsg);
 				validateSession();				
-				scheduleRefresh(1000);
 			}
 
 			@Override
 			public void onSuccess(Void v) {
 				tusachView.setErrorMessage("");
-				scheduleRefresh(1000);
 			}
 		};
 		Book book = new Book();
 		book.setId(Integer.parseInt(bookId));
 		clientFactory.getBookService().abortBook(book, callback);
+		scheduleRefresh(1000);
 	}
 
 	@Override
@@ -194,18 +192,17 @@ public class MainActivity extends AbstractActivity implements
 				String errorMsg = caught.getMessage();
 				tusachView.setErrorMessage(errorMsg);
 				validateSession();				
-				scheduleRefresh(0);
 			}
 
 			@Override
 			public void onSuccess(Void v) {
 				tusachView.setErrorMessage("");
-				scheduleRefresh(0);
 			}
 		};
 		Book book = new Book();
 		book.setId(Integer.parseInt(bookId));
 		clientFactory.getBookService().deleteBook(book, callback);
+		scheduleRefresh(1000);
 	}
 	
 	private void validateSession() {

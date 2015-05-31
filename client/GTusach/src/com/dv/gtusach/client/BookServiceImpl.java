@@ -76,7 +76,14 @@ public class BookServiceImpl implements IBookService {
 								currentUser.update(user);
 								log.info("User bean: " + user);									
 								// store in cookie
-						    Cookies.setCookie("sid", user.getSessionId());													
+						    Cookies.setCookie("sid", user.getSessionId());		
+						    
+								try {
+									eventBus.fireEvent(new PropertyChangeEvent(EventTypeEnum.Authentication, "login", user, null));			
+								} catch (Exception ex) {	
+									log.warning(ex.getMessage());			
+								}
+						    
 							} else {
 								log.warning("Error: " + response.getStatusText());
 						    Cookies.removeCookie("sid");;													
