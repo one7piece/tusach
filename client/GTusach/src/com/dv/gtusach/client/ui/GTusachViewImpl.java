@@ -285,7 +285,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		
 		updateBookListPanelSize();		
 	}
-	
+		
 	private void updateBookListPanelSize() {
 		int heightPx = Math.max(200, Window.getClientHeight() - bookListPanel.getAbsoluteTop() - 50);
 		bookListPanel.setHeight(heightPx + "px");		
@@ -313,7 +313,11 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			bookListTable.setText(row, 1, book.getTitle());
 			bookListTable.setText(row, 2, book.getStatus());
 			bookListTable.setText(row, 3, book.getPages());
-			bookListTable.setText(row, 4, book.getLastUpdatedTime().toString());
+			if (book.getLastUpdatedTime() != null) {
+				bookListTable.setText(row, 4, book.getLastUpdatedTime().toString());
+			} else {
+				bookListTable.setText(row, 4, "");			
+			}
 			bookListTable.setText(row, 5, book.getErrorMsg());
 			bookListTable.setText(row, 6, book.getCurrentPageUrl());					
 		} catch (Exception ex) {

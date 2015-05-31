@@ -2,8 +2,8 @@
 <opf:package version="2.0" unique-identifier="BookId" xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <opf:metadata>
     <dc:identifier id="BookId" opf:scheme="UUID">49deff45-74b0-4657-a331-f47f12f47ee4</dc:identifier>
-    <dc:title>mytitle</dc:title>
-    <dc:creator opf:role="aut" opf:file-as="mytitle, ">mytitle</dc:creator>
+    <dc:title>dai de</dc:title>
+    <dc:creator opf:role="aut"></dc:creator>
     <dc:language>vi</dc:language>
     <opf:meta name="generator" content="EPUBLib version 3.0" />
   </opf:metadata>
@@ -14,8 +14,11 @@
     <opf:item id="verdanab.ttf" href="verdanab.ttf" media-type="application/x-truetype-font" />
     <opf:item id="verdanai.ttf" href="verdanai.ttf" media-type="application/x-truetype-font" />
     <opf:item id="verdanaz.ttf" href="verdanaz.ttf" media-type="application/x-truetype-font" />
-  </opf:manifest>
-  <opf:spine toc="ncx">
-  </opf:spine>
-  <opf:guide />
+  <opf:item id="chapter0001.html" href="chapter0001.html" media-type="application/xhtml+xml" />
+<opf:item id="chapter0002.html" href="chapter0002.html" media-type="application/xhtml+xml" />
+</opf:manifest>
+<opf:spine toc="ncx">
+<opf:itemref idref="chapter0001.html" />
+<opf:itemref idref="chapter0002.html" />
+</opf:spine>
 </opf:package>

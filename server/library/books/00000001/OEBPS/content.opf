@@ -137,6 +137,7 @@
 <opf:item id="chapter0121.html" href="chapter0121.html" media-type="application/xhtml+xml" />
 <opf:item id="chapter0122.html" href="chapter0122.html" media-type="application/xhtml+xml" />
 <opf:item id="chapter0123.html" href="chapter0123.html" media-type="application/xhtml+xml" />
+<opf:item id="chapter0124.html" href="chapter0124.html" media-type="application/xhtml+xml" />
 </opf:manifest>
 <opf:spine toc="ncx">
 <opf:itemref idref="chapter0001.html" />
@@ -262,5 +263,6 @@
 <opf:itemref idref="chapter0121.html" />
 <opf:itemref idref="chapter0122.html" />
 <opf:itemref idref="chapter0123.html" />
+<opf:itemref idref="chapter0124.html" />
 </opf:spine>
 </opf:package>

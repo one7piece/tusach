@@ -154,11 +154,11 @@ func getNextPageUrl(rawHtml string, html string) (string, error) {
 			return
 		}
 	})
-	if !strings.HasPrefix(nextPageUrl, "http://www.tunghoanh.com") {
+	if !strings.HasPrefix(nextPageUrl, "http://") {
 		if strings.HasPrefix(nextPageUrl, "/") {
-			nextPageUrl = "http://www.tunghoanh.com" + nextPageUrl
+			nextPageUrl = "http://tunghoanh.com" + nextPageUrl
 		} else {
-			nextPageUrl = "http://www.tunghoanh.com/" + nextPageUrl
+			nextPageUrl = "http://tunghoanh.com/" + nextPageUrl
 		}
 	}
 	return nextPageUrl, nil

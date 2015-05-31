@@ -66,7 +66,7 @@ public class MainActivity extends AbstractActivity implements
 				refresh();
 			}
 		};
-		refreshTimer.scheduleRepeating(20000);
+		refreshTimer.scheduleRepeating(10000);
 		
 		clientFactory.getEventBus().addHandler(PropertyChangeEvent.TYPE, new PropertyChangeEventHandler() {
 			@Override
@@ -117,6 +117,19 @@ public class MainActivity extends AbstractActivity implements
 			@Override
 			public void onSuccess(Book book) {
 				tusachView.setErrorMessage("");
+				int index = -1;
+				for (int i=0; i<currentBooks.size(); i++) {
+					if (currentBooks.get(i).getId() == book.getId()) {
+						index = i;
+						break;
+					}
+				}
+				if (index != -1) {
+					currentBooks.set(index, book);
+				} else {
+					currentBooks.add(0, book);					
+				}
+				fireEvent(EventTypeEnum.Book, (index == -1 ? "load" : "update"), currentBooks);	
 			}
 		};
 
@@ -131,11 +144,13 @@ public class MainActivity extends AbstractActivity implements
 				String errorMsg = caught.getMessage();
 				tusachView.setErrorMessage(errorMsg);
 				validateSession();				
+				scheduleRefresh(1000);
 			}
 
 			@Override
 			public void onSuccess(Void v) {
 				tusachView.setErrorMessage("");
+				scheduleRefresh(1000);
 			}
 		};
 		Book book = new Book();
@@ -151,13 +166,63 @@ public class MainActivity extends AbstractActivity implements
 	
 	@Override
 	public void abort(String bookId) {
+		ICallback<Void> callback = new ICallback<Void>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				String errorMsg = caught.getMessage();
+				tusachView.setErrorMessage(errorMsg);
+				validateSession();				
+				scheduleRefresh(1000);
+			}
+
+			@Override
+			public void onSuccess(Void v) {
+				tusachView.setErrorMessage("");
+				scheduleRefresh(1000);
+			}
+		};
+		Book book = new Book();
+		book.setId(Integer.parseInt(bookId));
+		clientFactory.getBookService().abortBook(book, callback);
 	}
 
 	@Override
 	public void delete(String bookId) {
+		ICallback<Void> callback = new ICallback<Void>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				String errorMsg = caught.getMessage();
+				tusachView.setErrorMessage(errorMsg);
+				validateSession();				
+				scheduleRefresh(0);
+			}
+
+			@Override
+			public void onSuccess(Void v) {
+				tusachView.setErrorMessage("");
+				scheduleRefresh(0);
+			}
+		};
+		Book book = new Book();
+		book.setId(Integer.parseInt(bookId));
+		clientFactory.getBookService().deleteBook(book, callback);
 	}
 	
 	private void validateSession() {
+	}
+	
+	private void scheduleRefresh(int delayMS) {
+		if (delayMS == 0) {
+			refresh();
+		} else {
+			Timer timer = new Timer() {
+				@Override
+				public void run() {
+					refresh();
+				}
+			};
+			timer.schedule(delayMS);		
+		}
 	}
 	
 	private void loadBooks(final List<Integer> bookIds) {

@@ -20,7 +20,6 @@ type SessionUser struct {
 	expiredInSec int
 }
 
-var systemInfo maker.SystemInfo
 var users []maker.User
 var books []maker.Book
 var scripts []maker.ParserScript
@@ -127,7 +126,7 @@ func downloadBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetSystemInfo(w rest.ResponseWriter, r *rest.Request) {
-	w.WriteJson(systemInfo)
+	w.WriteJson(maker.GetSystemInfo())
 }
 
 func Login(w rest.ResponseWriter, r *rest.Request) {
@@ -135,13 +134,14 @@ func Login(w rest.ResponseWriter, r *rest.Request) {
 	dummy := maker.User{}
 	err := r.DecodeJsonPayload(&dummy)
 	if err != nil {
+		log.Println("Missing or invalid user object")
 		rest.Error(w, "Missing or invalid user object", 400)
 		return
 	}
-	log.Println("login: " + dummy.Name)
 
 	user := getUser(dummy.Name)
 	if user.Name == "" || user.Password != dummy.Password {
+		log.Printf("Wrong user name or password: '%s'/'%s'-'%s'/'%s'\n", user.Name, user.Password, dummy.Name, dummy.Password)
 		rest.Error(w, "Wrong user name or password", 400)
 		return
 	}
@@ -188,6 +188,7 @@ func ValidateSession(w rest.ResponseWriter, r *rest.Request) {
 
 func getUser(name string) maker.User {
 	for _, u := range users {
+		log.Printf("parser user: %s\n", u.Name)
 		if u.Name == name {
 			return u
 		}
@@ -259,6 +260,14 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 		switch op {
 		case "update":
 			_, err = maker.SaveBook(updateBook)
+			if err == nil {
+				for i := 0; i < len(books); i++ {
+					if books[i].ID == updateBook.ID {
+						books[i] = updateBook
+						break
+					}
+				}
+			}
 
 		case "resume":
 			currentBook.Status = maker.STATUS_WORKING
@@ -279,7 +288,15 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 			}
 
 		case "delete":
+			var newBooks []maker.Book
 			maker.DeleteBook(updateBook.ID)
+			for i := 0; i < len(books); i++ {
+				if books[i].ID == updateBook.ID {
+					newBooks = append(books[0:i], books[i+1:]...)
+					break
+				}
+			}
+			books = newBooks
 		}
 	}
 
@@ -329,12 +346,15 @@ func CreateBook(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	newBook.Status = maker.STATUS_WORKING
+	newBook.CreatedTime = time.Now()
 	bookId, err := maker.SaveBook(newBook)
 	if err != nil {
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	newBook.ID = bookId
+
+	books = append(books, newBook)
 
 	// schedule goroutine to create book
 	scheduleCreateBook(newBook, site)
@@ -354,11 +374,36 @@ func (sink EventSink) HandleEvent(event util.EventData) {
 			panic("Invalid book id, expecting a number")
 			return
 		}
+		reloadBook(bookId)
 		em, ok := eventManagers[bookId]
 		if ok {
 			log.Printf("Book %d completed, closing channel\n", bookId)
 			close(em.Channel)
 			delete(eventManagers, bookId)
+		}
+	} else if event.Name == "book.update" {
+		str := event.Data.(string)
+		bookId, err := strconv.Atoi(str)
+		if err != nil {
+			panic("Invalid book id, expecting a number")
+			return
+		}
+		log.Printf("Received book updated event for %d, reloading book\n", bookId)
+		reloadBook(bookId)
+	}
+}
+
+func reloadBook(bookId int) {
+
+	updatedBook, err := maker.LoadBook(bookId)
+	if err != nil {
+		log.Printf("Error loading book: %d - %s\n", bookId, err.Error())
+	} else {
+		for i := 0; i < len(books); i++ {
+			if books[i].ID == updatedBook.ID {
+				books[i] = updatedBook
+				break
+			}
 		}
 	}
 }
@@ -381,20 +426,14 @@ func loadData() {
 		log.Fatal("GOWebserver - ERROR! missing parameter: configFile")
 		os.Exit(1)
 	}
-	now := time.Now()
+	//now := time.Now()
 
 	// load configuration
 	util.LoadConfig(configFile)
 	maker.InitDB()
 
-	// init system info
-	systemInfo = maker.SystemInfo{SystemUpTime: now, BookLastUpdateTime: now, ParserEditing: false}
-	err := maker.SaveSystemInfo(systemInfo)
-	if err != nil {
-		panic("Error saving system info! " + err.Error())
-	}
-
 	// init users
+	var err error
 	users, err = maker.LoadUsers()
 	if err != nil {
 		panic("Error loading users! " + err.Error())
@@ -412,6 +451,7 @@ func loadData() {
 		}
 		users = []maker.User{adminUser, dadUser}
 	}
+	log.Printf("found %d users\n", len(users))
 
 	// load books
 	books, err = maker.LoadBooks()

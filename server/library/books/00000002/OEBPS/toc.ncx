@@ -6,13 +6,15 @@
     <meta name="dtb:depth" content="1" />
     <meta name="dtb:totalPageCount" content="0" />
     <meta name="dtb:maxPageNumber" content="0" />
-  </head>
-  <docTitle>
-    <text>mytitle</text>
-  </docTitle>
-  <docAuthor>
-    <text>mytitle, </text>
-  </docAuthor>
-  <navMap>
-  </navMap>
-</ncx>
+  </head><docTitle><text>dai de</text></docTitle>
+<docAuthor><text></text></docAuthor>
+<navMap>
+<navPoint id="navPoint-1" playOrder="1" class="chapter">
+<navLabel><text>Chương 54: Cha của chị</text></navLabel>
+<content src="chapter0001.html"/>
+</navPoint>
+<navPoint id="navPoint-2" playOrder="2" class="chapter">
+<navLabel><text>Chương 55: Thấ</text></navLabel>
+<content src="chapter0002.html"/>
+</navPoint>
+</navMap></ncx>

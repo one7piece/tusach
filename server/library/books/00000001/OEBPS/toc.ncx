@@ -498,7 +498,11 @@
 <content src="chapter0122.html"/>
 </navPoint>
 <navPoint id="navPoint-123" playOrder="123" class="chapter">
-<navLabel><text>Chương 628: Thanh Châu Bá Kỵ</text></navLabel>
+<navLabel><text>Chương 628: Thanh Châu Bá Kỵ/Chương 632: Chiến thuật số năm </text></navLabel>
 <content src="chapter0123.html"/>
+</navPoint>
+<navPoint id="navPoint-124" playOrder="124" class="chapter">
+<navLabel><text>Chương 633: Chân thân hiện/Chương 635: Hậu chiêu của Binh</text></navLabel>
+<content src="chapter0124.html"/>
 </navPoint>
 </navMap></ncx>

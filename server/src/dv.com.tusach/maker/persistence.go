@@ -18,6 +18,7 @@ import (
 )
 
 var db *sql.DB
+var systemInfo SystemInfo
 
 func InitDB() {
 	db = nil
@@ -34,12 +35,23 @@ func InitDB() {
 	createTable("user", reflect.TypeOf(User{}))
 	createTable("book", reflect.TypeOf(Book{}))
 	createTable("chapter", reflect.TypeOf(Chapter{}))
+
+	// init system info
+	systemInfo = SystemInfo{SystemUpTime: time.Now(), BookLastUpdateTime: time.Now(), ParserEditing: false}
+	err = SaveSystemInfo(systemInfo)
+	if err != nil {
+		panic("Error saving system info! " + err.Error())
+	}
 }
 
 func CloseDB() {
 	if db != nil {
 		db.Close()
 	}
+}
+
+func GetSystemInfo() SystemInfo {
+	return systemInfo
 }
 
 func createTable(tableName string, tableType reflect.Type) {
@@ -197,6 +209,7 @@ func SaveBook(book Book) (retId int, retErr error) {
 
 	// TODO need locking here
 
+	book.LastUpdateTime = time.Now()
 	if book.ID == 0 {
 		rows, retErr := db.Query("SELECT max(ID) FROM book")
 		if retErr != nil {
@@ -242,6 +255,9 @@ func SaveBook(book Book) (retId int, retErr error) {
 		args := []interface{}{book.ID}
 		retErr = updateRecord("book", reflect.ValueOf(book), "ID=?", args)
 	}
+
+	systemInfo.BookLastUpdateTime = book.LastUpdateTime
+	SaveSystemInfo(systemInfo)
 
 	return book.ID, retErr
 }

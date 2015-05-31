@@ -42,7 +42,7 @@ type Book struct {
 	CurrentPageUrl string    `json:"currentPageUrl"`
 	CurrentPageNo  int       `json:"currentPageNo"`
 	MaxNumPages    int       `json:"maxNumPages"`
-	LastUpdateTime time.Time `json:"lastUpdateTime"`
+	LastUpdateTime time.Time `json:"lastUpdatedTime"`
 	ErrorMsg       string    `json:"errorMsg"`
 	EpubCreated    bool      `json:"epubCreated"`
 }
