@@ -6,8 +6,8 @@ server/pkg/*
 server/tusach-config.json
 server/library/books/*
 server/library/parser/*
-client/GTusach/gwt-unitCache
-client/GTusach/war/WEB-INF
+client/GTusach/gwt-unitCache/*
+client/GTusach/war/WEB-INF/*
 server/*.log
 server/*.json
 server/src/dv.com.tusach/*
