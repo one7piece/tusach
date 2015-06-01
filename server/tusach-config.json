@@ -1,6 +1,0 @@
-{
-	"serverPath": "/home/dvan/dev/gtusach/client/GTusach/war",
-	"libraryPath": "/home/dvan/dev/gtusach/server/library",
-	"dbFilename": "/home/dvan/dev/gtusach/server/library/tusach.db",
-	"ServerBindPort": 8888
-}
