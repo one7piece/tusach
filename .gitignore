@@ -1,7 +1,12 @@
+*.a
+*.o
+*.so
+*.log
 server/pkg/*
 server/tusach-config.json
-server/library/books
-server/library/parser
+server/library/books/*
+server/library/parser/*
 client/GTusach/gwt-unitCache
 client/GTusach/war/WEB-INF
-
+server/src/dv.com.tusach/*
+!*.go
