@@ -31,6 +31,48 @@ type HttpService interface {
 	ExecuteRequest(url string) []byte
 }
 
+func GetBookSites() []string {
+	sites := []string{}
+	// get list of parsers
+	names, err := util.ListDir(util.GetParserPath(), true)
+	if err != nil {
+		log.Println("Error reading parser directory. " + err.Error())
+		return sites
+	}
+	for _, name := range names {
+		// call parser to check url support
+		log.Println("executing validate command: " + util.GetParserPath() + "/" + name)
+		cmd := exec.Command(util.GetParserPath()+"/"+name,
+			"-configFile="+util.GetConfigFile(), "-op=v",
+			"-url=http://dummy.com")
+		out, err := cmd.CombinedOutput()
+		str := string(out)
+		log.Println("validate command output: ", str)
+		if err != nil {
+			log.Println("Error checking url. " + err.Error())
+			return sites
+		}
+
+		lines := strings.Split(str, "\n")
+		var m map[string]string
+		for _, line := range lines {
+			if strings.HasPrefix(line, "parser-output:") {
+				jsonstr := line[len("parser-output:"):]
+				//log.Printf("Found json: %s\n", jsonstr)
+				json.Unmarshal([]byte(jsonstr), &m)
+				//log.Printf("%v, validated: %s\n", m, m["validated"])
+				break
+			}
+		}
+		if m["url"] != "" {
+			sites = append(sites, m["url"])
+		}
+	}
+
+	log.Printf("Found book sites: [%v]\n", sites)
+	return sites
+}
+
 func GetBookSite(url string) BookSite {
 	site := BookSite{}
 	if url == "" {

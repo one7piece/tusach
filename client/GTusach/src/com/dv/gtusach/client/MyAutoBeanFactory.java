@@ -9,4 +9,5 @@ public interface MyAutoBeanFactory extends AutoBeanFactory{
 	AutoBean<IBookList> books();
 	AutoBean<ISystemInfo> systeminfo();
 	AutoBean<IUser> user();
+	AutoBean<IMapData> map();
 }

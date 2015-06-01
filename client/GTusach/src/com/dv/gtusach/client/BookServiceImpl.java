@@ -1,8 +1,8 @@
 package com.dv.gtusach.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.dv.gtusach.client.event.PropertyChangeEvent;
@@ -24,6 +24,12 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONException;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
 import com.google.web.bindery.autobean.shared.AutoBean;
@@ -107,6 +113,51 @@ public class BookServiceImpl implements IBookService {
 		}		
 	}
 
+	@Override
+	public void getSites(final ICallback<List<String>> callback) {
+		RequestCallback cb = new RequestCallback() {
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				try {
+					if (response.getStatusCode() == 200) {
+						log.info("sites response: " + response.getText());
+						try {
+							String str = "{\"map\" :{\"p1\": \"v1\"}}";
+							AutoBean<IMapData> bean = AutoBeanCodex.decode(factory, IMapData.class, str);
+							log.info("test map value p1: " + bean.as().getData().get("p1"));						
+						} catch (Exception ex1) {
+							log.warning("error! " + ex1.getMessage());
+						}
+						
+						List<String> sites = new ArrayList<String>();
+						JSONArray jsonArray = parseJSONArray(response.getText());
+						for (int i=0; i<jsonArray.size(); i++) {
+							JSONString value = jsonArray.get(i).isString();
+							if (value != null) {
+								sites.add(value.stringValue());
+							}
+						}						
+						callback.onSuccess(sites);												
+					} else {
+						log.warning("Error: " + response.getStatusText());
+						callback.onFailure(new Exception(response.getStatusText() 
+								+ "(" + response.getStatusCode() + ")"));
+					}
+				} catch (Exception ex) {
+					log.warning("Error: " + ex.getMessage());
+					callback.onFailure(ex);
+				}
+			}
+			@Override
+			public void onError(Request request, Throwable ex) {
+				callback.onFailure(ex);
+			}				
+		};
+		
+		String url = "/api/sites";
+		executeRequest(RequestBuilder.GET, URL.encode(url), null, cb);	
+	}
+	
 	@Override
 	public void login(String username, String password, final ICallback<User> callback) {
 		RequestCallback cb = new RequestCallback() {
@@ -475,6 +526,7 @@ public class BookServiceImpl implements IBookService {
 			}
 		}
 	}
+*/
 	
 	private JSONArray parseJSONArray(String json) throws JSONException {
 		JSONArray jsonArray;
@@ -500,5 +552,5 @@ public class BookServiceImpl implements IBookService {
 		}		
 		return jsonObject;
 	}
-*/	
+
 }

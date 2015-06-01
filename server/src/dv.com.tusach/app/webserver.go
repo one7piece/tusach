@@ -20,6 +20,10 @@ type SessionUser struct {
 	expiredInSec int
 }
 
+type MapData struct {
+	data map[string]string `json:data`
+}
+
 var users []maker.User
 var books []maker.Book
 var scripts []maker.ParserScript
@@ -137,8 +141,17 @@ func GetSystemInfo(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteJson(maker.GetSystemInfo())
 }
 
+func writeJsonMap(w rest.ResponseWriter, name string, value string) {
+	m := map[string]map[string]string{}
+	m["map"] = map[string]string{name: value}
+	w.WriteJson(m)
+}
+
 func GetSites(w rest.ResponseWriter, r *rest.Request) {
-	w.WriteJson(map[string]string{"sites": util.GetConfiguration().SupportedSites})
+	sites := maker.GetBookSites()
+	//siteStr := strings.Join(sites, ",")
+	//writeJsonMap(w, "sites", siteStr)
+	w.WriteJson(sites)
 }
 
 func Login(w rest.ResponseWriter, r *rest.Request) {

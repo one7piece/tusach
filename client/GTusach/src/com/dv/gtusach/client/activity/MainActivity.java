@@ -5,20 +5,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.jetty.util.log.Log;
-
 import com.dv.gtusach.client.ClientFactory;
 import com.dv.gtusach.client.ICallback;
 import com.dv.gtusach.client.event.PropertyChangeEvent;
 import com.dv.gtusach.client.event.PropertyChangeEvent.EventTypeEnum;
 import com.dv.gtusach.client.event.PropertyChangeEventHandler;
-import com.dv.gtusach.client.model.*;
+import com.dv.gtusach.client.model.BadDataException;
+import com.dv.gtusach.client.model.Book;
 import com.dv.gtusach.client.model.Book.BookStatus;
+import com.dv.gtusach.client.model.ParserScript;
+import com.dv.gtusach.client.model.SystemInfo;
+import com.dv.gtusach.client.model.User;
 import com.dv.gtusach.client.model.User.PermissionEnum;
 import com.dv.gtusach.client.place.MainPlace;
 import com.dv.gtusach.client.ui.GTusachView;
 import com.google.gwt.activity.shared.AbstractActivity;
-import com.google.web.bindery.event.shared.EventBus;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -28,6 +30,7 @@ public class MainActivity extends AbstractActivity implements
 		GTusachView.Presenter {
 
 	static Logger log = Logger.getLogger("MainActivity");
+	static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("dd/MM/yyyy HH:mm:ss");
 	//private final long SESSION_EXPIRE_TIME = 1000*60*60*24*14;
 	// Used to obtain views, eventBus, placeController
 	// Alternatively, could be injected via GIN
@@ -85,6 +88,23 @@ public class MainActivity extends AbstractActivity implements
 		refreshTimer.cancel();
 	}
 
+	public void getSites() {
+		ICallback<List<String>> callback = new ICallback<List<String>>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				String errorMsg = caught.getMessage();
+				tusachView.setErrorMessage(errorMsg);
+			}
+
+			@Override
+			public void onSuccess(List<String> sites) {
+				log.info("got sites: " + sites);
+				tusachView.setSites(sites);
+			}
+		};
+		clientFactory.getBookService().getSites(callback);
+	}
+	
 	public User getUser() {
 		return clientFactory.getBookService().getUser();
 	}
@@ -258,9 +278,10 @@ public class MainActivity extends AbstractActivity implements
 					
 					List<Book> list = (reload ? currentBooks : result);
 					
-					String header = (reload ? "Loaded " : "Updated ") + list.size() + " books. ";
+					String header = list.size() + " books. ";
 					if (libraryUpdateTime > 0) {
-						header += new Date(libraryUpdateTime);
+						Date time = new Date(libraryUpdateTime);
+						header += dateTimeFormat.format(time);
 					}
 					tusachView.setInfoMessage(header);
 					fireEvent(EventTypeEnum.Book, (reload ? "load" : "update"), list);	

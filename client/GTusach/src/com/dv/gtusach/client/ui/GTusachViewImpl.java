@@ -14,9 +14,9 @@ import com.dv.gtusach.client.event.PropertyChangeEvent;
 import com.dv.gtusach.client.event.PropertyChangeEvent.EventTypeEnum;
 import com.dv.gtusach.client.model.BadDataException;
 import com.dv.gtusach.client.model.Book;
+import com.dv.gtusach.client.model.Book.BookStatus;
 import com.dv.gtusach.client.model.ParserScript;
 import com.dv.gtusach.client.model.User;
-import com.dv.gtusach.client.model.Book.BookStatus;
 import com.dv.gtusach.client.model.User.PermissionEnum;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -262,11 +263,11 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		bookListTable.setText(0, 0, "");
 		bookListTable.getColumnFormatter().setWidth(0, "75px");
 		bookListTable.setText(0, 1, "Title");
-		bookListTable.getColumnFormatter().setWidth(1, "100px");
+		bookListTable.getColumnFormatter().setWidth(1, "150px");
 		bookListTable.setText(0, 2, "Status");
-		bookListTable.getColumnFormatter().setWidth(2, "50px");
+		bookListTable.getColumnFormatter().setWidth(2, "40px");
 		bookListTable.setText(0, 3, "#Pages");		
-		bookListTable.getColumnFormatter().setWidth(3, "50px");
+		bookListTable.getColumnFormatter().setWidth(3, "40px");
 		
 		bookListTable.setText(0, 4, "CreatedBy/Date");
 		bookListTable.setText(0, 5, "Error Message");
@@ -312,7 +313,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			}
 
 			bookListTable.setText(row, 1, book.getTitle());
-			bookListTable.setText(row, 2, book.getStatus());
+			bookListTable.setText(row, 2, (book.getStatus() != null ? book.getStatus().toLowerCase() : ""));
 			bookListTable.setText(row, 3, book.getPages());
 			if (book.getLastUpdatedTime() != null) {
 				bookListTable.setText(row, 4, book.getCreatedBy() + "/" + book.getLastUpdatedTime().toString());
@@ -431,6 +432,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 				currentScript = null;
 			}
 		} else if (event.getSource().equals(showBookDetails)) {
+			//messageLabel.setVisible(showBookDetails.getValue());
 			List<Book> list = new ArrayList<Book>(bookTableMap.values());
 			setBooks(list, false);								
 		}
@@ -441,6 +443,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 	public void setPresenter(Presenter listener) {
 		this.listener = listener;		
 		this.initProfilePanel();
+		this.listener.getSites();
 	}
 
 	@Override
@@ -455,6 +458,24 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		messageLabel.setText(info);
 	}
 
+	@Override
+	public void setSites(List<String> sites) {
+		log.info("set sites: " + sites);
+		siteLinks.clear();
+		//siteLinks.add(new Label("Supported Sites:"));
+		for (String site: sites) {
+			//siteLinks.add(new Label(" "));
+			Anchor a = new Anchor();
+			a.getElement().getStyle().setCursor(Cursor.POINTER);
+			a.setHref(site);
+			a.setText(site);
+			a.setTarget("_blank");
+			a.getElement().getStyle().setProperty("float", "left");
+			a.getElement().getStyle().setProperty("margin-left", "10px");
+			siteLinks.add(a);
+		}
+	}
+	
 	private void setBooks(List<Book> bookList, boolean reload) {
 		try {
 			if (reload) {
@@ -494,6 +515,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			}
 			
 			for (int i=0; i<bookListTable.getRowCount(); i++) {
+				bookListTable.getCellFormatter().setVisible(i, 3, showBookDetails.getValue());
 				bookListTable.getCellFormatter().setVisible(i, 4, showBookDetails.getValue());
 				bookListTable.getCellFormatter().setVisible(i, 5, showBookDetails.getValue());
 				bookListTable.getCellFormatter().setVisible(i, 6, showBookDetails.getValue());

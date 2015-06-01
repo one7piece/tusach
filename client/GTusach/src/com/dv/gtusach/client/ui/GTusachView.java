@@ -20,7 +20,7 @@ public interface GTusachView extends IsWidget {
 	static enum ActionEnum {
 		Download, Delete, Resume, Abort
 	};
-	
+	void setSites(List<String> sites);
 	void setPresenter(Presenter listener);
 	void setErrorMessage(String error);
 	void setInfoMessage(String info);
@@ -29,6 +29,7 @@ public interface GTusachView extends IsWidget {
 	//void setParserScripts(ParserScript[] scripts);
 	
 	public interface Presenter {
+		void getSites();
 		User getUser();
 		void goTo(Place place);
 		void create(Book newBook) throws BadDataException;

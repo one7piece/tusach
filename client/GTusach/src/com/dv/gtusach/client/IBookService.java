@@ -10,6 +10,8 @@ import com.google.web.bindery.event.shared.EventBus;
 
 public interface IBookService {
 	void init();
+	
+	void getSites(ICallback<List<String>> callback);
 	User getUser();
 	void login(String username, String password, ICallback<User> callback);
 	void logout();
