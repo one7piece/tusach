@@ -192,7 +192,7 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 		book.ErrorMsg = errorMsg
 		book.Status = STATUS_ERROR
 	} else {
-		err = makeEpub(book, chapters)
+		err = MakeEpub(book, chapters)
 		if err != nil {
 			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
 			log.Println(errorMsg)
@@ -218,7 +218,7 @@ func saveBook(manager *util.EventManager, book Book, done bool) (int, error) {
 	return id, err
 }
 
-func makeEpub(book Book, chapters []Chapter) error {
+func MakeEpub(book Book, chapters []Chapter) error {
 	if book.CurrentPageNo == 0 {
 		return errors.New("Book has no chapters")
 	}
@@ -418,6 +418,10 @@ func (site BookSite) ExecuteRequest(url string) ([]byte, error) {
 	for i := 0; i < n; i++ {
 		log.Printf("Attempt#%d to load from %s\n", (i + 1), url)
 		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("Error loading from %s. %s\n", url, err.Error())
+			return nil, err
+		}
 		defer resp.Body.Close()
 		if err == nil {
 			result, err = ioutil.ReadAll(resp.Body)

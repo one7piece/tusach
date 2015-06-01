@@ -143,6 +143,8 @@ func getNextPageUrl(rawHtml string, html string) (string, error) {
 	doc.Find("a#next_chap").Each(func(i int, a *goquery.Selection) {
 		nextPageUrl, _ = a.Attr("href")
 	})
-
+	if !strings.HasPrefix(nextPageUrl, "http://") {
+		nextPageUrl = ""
+	}
 	return nextPageUrl, nil
 }

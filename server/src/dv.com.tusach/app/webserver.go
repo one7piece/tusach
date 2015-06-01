@@ -30,12 +30,12 @@ var sessionTimeLeftSecs map[string]int
 const sessionExpiredTimeSec = 1 * 60
 
 func main() {
-	f, err := os.OpenFile("webserver.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal("error opening file: %v", err)
-	}
-	defer f.Close()
-	log.SetOutput(f)
+	//f, err := os.OpenFile("webserver.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	//if err != nil {
+	//log.Fatal("error opening file: %v", err)
+	//}
+	//defer f.Close()
+	//log.SetOutput(f)
 
 	loadData()
 
