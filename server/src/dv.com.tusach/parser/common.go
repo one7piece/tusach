@@ -3,9 +3,13 @@ package parser
 import (
 	"errors"
 	"flag"
-	//"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển"}
@@ -75,4 +79,77 @@ func findChapterTitle(html string, restr string) string {
 	}
 	//fmt.Println("Found chapter title: ", title)
 	return title
+}
+
+func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries int,
+	headerMap map[string]string, formMap map[string]string) ([]byte, error) {
+	var result []byte
+
+	var timeout time.Duration
+	if timeoutSec > 0 {
+		timeout = time.Duration(time.Duration(timeoutSec) * time.Second)
+	} else {
+		timeout = time.Duration(10 * time.Second)
+	}
+
+	client := http.Client{Timeout: timeout}
+	var req *http.Request
+	var err error
+	if formMap != nil {
+		// set form data
+		form := url.Values{}
+		for key, value := range formMap {
+			form.Add(key, value)
+		}
+		req, err = http.NewRequest(method, targetUrl, strings.NewReader(form.Encode()))
+	} else {
+		req, err = http.NewRequest(method, targetUrl, nil)
+	}
+	if err != nil {
+		return result, err
+	}
+
+	// set headers
+	for key, value := range headerMap {
+		req.Header.Add(key, value)
+	}
+	_, hasUserAgent := headerMap["User-Agent"]
+	if !hasUserAgent {
+		req.Header.Add("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2")
+	}
+
+	var n int
+	if numTries > 0 {
+		n = numTries
+	} else {
+		n = 1
+	}
+	for i := 0; i < n; i++ {
+		log.Printf("Attempt#%d to load from %s\n", (i + 1), targetUrl)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("Error loading from %s. %s\n", targetUrl, err.Error())
+			return nil, err
+		}
+		defer resp.Body.Close()
+		if err == nil {
+			result, err = ioutil.ReadAll(resp.Body)
+		}
+		resp.Body.Close()
+		if result != nil {
+			break
+		}
+	}
+	if result == nil || len(result) == 0 {
+		return result, errors.New("No html data loaded")
+	}
+	return result, err
+}
+
+func GetUrl(target string, request string) string {
+	url := strings.TrimRight(target, "/") + "/" + strings.TrimLeft(request, "/")
+	if !strings.HasPrefix(url, "http://") {
+		url = "http://" + url
+	}
+	return url
 }

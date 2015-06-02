@@ -8,10 +8,25 @@ import com.google.gwt.resources.client.ImageResource.ImageOptions;
 public interface Resources extends ClientBundle {
 	public Resources INSTANCE = GWT.create(Resources.class);
 	
-	@Source("disclosurePanelOpen.png")
-	ImageResource disclosurePanelOpen();
+	@Source("abort.png")
+	ImageResource abort();
 	
-	@Source("disclosurePanelClosed.png")
-	ImageResource disclosurePanelClosed();
+	@Source("abort-disabled.png")
+	ImageResource abortDisabled();
+	
+	@Source("resume.png")
+	ImageResource resume();
+	
+	@Source("resume-disabled.png")
+	ImageResource resumeDisabled();
+	
+	@Source("delete.png")
+	ImageResource delete();
+	
+	@Source("delete-disabled.png")
+	ImageResource deleteDisabled();
+	
+	@Source("download.png")
+	ImageResource download();		
 }
 

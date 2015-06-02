@@ -336,14 +336,17 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			anchor.getElement().appendChild(image.getElement());
 			String ref = action.name() + "@" + book.getId();
 			anchor.setName(ref);
-			if (action == ActionEnum.Download) {
-				AnchorElement.as(anchor.getElement()).setType("application/epub+zip");
-				String url = "/downloadBook/" + book.getTitle() + ".epub" + "?bookId=" + book.getId();				
-				anchor.setHref(url);
-			} else {
-				//anchor.setHref("/downloadBook?bookId=" + bookId);
-				anchor.addClickHandler(this);
+			if (enabled) {
+				if (action == ActionEnum.Download) {
+					AnchorElement.as(anchor.getElement()).setType("application/epub+zip");
+					String url = "/downloadBook/" + book.getTitle() + ".epub" + "?bookId=" + book.getId();				
+					anchor.setHref(url);
+				} else {
+					//anchor.setHref("/downloadBook?bookId=" + bookId);
+						anchor.addClickHandler(this);					
+				}
 			}
+			anchor.setEnabled(enabled);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
