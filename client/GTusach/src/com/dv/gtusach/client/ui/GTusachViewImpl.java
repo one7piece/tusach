@@ -302,14 +302,14 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			boolean isWorking = (book.getStatusEnum() == BookStatus.WORKING);
 
 			panel.add(createImageWidget(row, book, ActionEnum.Download, 
-					listener.hasPermission(PermissionEnum.Download) && book.isEpubCreated() && !isWorking));
+					listener.hasPermission(book, PermissionEnum.Download) && book.isEpubCreated() && !isWorking));
 			panel.add(createImageWidget(row, book, ActionEnum.Resume, 
-					listener.hasPermission(PermissionEnum.Update) && !isWorking));
+					listener.hasPermission(book, PermissionEnum.Update) && !isWorking));
 
 			if (isWorking) {
-				panel.add(createImageWidget(row, book, ActionEnum.Abort, listener.hasPermission(PermissionEnum.Update)));
+				panel.add(createImageWidget(row, book, ActionEnum.Abort, listener.hasPermission(book, PermissionEnum.Update)));
 			} else {
-				panel.add(createImageWidget(row, book, ActionEnum.Delete, listener.hasPermission(PermissionEnum.Delete)));
+				panel.add(createImageWidget(row, book, ActionEnum.Delete, listener.hasPermission(book, PermissionEnum.Delete)));
 			}
 
 			bookListTable.setText(row, 1, book.getTitle());
@@ -532,29 +532,32 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			if (event.getErrorMessage() != null) {
 				setErrorMessage(event.getErrorMessage());				
 			} else {
-				// logon/logout successfull, reinitialise the profile/create panel
-				
-				User user = getUser();
 				setInfoMessage("");
-				
-				initProfilePanel();			
-				profilePanel.setOpen(false);
-				
-				// initialise create panel
-				boolean canCreate = listener.hasPermission(PermissionEnum.Create);
-				createBookButton.setEnabled(canCreate);
-				if (canCreate) {
-					createPanel.setVisible(true);
-				} else {
-					createPanel.setVisible(false);			
-				}			
-				// initialise script panel
-				initScriptPanel();
-				
-				// force refresh to update icon's states
-				List<Book> list = new ArrayList<Book>(bookTableMap.values());
-				setBooks(list, false);					
 			}
+			// logon/logout successfull, reinitialise the profile/create panel
+			
+			User user = getUser();
+			log.info("authentication event, user: " + user 
+					+ ", logon:" + user.isLogon());
+			
+			initProfilePanel();			
+			profilePanel.setOpen(false);
+			
+			// initialise create panel
+			boolean canCreate = listener.hasPermission(null, PermissionEnum.Create);
+			createBookButton.setEnabled(canCreate);
+			if (canCreate) {
+				createPanel.setVisible(true);
+			} else {
+				createPanel.setVisible(false);			
+			}			
+			// initialise script panel
+			initScriptPanel();
+			
+			// force refresh to update icon's states
+			List<Book> list = new ArrayList<Book>(bookTableMap.values());
+			setBooks(list, false);					
+			
 		} else if (event.getEventType() == EventTypeEnum.Script) {
 			if (event.getErrorMessage() != null) {
 				setErrorMessage(event.getErrorMessage());

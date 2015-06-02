@@ -37,7 +37,7 @@ public interface GTusachView extends IsWidget {
 		void resume(String bookId);
 		void abort(String bookId);
 		void delete(String bookId);
-		boolean hasPermission(PermissionEnum permission);
+		boolean hasPermission(Book book, PermissionEnum permission);
 		void login(String userName, String password);
 		void logout();		
 		void saveScript(ParserScript script);

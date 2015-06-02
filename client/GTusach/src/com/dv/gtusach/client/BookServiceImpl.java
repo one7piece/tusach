@@ -120,15 +120,7 @@ public class BookServiceImpl implements IBookService {
 			public void onResponseReceived(Request request, Response response) {
 				try {
 					if (response.getStatusCode() == 200) {
-						log.info("sites response: " + response.getText());
-						try {
-							String str = "{\"map\" :{\"p1\": \"v1\"}}";
-							AutoBean<IMapData> bean = AutoBeanCodex.decode(factory, IMapData.class, str);
-							log.info("test map value p1: " + bean.as().getData().get("p1"));						
-						} catch (Exception ex1) {
-							log.warning("error! " + ex1.getMessage());
-						}
-						
+						log.info("sites response: " + response.getText());						
 						List<String> sites = new ArrayList<String>();
 						JSONArray jsonArray = parseJSONArray(response.getText());
 						for (int i=0; i<jsonArray.size(); i++) {
@@ -209,27 +201,29 @@ public class BookServiceImpl implements IBookService {
 				try {
 					if (response.getStatusCode() == 200) {
 						log.info("logout response: " + response.getText());
-						AutoBean<IMapData> bean = AutoBeanCodex.decode(factory, IMapData.class, response.getText());
-						String value = bean.as().getData().get("status");
+						JSONWrapper root = new JSONWrapper(response.getText());
+						String value = root.get("status").valueString();
 						if (value != null && value.equals("1")) {
-							userHasLoggedOff();
+							log.info("user logged off successfully");
+						} else {
+							log.info("user not logged off!");
 						}
 					} else {
 						log.warning("Error: " + response.getStatusText());
 					}
 				} catch (Exception ex) {
-					userHasLoggedOff();
 					log.warning("Error: " + ex.getMessage());
 				}
 			}
 			@Override
 			public void onError(Request request, Throwable ex) {
-				userHasLoggedOff();
+				log.warning("Error: " + ex.getMessage());
 			}				
 		};
 		
 		String url = "/api/logout/" + currentUser.getSessionId();
-		executeRequest(RequestBuilder.GET, URL.encode(url), null, cb);		
+		executeRequest(RequestBuilder.GET, URL.encode(url), null, cb);
+		userHasLoggedOff();		
 	}
 	
 	private void userHasLoggedOff() {

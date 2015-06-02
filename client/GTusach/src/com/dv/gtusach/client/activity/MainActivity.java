@@ -324,19 +324,20 @@ public class MainActivity extends AbstractActivity implements
 	}
 		
 	@Override
-	public boolean hasPermission(PermissionEnum permission) {
+	public boolean hasPermission(Book book, PermissionEnum permission) {
+		User user = clientFactory.getBookService().getUser();
+		boolean isLoggedIn = user.isLogon();
+		boolean isAdmin = (user.getRole().toLowerCase().indexOf("admin") != -1); 
 		if (permission == PermissionEnum.Download) {
 			return true;
 		} else if (permission == PermissionEnum.Create) {
-			return (clientFactory.getBookService().getUser().isLogon());
+			return (isLoggedIn);
 		} else if (permission == PermissionEnum.Update) {
-			// abort or resume
-			return (clientFactory.getBookService().getUser().isLogon());
+			return (isLoggedIn && (isAdmin || (book != null && book.getCreatedBy().equals(user.getName()))));
 		} else if (permission == PermissionEnum.Delete) {
-			return (clientFactory.getBookService().getUser().isLogon());
+			return (isLoggedIn && isAdmin);
 		} else if (permission == PermissionEnum.Javascript) {
-			boolean isAdmin = (clientFactory.getBookService().getUser().getRole().toLowerCase().indexOf("admin") != -1); 
-			return (clientFactory.getBookService().getUser().isLogon() && isAdmin);
+			return (isLoggedIn && isAdmin);
 		}
 		return false;
 	}

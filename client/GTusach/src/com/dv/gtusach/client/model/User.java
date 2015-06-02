@@ -15,8 +15,8 @@ public class User implements IsSerializable, IUser {
 		Javascript
 	}
 	
-	private String name;
-	private String role;
+	private String name = "";
+	private String role = "";
 	private Date lastLogonTime;
 	private String sessionId = "";
 	@GwtTransient private String password;
