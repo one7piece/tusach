@@ -679,6 +679,17 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 	class BookComparator implements Comparator<Book> {
 		@Override
 		public int compare(Book o1, Book o2) {
+			if (getUser().getName().length() > 0) {
+				if (getUser().getName().equals(o1.getCreatedBy()) 
+						&& !getUser().getName().equals(o2.getCreatedBy())) {
+					return -1;
+				}
+				if (getUser().getName().equals(o2.getCreatedBy()) 
+						&& !getUser().getName().equals(o1.getCreatedBy())) {
+					return 1;
+				}
+			}
+				
 			if (o1.getStatusEnum() == BookStatus.WORKING
 					&& o2.getStatusEnum() != BookStatus.WORKING) {
 				return -1;

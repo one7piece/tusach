@@ -34,7 +34,7 @@ func main() {
 	if op == "v" {
 		fmt.Println(Validate(url))
 	} else {
-		str, err := Parse(inputFile, outputFile)
+		str, err := Parse(url, inputFile, outputFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
@@ -57,12 +57,21 @@ func Validate(url string) (string, error) {
 	return "\nparser-output:" + string(json) + "\n", nil
 }
 
-func Parse(inputFile string, outputFile string) (string, error) {
-	data, err := ioutil.ReadFile(inputFile)
+func Parse(chapterUrl string, inputFile string, outputFile string) (string, error) {
+	// load the request
+	headers := map[string]string{}
+	form := map[string]string{}
+	responseBytes, err := parser.ExecuteRequest("GET", chapterUrl, 10, 2, headers, form)
 	if err != nil {
-		return "", errors.New("Error reading file: " + inputFile + ". " + err.Error())
+		return "", err
 	}
-	rawHtml := string(data)
+	rawHtml := string(responseBytes)
+	// save raw file
+	err = util.SaveFile(inputFile, responseBytes)
+	if err != nil {
+		return "", errors.New("Error saving file: " + inputFile + ". " + err.Error())
+	}
+
 	chapterTitle := ""
 	html, err := getChapterHtml(rawHtml, &chapterTitle)
 	if err != nil || html == "" {

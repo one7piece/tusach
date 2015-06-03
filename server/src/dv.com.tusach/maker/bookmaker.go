@@ -8,13 +8,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type BookSite struct {
@@ -162,26 +160,18 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 			break
 		}
 
-		// load page
-		log.Println("Loading page: ", url)
-		rawHtml, err := site.ExecuteRequest(url)
-		if err != nil {
-			errorMsg = "Failed to load from url: " + url + ". " + err.Error()
-			break
-		}
-
 		newChapterNo := book.CurrentPageNo + 1
 		if book.CurrentPageUrl == url {
 			newChapterNo = book.CurrentPageNo
 		}
-
 		newChapter := Chapter{BookId: book.ID, ChapterNo: newChapterNo}
-		nextPageUrl, err := parse(site.Parser, rawHtml, &newChapter)
+		nextPageUrl, err := CreateChapter(site.Parser, url, &newChapter)
+
 		if err != nil {
 			errorMsg = err.Error()
-			log.Println("Error parsing chapter. " + errorMsg)
 			break
 		}
+
 		if newChapter.Title == "" {
 			newChapter.Title = "Chapter " + strconv.Itoa(newChapter.ChapterNo)
 		}
@@ -384,107 +374,43 @@ func MakeEpub(book Book, chapters []Chapter) error {
 	return nil
 }
 
-func parse(parser string, rawHtml []byte, chapter *Chapter) (string, error) {
+func CreateChapter(parser string, chapterUrl string, chapter *Chapter) (string, error) {
 	var nextPageUrl = ""
 
-	// write to raw html file
 	rawFilename := util.GetRawChapterFilename(chapter.BookId, chapter.ChapterNo)
-	err := util.SaveFile(rawFilename, rawHtml)
-	if err != nil {
-		return "", err
-	}
-
 	filename := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
 
-	// call parser to parse chapter html
-	log.Println("executing parser command: ", parser)
+	// call parser to create chapter html
+	log.Printf("Calling parser: %s to create chapter: %s\n", parser, chapterUrl)
+
 	cmd := exec.Command(util.GetParserPath()+"/"+parser,
-		"-configFile="+util.GetConfigFile(), "-op=p",
+		"-configFile="+util.GetConfigFile(), "-op=p", "-url="+chapterUrl,
 		"-inputFile="+rawFilename, "-outputFile="+filename)
 	out, err := cmd.CombinedOutput()
+	outStr := ""
+	if out != nil {
+		outStr = string(out)
+	}
 	if err != nil {
-		return "", errors.New("Error parsing html file. " + err.Error())
+		log.Printf("start parser command output:[\n%s\n]end output\n", outStr)
+		return "", errors.New("Error executing parser command: " + err.Error())
 	}
-	str := string(out)
-	log.Println("parser command output: ", str)
 
-	found := false
 	// extract the nextPageUrl & chapterTitle
-	lines := strings.Split(str, "\n")
 	var m map[string]string
-	for _, line := range lines {
-		if strings.HasPrefix(line, "parser-output:") {
-			json.Unmarshal([]byte(line[len("parser-output:"):]), &m)
-			break
-		}
+	index := strings.LastIndex(outStr, "parser-output:")
+	if index != -1 {
+		json.Unmarshal([]byte(outStr[index+len("parser-output:"):]), &m)
 	}
-	nextPageUrl, found = m["nextPageUrl"]
-	chapter.Title, _ = m["chapterTitle"]
+	nextPageUrl, found := m["nextPageUrl"]
 	if !found {
-		return "", errors.New(str)
+		return "", errors.New("Invalid parser output: " + outStr)
 	}
+	chapter.Title, _ = m["chapterTitle"]
 
 	os.Remove(rawFilename)
 
 	return nextPageUrl, nil
-}
-
-func (site BookSite) ExecuteRequest(url string) ([]byte, error) {
-	var result []byte
-
-	var timeout time.Duration
-	if site.TimeoutSec > 0 {
-		timeout = time.Duration(time.Duration(site.TimeoutSec) * time.Second)
-	} else {
-		timeout = time.Duration(10 * time.Second)
-	}
-	client := http.Client{Timeout: timeout}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return result, err
-	}
-	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2")
-	if site.Referer != "" {
-		req.Header.Add("Referer", site.Referer)
-	}
-	if site.Cookie != "" {
-		req.Header.Add("Cookie", site.Cookie)
-	}
-
-	var n int
-	if site.NumTries > 0 {
-		n = site.NumTries
-	} else {
-		n = 1
-	}
-	for i := 0; i < n; i++ {
-		log.Printf("Attempt#%d to load from %s\n", (i + 1), url)
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Printf("Error loading from %s. %s\n", url, err.Error())
-			return nil, err
-		}
-		defer resp.Body.Close()
-		if err == nil {
-			result, err = ioutil.ReadAll(resp.Body)
-		}
-		resp.Body.Close()
-		if result != nil {
-			break
-		}
-	}
-	if result == nil || len(result) == 0 {
-		return result, errors.New("No html data loaded")
-	}
-	return result, err
-}
-
-func GetUrl(target string, request string) string {
-	url := strings.TrimRight(target, "/") + "/" + strings.TrimLeft(request, "/")
-	if !strings.HasPrefix(url, "http://") {
-		url = "http://" + url
-	}
-	return url
 }
 
 type EventSink struct {

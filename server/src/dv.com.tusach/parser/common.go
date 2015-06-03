@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển"}
+var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"}
 
 func ReadArgs(configFile *string, op *string, url *string, inputFile *string, outputFile *string) error {
 	flag.StringVar(configFile, "configFile", "", "configFile")
@@ -33,6 +33,9 @@ func ReadArgs(configFile *string, op *string, url *string, inputFile *string, ou
 			return errors.New("Missing argument url")
 		}
 	} else if *op == "p" {
+		if *url == "" {
+			return errors.New("Missing argument url")
+		}
 		if *inputFile == "" {
 			return errors.New("Missing argument inputFile")
 		}
@@ -64,20 +67,16 @@ func findChapterTitle(html string, restr string) string {
 	arr := r.FindStringIndex(html)
 	if len(arr) >= 2 {
 		index0 := arr[0]
-		//fmt.Println("index0=", index0)
 		index1 := strings.Index(html[index0:], ":")
 		if index1 != -1 && index1 < 20 {
 			index1 += index0
-			//fmt.Println("index1=", index1)
 			index2 := strings.Index(html[index1:], "<")
-			//fmt.Println("index2=", index2)
 			if index2 != -1 && index2 < 150 {
 				index2 += index1
 				title = html[index0:index2]
 			}
 		}
 	}
-	//fmt.Println("Found chapter title: ", title)
 	return title
 }
 
@@ -152,4 +151,12 @@ func GetUrl(target string, request string) string {
 		url = "http://" + url
 	}
 	return url
+}
+
+func GetIndexOf(source string, search string, offset int) int {
+	index := strings.Index(source[offset:], search)
+	if index != -1 {
+		index = index + offset
+	}
+	return index
 }

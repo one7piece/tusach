@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bytes"
+	//"bytes"
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	//"golang.org/x/net/html"
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -17,6 +16,8 @@ import (
 	"strings"
 	"time"
 )
+
+var chapterTitlePrefixes = []string{"Hồi", "Chương"}
 
 func main() {
 	var configFile string
@@ -37,7 +38,7 @@ func main() {
 	if op == "v" {
 		fmt.Println(Validate(url))
 	} else {
-		str, err := Parse(inputFile, outputFile)
+		str, err := Parse(url, inputFile, outputFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
@@ -61,20 +62,29 @@ func Validate(url string) (string, error) {
 	return "\nparser-output:" + string(json) + "\n", nil
 }
 
-func Parse(inputFile string, outputFile string) (string, error) {
-	data, err := ioutil.ReadFile(inputFile)
-	if err != nil {
-		return "", errors.New("Error reading file: " + inputFile + ". " + err.Error())
+func Parse(chapterUrl string, inputFile string, outputFile string) (string, error) {
+	paramIndex := strings.Index(chapterUrl, "***")
+	requestParam := ""
+	if paramIndex != -1 {
+		requestParam = chapterUrl[paramIndex+3:]
+		chapterUrl = chapterUrl[0:paramIndex]
 	}
-	rawHtml := string(data)
+	// load the request
+	rawHtml, err := executeRequest(chapterUrl, requestParam)
+	if err != nil {
+		return "", err
+	}
+	// save raw file
+	err = util.SaveFile(inputFile, []byte(rawHtml))
+	if err != nil {
+		return "", errors.New("Error saving file: " + inputFile + ". " + err.Error())
+	}
+
 	chapterTitle := ""
 	nextPageUrl := ""
-	html, err := getChapterHtml(rawHtml, &chapterTitle, &nextPageUrl)
+	html, err := getChapterHtml(chapterUrl, requestParam, rawHtml, &chapterTitle, &nextPageUrl)
 	if err != nil {
-		return "", errors.New("Error parsing chapter content from: " + inputFile + ". " + err.Error())
-	}
-	if html == "" {
-		return "", errors.New("Error parsing chapter content from: " + inputFile + ". No data.")
+		return "", err
 	}
 
 	// write to file
@@ -88,51 +98,27 @@ func Parse(inputFile string, outputFile string) (string, error) {
 	return "\nparser-output:" + string(json) + "\n", nil
 }
 
-func getChapterHtml(rawHtml string, chapterTitle *string, nextPageUrl *string) (string, error) {
-	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
-	if err != nil {
-		return "", err
-	}
-	templateHtml := string(template)
-
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(rawHtml))
-	if err != nil {
-		return "", err
-	}
-
-	requestData := ""
-	doc.Find("div#khungchinh").Each(func(i int, s *goquery.Selection) {
-		nodeHtml, err := s.Html()
-		if err == nil {
-			// extract the tuaid & chuong
-			index1 := strings.Index(nodeHtml, "noidung")
-			if index1 != -1 {
-				index1 = strings.Index(nodeHtml[index1:], "'")
-				index2 := -1
-				if index1 != -1 {
-					index2 = strings.Index(nodeHtml[index1+1:], "'")
-				}
-				if index2 > index1 {
-					requestData = nodeHtml[index1+1 : index2]
-				}
-			}
+func executeRequest(chapterUrl string, requestData string) (string, error) {
+	headers := map[string]string{}
+	form := map[string]string{}
+	responseHtml := ""
+	if requestData == "" {
+		response, err := parser.ExecuteRequest("GET", chapterUrl, 10, 2, headers, form)
+		if err != nil {
+			return "", err
 		}
-	})
-
-	log.Println("found request data: " + requestData)
-	rawHtml2 := ""
-	if requestData != "" {
-		headers := map[string]string{}
+		responseHtml = string(response)
+	} else {
 		headers["Origin"] = "http://vnthuquan.net"
 		headers["Accept-Encoding"] = ""
 		headers["Accept-Encoding"] = "gzip, deflate"
 		headers["Accept-Language"] = "en-US,en;q=0.8,vi;q=0.6"
 		headers["Content-Type"] = "application/x-www-form-urlencoded"
 		headers["Accept"] = "*/*"
-		headers["Referer"] = "http://vnthuquan.net/truyen/truyen.aspx?tid=2qtqv3m3237n4n1n1ntn31n343tq83a3q3m3237nvn"
+		//headers["Referer"] = "http://vnthuquan.net/truyen/truyen.aspx?tid=2qtqv3m3237n4n1n1ntn31n343tq83a3q3m3237nvn"
+		headers["Referer"] = chapterUrl
 		headers["Cookie"] = "_sm_au_c=iVV7FF66fjm6RNBF0d; ASP.NET_SessionId=wf4dhb55hyoubbjz3wfwxr2f"
 		headers["Proxy-Connection"] = "keep-alive"
-		form := map[string]string{}
 		arr1 := strings.Split(requestData, "&")
 		for _, s := range arr1 {
 			arr2 := strings.Split(s, "=")
@@ -141,82 +127,131 @@ func getChapterHtml(rawHtml string, chapterTitle *string, nextPageUrl *string) (
 			}
 		}
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
-		targetUrl := fmt.Sprintf("http://vnthuquan.net/truyen/chuonghoi_moi.aspx?&rand=%f", r.Float32)
+		targetUrl := fmt.Sprintf("http://vnthuquan.net/truyen/chuonghoi_moi.aspx?&rand=%f", r.Float32())
 
-		responses, err := parser.ExecuteRequest("POST", targetUrl, 0, 2, headers, form)
+		response, err := parser.ExecuteRequest("POST", targetUrl, 0, 2, headers, form)
 		if err != nil {
 			return "", err
 		}
-		rawHtml2 = string(responses)
-		// add the html header
-		if strings.Index(rawHtml2, "<html>") == -1 {
-			prefix := "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head>"
-			rawHtml2 = prefix + rawHtml2 + "</html>"
+		responseHtml = string(response)
+		log.Printf("loaded html:\n%s\n", responseHtml)
+
+		/*
+			if strings.Index(responseHtml, "<html") == -1 {
+				prefix := "<html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/></head>"
+				responseHtml = prefix + responseHtml + "</html>"
+			} else {
+				return "", errors.New("Invalid html page loaded")
+			}
+		*/
+		if len(responseHtml) < 500 {
+			return "", errors.New("Invalid html page loaded")
 		}
-		util.SaveFile(util.GetConfiguration().LibraryPath+"/"+"vnthuquan-chapter-raw.html", responses)
+	}
+	if responseHtml == "" {
+		return "", errors.New("No html loaded from site.")
 	}
 
-	if rawHtml2 == "" {
-		return "", nil
-	}
+	return responseHtml, nil
+}
 
-	doc, err = goquery.NewDocumentFromReader(strings.NewReader(rawHtml2))
+func getChapterHtml(chapterUrl string, requestData string, rawHtml string, chapterTitle *string, nextPageUrl *string) (string, error) {
+	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
 	if err != nil {
 		return "", err
 	}
+	templateHtml := string(template)
 
-	//index := strings.Index(rawHtml2, "onClick=\"noidung1")
-
-	var buffer bytes.Buffer
-	doc.Find("body").Each(func(i int, b *goquery.Selection) {
-
-		b.Find("span.chutieude").Each(func(i int, s *goquery.Selection) {
-			if s.Text() != "" {
-				if *chapterTitle != "" {
-					*chapterTitle = *chapterTitle + " " + s.Text()
-				} else {
-					*chapterTitle = *chapterTitle + s.Text()
+	rawHtml2 := rawHtml
+	if requestData == "" {
+		// download the chapter content
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(rawHtml))
+		if err != nil {
+			return "", err
+		}
+		doc.Find("div#khungchinh").Each(func(i int, s *goquery.Selection) {
+			nodeHtml, err := s.Html()
+			if err == nil {
+				// extract the tuaid & chuong
+				index1 := parser.GetIndexOf(nodeHtml, "noidung", 0)
+				if index1 != -1 {
+					index1 = parser.GetIndexOf(nodeHtml, "'", index1)
+					index2 := -1
+					if index1 != -1 {
+						index2 = parser.GetIndexOf(nodeHtml, "'", index1+1)
+					}
+					if index2 > index1 {
+						requestData = nodeHtml[index1+1 : index2]
+					}
 				}
 			}
 		})
 
-		b.Contents().Each(func(i int, s *goquery.Selection) {
-			if s.Text() != "" {
-				buffer.WriteString("<br/>")
-				buffer.WriteString(s.Text())
-			}
-		})
-	})
+		log.Println("found chapter request id: " + requestData)
+		if requestData == "" || !strings.HasPrefix(requestData, "tuaid=") {
+			return "", errors.New("Invalid or No chapter request id found")
+		}
 
+		rawHtml2, err = executeRequest(chapterUrl, requestData)
+		if err != nil {
+			return "", err
+		}
+		//util.SaveFile(util.GetConfiguration().LibraryPath+"/"+"vnthuquan-chapter-raw.html", responses)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(rawHtml2))
+	if err != nil {
+		return "", err
+	}
+
+	nextRequestData := ""
+	index1 := strings.LastIndex(rawHtml2, "onClick=\"noidung1")
+	if index1 != -1 {
+		index1 = parser.GetIndexOf(rawHtml2, "'", index1)
+		index2 := parser.GetIndexOf(rawHtml2, "'", index1+1)
+		if index1 != -1 && index2 > index1 {
+			nextRequestData = rawHtml2[index1+1 : index2]
+		}
+	}
+	if nextRequestData != "" {
+		*nextPageUrl = chapterUrl + "***" + nextRequestData
+	}
+
+	//var buffer bytes.Buffer
+	doc.Find("body").Each(func(i int, b *goquery.Selection) {
+		b.Find("span.chutieude").Each(func(i int, s *goquery.Selection) {
+			txt := s.Text()
+			found := false
+			for _, prefix := range chapterTitlePrefixes {
+				if strings.Contains(txt, prefix) {
+					found = true
+					break
+				}
+			}
+			if found {
+				*chapterTitle = txt
+			} else if *chapterTitle != "" {
+				*chapterTitle = *chapterTitle + " " + txt
+			}
+
+		})
+		/*
+			b.Contents().Each(func(i int, s *goquery.Selection) {
+				if s.Text() != "" {
+					buffer.WriteString("<br/>")
+					buffer.WriteString(s.Text())
+				}
+			})
+		*/
+	})
+	*chapterTitle = strings.Replace(*chapterTitle, "\n", "", -1)
+	*chapterTitle = strings.Replace(*chapterTitle, "\t", "", -1)
+	*chapterTitle = strings.Replace(*chapterTitle, "  ", " ", -1)
+	textStr := rawHtml2
 	chapterHtml := ""
-	textStr := buffer.String()
 	if textStr != "" {
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	//fmt.Println("chapter title: ", *chapterTitle)
 	return chapterHtml, nil
-}
-
-func getIndexOf(source string, search string, offset int) int {
-	index := strings.Index(source[offset:], search)
-	if index != -1 {
-		index = index + offset
-	}
-	return index
-}
-
-func getNextPageUrl(rawHtml string, html string) (string, error) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(rawHtml))
-	if err != nil {
-		return "", err
-	}
-	nextPageUrl := ""
-	doc.Find("a#next_chap").Each(func(i int, a *goquery.Selection) {
-		nextPageUrl, _ = a.Attr("href")
-	})
-	if !strings.HasPrefix(nextPageUrl, "http://") {
-		nextPageUrl = ""
-	}
-	return nextPageUrl, nil
 }
