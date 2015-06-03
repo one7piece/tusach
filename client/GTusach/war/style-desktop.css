@@ -11,7 +11,8 @@ h1 {
 }
 
 body {
-  padding: 10px;
+	font-size: 14px;
+	padding: 10px;
 }
 
 /* stock list header row */
@@ -93,7 +94,6 @@ body {
 .siteLinks {
 	color: blue;
 	font-style: italic;
-	font-size: 12px;
 }
 
 .floatLeft {

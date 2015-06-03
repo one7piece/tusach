@@ -13,7 +13,7 @@ public class Book implements IsSerializable, IBook {
 	private String title;
 	private String author;
 	private Date createdTime;
-	private String createdBy = "dv";
+	private String createdBy = "";
 	private BookStatus status = BookStatus.NONE;
 	private int buildTimeSec;
 	private String startPageUrl = "";

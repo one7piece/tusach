@@ -31,7 +31,7 @@ var eventManagers map[int]util.EventManager
 var sessions map[string]maker.User
 var sessionTimeLeftSecs map[string]int
 
-const sessionExpiredTimeSec = 1 * 60
+const sessionExpiredTimeSec = 60 * 60
 
 func main() {
 	//f, err := os.OpenFile("webserver.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -63,6 +63,7 @@ func main() {
 		&rest.Route{"POST", "/logout/:session", Logout},
 		&rest.Route{"GET", "/user/:session", GetUser},
 		&rest.Route{"GET", "/validate/:session", ValidateSession},
+		&rest.Route{"POST", "/recharge/:session", RechargeSession},
 	)
 	if err != nil {
 		log.Fatal("GOWebServer - ERROR! ", err)
@@ -209,6 +210,16 @@ func ValidateSession(w rest.ResponseWriter, r *rest.Request) {
 	} else {
 		w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(secs)})
 	}
+}
+
+func RechargeSession(w rest.ResponseWriter, r *rest.Request) {
+	sessionId := r.PathParam("session")
+	secs, ok := sessionTimeLeftSecs[sessionId]
+	if ok && secs > 0 {
+		sessionTimeLeftSecs[sessionId] = sessionExpiredTimeSec
+		secs = sessionExpiredTimeSec
+	}
+	w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(secs)})
 }
 
 func getUser(name string) maker.User {

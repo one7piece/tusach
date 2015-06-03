@@ -45,7 +45,10 @@
 			</g:FlowPanel>
 			<g:FlowPanel width="100%" styleName="bottomPanel">
 				<g:Label ui:field="messageLabel" text="" styleName="margin-left"/>
-				<g:CheckBox ui:field="showBookDetails" text="Show Details"/>				
+				<g:HorizontalPanel>
+					<g:CheckBox ui:field="showBookDetails" text="Show Details"/>				
+					<g:CheckBox ui:field="showOnlyMyBooks" text="Show Only My Books"/>				
+				</g:HorizontalPanel>
 				<g:ScrollPanel ui:field="bookListPanel" width="99%" styleName="floatLeft">
 					<g:FlexTable ui:field="bookListTable" height="100%" width="100%" styleName="borderPanel" />
 				</g:ScrollPanel>

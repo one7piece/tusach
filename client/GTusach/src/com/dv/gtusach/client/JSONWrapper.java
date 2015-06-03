@@ -46,6 +46,13 @@ public class JSONWrapper {
 		if (i != null) {
 			return i.doubleValue();
 		}
+		JSONString s = (value != null ? value.isString() : null);
+		if (s != null) {
+			try {
+				return Double.parseDouble(s.stringValue());				
+			} catch (Exception ex) {				
+			}
+		}
 		return Double.MIN_VALUE;
 	}
 

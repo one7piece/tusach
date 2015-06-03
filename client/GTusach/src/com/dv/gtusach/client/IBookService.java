@@ -15,6 +15,7 @@ public interface IBookService {
 	User getUser();
 	void login(String username, String password, ICallback<User> callback);
 	void logout();
+	void rechargeSession();
 	
 	void getSystemInfo(ICallback<SystemInfo> callback);
 	

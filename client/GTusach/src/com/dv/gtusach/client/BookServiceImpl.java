@@ -10,7 +10,6 @@ import com.dv.gtusach.client.event.PropertyChangeEvent.EventTypeEnum;
 import com.dv.gtusach.client.model.Book;
 import com.dv.gtusach.client.model.IBook;
 import com.dv.gtusach.client.model.IBookList;
-import com.dv.gtusach.client.model.IMapData;
 import com.dv.gtusach.client.model.ISystemInfo;
 import com.dv.gtusach.client.model.IUser;
 import com.dv.gtusach.client.model.ParserScript;
@@ -45,6 +44,7 @@ public class BookServiceImpl implements IBookService {
 	private Timer timer;
 	private MyAutoBeanFactory factory;
 	private EventBus eventBus;
+	private boolean rechargeRequired = false;
 	
 	public BookServiceImpl(EventBus eventBus) {
 		this.eventBus = eventBus;
@@ -59,7 +59,12 @@ public class BookServiceImpl implements IBookService {
 			@Override
 			public void run() {
 				if (getUser().isLogon()) {
-					validateSession();
+					if (rechargeRequired) {
+						rechargeRequired = false;
+						doRechargeSession();
+					} else {
+						validateSession();
+					}
 				}
 			}
 		};
@@ -227,6 +232,7 @@ public class BookServiceImpl implements IBookService {
 	}
 	
 	private void userHasLoggedOff() {
+		log.info("user has logged off");
 		Cookies.removeCookie("sid");
 		currentUser.update(new User());
 		eventBus.fireEvent(new PropertyChangeEvent(EventTypeEnum.Authentication, "logout", getUser(), null));		
@@ -243,10 +249,10 @@ public class BookServiceImpl implements IBookService {
 				try {
 					if (response.getStatusCode() == 200) {
 						log.info("validateSession response: " + response.getText());
-						AutoBean<IMapData> bean = AutoBeanCodex.decode(factory, IMapData.class, response.getText());
-						String value = bean.as().getData().get("sessionTimeRemainingSec");
+						JSONWrapper root = new JSONWrapper(response.getText());
+						JSONWrapper value = root.get("sessionTimeRemainingSec");
 						if (value != null) {
-							sessionTimeLeftSec = Integer.parseInt(value);
+							sessionTimeLeftSec = value.valueInt();
 						} else {
 							sessionTimeLeftSec = 0;
 						}
@@ -268,7 +274,41 @@ public class BookServiceImpl implements IBookService {
 		String url = "/api/validate/" + currentUser.getSessionId();
 		executeRequest(RequestBuilder.GET, URL.encode(url), null, cb);		
 	}
-
+	
+	private void doRechargeSession() {
+		RequestCallback cb = new RequestCallback() {
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				try {
+					if (response.getStatusCode() == 200) {
+						log.info("rechargeSession response: " + response.getText());
+						JSONWrapper root = new JSONWrapper(response.getText());
+						JSONWrapper value = root.get("sessionTimeRemainingSec");
+						if (value != null) {
+							sessionTimeLeftSec = value.valueInt();
+						} else {
+							sessionTimeLeftSec = 0;
+						}
+						if (sessionTimeLeftSec <= 0) {
+							userHasLoggedOff();
+						}						
+					} else {
+						log.warning("Error: " + response.getStatusText());
+					}
+				} catch (Exception ex) {
+					log.warning("Error: " + ex.getMessage());
+				}
+			}
+			@Override
+			public void onError(Request request, Throwable ex) {
+			}				
+		};
+		if (currentUser.getSessionId().length() != 0) {
+			String url = "/api/recharge/" + currentUser.getSessionId();
+			executeRequest(RequestBuilder.POST, URL.encode(url), null, cb);		
+		}
+	}
+	
 	@Override
 	public void getSystemInfo(final ICallback<SystemInfo> callback) {
 		RequestCallback cb = new RequestCallback() {
@@ -386,21 +426,25 @@ public class BookServiceImpl implements IBookService {
 		AutoBean<IBook> bean = factory.create(IBook.class, newBook);	
 		String payload = AutoBeanCodex.encode(bean).getPayload();
 		executeRequest(RequestBuilder.POST, URL.encode(url), payload, cb);
+		rechargeRequired = true;
 	}
 
 	@Override
 	public void abortBook(Book book, final ICallback<Void> callback) {
 		postBook("/api/book/abort", book, callback);
+		rechargeRequired = true;
 	}
 
 	@Override
 	public void resumeBook(Book book, final ICallback<Void> callback) {
 		postBook("/api/book/resume", book, callback);
+		rechargeRequired = true;
 	}
 
 	@Override
 	public void updateBook(Book book, final ICallback<Void> callback) {
 		postBook("/api/book/update", book, callback);
+		rechargeRequired = true;
 	}
 
 	@Override
@@ -408,6 +452,10 @@ public class BookServiceImpl implements IBookService {
 		postBook("/api/book/delete", book, callback);
 	}
 
+	public void rechargeSession() {
+		rechargeRequired = true;
+	}
+	
 	private void postBook(final String url, Book book, final ICallback<Void> callback) {
 		RequestCallback cb = new RequestCallback() {
 			@Override

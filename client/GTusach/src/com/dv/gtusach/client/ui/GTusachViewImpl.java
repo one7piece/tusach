@@ -78,6 +78,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 	
 	@UiField Label messageLabel;
 	@UiField CheckBox showBookDetails;
+	@UiField CheckBox showOnlyMyBooks;
 	@UiField FlowPanel siteLinks;
 	
 	Button createBookButton = new Button("Create");
@@ -89,7 +90,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 	TextBox textUserName = new TextBox();
 	PasswordTextBox textPassword = new PasswordTextBox();	
 	
-	private Map<Integer, Book> bookTableMap = new HashMap<Integer, Book>();
+	private List<Book> currentDisplayedBooks = new ArrayList<Book>();
 	private ScriptModeEnum scriptMode = ScriptModeEnum.VIEWING;
 	private ParserScript currentScript;
 	private List<ParserScript> scripts = new ArrayList<ParserScript>();
@@ -122,6 +123,8 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		
 		showBookDetails.setValue(false);
 		showBookDetails.addClickHandler(this);
+		showOnlyMyBooks.setValue(false);
+		showOnlyMyBooks.addClickHandler(this);
 		
 		initBookListPanel();
 		
@@ -175,6 +178,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		if (listener != null) {
 			return listener.getUser();
 		} else {
+			log.warning("listener not set");
 			return new User();
 		}
 	}
@@ -435,9 +439,9 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 				currentScript = null;
 			}
 		} else if (event.getSource().equals(showBookDetails)) {
-			//messageLabel.setVisible(showBookDetails.getValue());
-			List<Book> list = new ArrayList<Book>(bookTableMap.values());
-			setBooks(list, false);								
+			updateBookList(null);								
+		} else if (event.getSource().equals(showOnlyMyBooks)) {
+			reloadBookList();					
 		}
 		
 	}
@@ -479,44 +483,52 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		}
 	}
 	
-	private void setBooks(List<Book> bookList, boolean reload) {
+	private void reloadBookList() {
 		try {
-			if (reload) {
-				log.info("reloading books #" + bookList.size());
-				bookTableMap.clear();
-				for (int i = 1; i < bookListTable.getRowCount(); i++) {
-					bookListTable.removeRow(i);
-				}
-				log.info("sorting books...");
-				Collections.sort(bookList, comparator);
-				for (int i = 0; i < bookList.size(); i++) {
-					int row = i + 1;
-					updateBook(row, bookList.get(i));
-					bookTableMap.put(row, bookList.get(i));
-				}
-				log.info("reloading books completed");
-			} else {
-				log.info("updating books...");
-				for (Book book : bookList) {
-					// find the row number of this book
-					int row = -1;
-					Iterator<Entry<Integer, Book>> iter = bookTableMap.entrySet()
-							.iterator();
-					while (iter.hasNext()) {
-						Entry<Integer, Book> entry = iter.next();
-						if (entry.getValue().getId() == book.getId()) {
-							row = entry.getKey();
-							break;
-						}
-					}
-					if (row != -1) {
-						updateBook(row, book);
-						bookTableMap.put(row, book);
-					}
-				}
-				log.info("updating books completed");
+			log.info("reloadBookList, user: " + getUser());
+			for (int i = 1; i < bookListTable.getRowCount(); i++) {
+				bookListTable.removeRow(i);
 			}
+			currentDisplayedBooks.clear();
+			currentDisplayedBooks.addAll(listener.getBooks());
+			Collections.sort(currentDisplayedBooks, comparator);
 			
+			for (int i=0; i<currentDisplayedBooks.size(); i++) {
+				Book book = currentDisplayedBooks.get(i);
+				if (displayBook(book)) {
+					log.info("show book: " + book.getTitle() + ", created by: " + book.getCreatedBy());
+					updateBook(i+1, book);
+				} else {
+					log.info("hide book: " + book.getTitle() + ", created by: " + book.getCreatedBy());
+				}
+			}
+			updateBookList(null);
+		} catch (Exception ex) {
+			log.warning("Error refreshing display. " + ex.getMessage());
+		}
+	}
+
+	private void updateBookList(List<Book> updatedBooks) {
+		try {
+			if (updatedBooks == null) {
+				updatedBooks = new ArrayList<Book>();
+			}
+			log.info("updateBookList, #books:" + updatedBooks.size());
+			for (Book updatedBook: updatedBooks) {
+				int index = -1;
+				for (int i=0; i<currentDisplayedBooks.size(); i++) {
+					if (currentDisplayedBooks.get(i).getId() == updatedBook.getId()) {
+						index = i;
+						break;
+					}
+				}				
+				if (index != -1) {
+					currentDisplayedBooks.set(index, updatedBook);					
+					log.info("update show book: " + updatedBook.getTitle() + ", created by: " + updatedBook.getCreatedBy());
+					updateBook(index+1, updatedBook);
+				}
+			}
+
 			for (int i=0; i<bookListTable.getRowCount(); i++) {
 				bookListTable.getCellFormatter().setVisible(i, 3, showBookDetails.getValue());
 				bookListTable.getCellFormatter().setVisible(i, 4, showBookDetails.getValue());
@@ -524,8 +536,16 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 				bookListTable.getCellFormatter().setVisible(i, 6, showBookDetails.getValue());
 			}				
 		} catch (Exception ex) {
-			log.warning("Error refreshing display. " + ex.getMessage());
+			log.warning("Error updateBookList. " + ex.getMessage());
 		}
+	}
+	
+	private boolean displayBook(Book book) {
+		if (getUser().getName().length() > 0 && book.getCreatedBy().length() > 0 
+				&& showOnlyMyBooks.getValue()) {
+			return getUser().getName().equals(book.getCreatedBy());
+		}
+		return true;
 	}
 	
 	@Override
@@ -540,9 +560,9 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			// logon/logout successfull, reinitialise the profile/create panel
 			
 			User user = getUser();
-			log.info("authentication event, user: " + user 
-					+ ", logon:" + user.isLogon());
-			
+			log.info("authentication event, user: " + user + ", logon:" + user.isLogon());
+			showOnlyMyBooks.setValue(user.isLogon());
+			//showOnlyMyBooks.setEnabled(user.isLogon());
 			initProfilePanel();			
 			profilePanel.setOpen(false);
 			
@@ -558,8 +578,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 			initScriptPanel();
 			
 			// force refresh to update icon's states
-			List<Book> list = new ArrayList<Book>(bookTableMap.values());
-			setBooks(list, false);					
+			reloadBookList();					
 			
 		} else if (event.getEventType() == EventTypeEnum.Script) {
 			if (event.getErrorMessage() != null) {
@@ -589,10 +608,10 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		} else if (event.getEventType() == EventTypeEnum.Book) {
 			if (event.getName().equals("load")) {
 				// refresh books
-				setBooks((List<Book>)event.getValue(), true);
+				reloadBookList();
 			} else if (event.getName().equals("update")) {
 				// update books
-				setBooks((List<Book>)event.getValue(), false);
+				updateBookList((List<Book>)event.getValue());
 			}
 		}						
 	}
@@ -699,7 +718,11 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 				return 1;
 			}
 			if (o1.getLastUpdatedTime() != null && o2.getLastUpdatedTime() != null) {
-				return o2.getLastUpdatedTime().compareTo(o1.getLastUpdatedTime());
+				int c = o2.getLastUpdatedTime().compareTo(o1.getLastUpdatedTime());
+				if (c == 0) {
+					c = Integer.valueOf(o2.getId()).compareTo(Integer.valueOf(o1.getId()));
+				}
+				return c;
 			}
 			if (o1.getLastUpdatedTime() != null) {
 				return -1;

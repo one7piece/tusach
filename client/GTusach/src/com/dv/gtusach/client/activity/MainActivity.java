@@ -69,7 +69,7 @@ public class MainActivity extends AbstractActivity implements
 				refresh();
 			}
 		};
-		refreshTimer.scheduleRepeating(10000);
+		refreshTimer.scheduleRepeating(15000);
 		
 		clientFactory.getEventBus().addHandler(PropertyChangeEvent.TYPE, new PropertyChangeEventHandler() {
 			@Override
