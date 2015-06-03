@@ -123,6 +123,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 		
 		showBookDetails.setValue(false);
 		showBookDetails.addClickHandler(this);
+		showOnlyMyBooks.setVisible(false);
 		showOnlyMyBooks.setValue(false);
 		showOnlyMyBooks.addClickHandler(this);
 		
@@ -543,7 +544,7 @@ public class GTusachViewImpl extends Composite implements GTusachView, ClickHand
 	private boolean displayBook(Book book) {
 		if (getUser().getName().length() > 0 && book.getCreatedBy().length() > 0 
 				&& showOnlyMyBooks.getValue()) {
-			return getUser().getName().equals(book.getCreatedBy());
+			//return getUser().getName().equals(book.getCreatedBy());
 		}
 		return true;
 	}

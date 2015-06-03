@@ -3,7 +3,7 @@ var __gwtModuleFunction = $wnd.gtusach;
 var $sendStats = __gwtModuleFunction.__sendStats;
 $sendStats('moduleStartup', 'moduleEvalStart');
 var $gwt_version = "2.7.0";
-var $strongName = '0A131DAF08C5F23FC5343BB8A3B75C18';
+var $strongName = '6EF0F1F13D119554F50C4A79CD870AC9';
 var $gwt = {};
 var $doc = $wnd.document;
 var $moduleName, $moduleBase;
@@ -3460,13 +3460,6 @@ function $createNewBook(this$static){
   $setText_2(this$static.textNumPages, '0');
 }
 
-function $displayBook(this$static, book){
-  if ($getUser(this$static).name_0.length > 0 && book.createdBy.length > 0 && $getValue(this$static.showOnlyMyBooks).value_0) {
-    return $equals($getUser(this$static).name_0, book.createdBy);
-  }
-  return true;
-}
-
 function $getUser(this$static){
   if (this$static.listener) {
     return $clinit_BookServiceImpl() , currentUser;
@@ -3589,13 +3582,9 @@ function $reloadBookList(this$static){
     sort_0(this$static.currentDisplayedBooks, this$static.comparator);
     for (i = 0; i < this$static.currentDisplayedBooks.array.length; i++) {
       book = dynamicCast($get_6(this$static.currentDisplayedBooks, i), 45);
-      if ($displayBook(this$static, book)) {
-        $info_0(log_3, 'show book: ' + book.title_0 + ', created by: ' + book.createdBy);
-        $updateBook(this$static, i + 1, book);
-      }
-       else {
-        $info_0(log_3, 'hide book: ' + book.title_0 + ', created by: ' + book.createdBy);
-      }
+      $getUser(this$static).name_0.length > 0 && book.createdBy.length > 0 && $getValue(this$static.showOnlyMyBooks).value_0;
+      $info_0(log_3, 'show book: ' + book.title_0 + ', created by: ' + book.createdBy);
+      $updateBook(this$static, i + 1, book);
     }
     $updateBookList(this$static, null);
   }
@@ -3752,6 +3741,7 @@ function GTusachViewImpl(){
   $initScriptPanel(this);
   $setValue(this.showBookDetails, ($clinit_Boolean() , $clinit_Boolean() , FALSE_0));
   $addDomHandler(this.showBookDetails, this, ($clinit_ClickEvent() , $clinit_ClickEvent() , TYPE_0));
+  $setVisible(this.showOnlyMyBooks, false);
   $setValue(this.showOnlyMyBooks, (null , FALSE_0));
   $addDomHandler(this.showOnlyMyBooks, this, (null , TYPE_0));
   $setHeight(this.bookListTable, '30px');
