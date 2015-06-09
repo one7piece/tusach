@@ -7,12 +7,15 @@ import java.util.logging.Logger;
 
 import com.dv.gtusach.client.ClientFactory;
 import com.dv.gtusach.client.ICallback;
+import com.dv.gtusach.client.MyAutoBeanFactory;
+import com.dv.gtusach.client.ServiceUtil;
 import com.dv.gtusach.client.event.PropertyChangeEvent;
 import com.dv.gtusach.client.event.PropertyChangeEvent.EventTypeEnum;
 import com.dv.gtusach.client.event.PropertyChangeEventHandler;
 import com.dv.gtusach.client.model.BadDataException;
 import com.dv.gtusach.client.model.Book;
 import com.dv.gtusach.client.model.Book.BookStatus;
+import com.dv.gtusach.client.model.IUser;
 import com.dv.gtusach.client.model.ParserScript;
 import com.dv.gtusach.client.model.SystemInfo;
 import com.dv.gtusach.client.model.User;
@@ -20,18 +23,31 @@ import com.dv.gtusach.client.model.User.PermissionEnum;
 import com.dv.gtusach.client.place.MainPlace;
 import com.dv.gtusach.client.ui.GTusachView;
 import com.google.gwt.activity.shared.AbstractActivity;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.place.shared.Place;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.web.bindery.autobean.shared.AutoBean;
+import com.google.web.bindery.autobean.shared.AutoBeanCodex;
 
 public class MainActivity extends AbstractActivity implements
 		GTusachView.Presenter {
 
 	static Logger log = Logger.getLogger("MainActivity");
 	static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("dd/MM/yyyy HH:mm:ss");
-	//private final long SESSION_EXPIRE_TIME = 1000*60*60*24*14;
+
+	private static final String COOKIE_ID = "thuvien-dv.sid";
+	private boolean rechargeRequired = false;
+	private MyAutoBeanFactory factory;
+
 	// Used to obtain views, eventBus, placeController
 	// Alternatively, could be injected via GIN
 	private ClientFactory clientFactory;
@@ -40,24 +56,26 @@ public class MainActivity extends AbstractActivity implements
 	private List<ParserScript> currentScripts = new ArrayList<ParserScript>();
 	private long libraryUpdateTime = -1;
 	private Timer refreshTimer;
+	private long lastSessionCheckTime = 0;
 
 	public MainActivity(MainPlace place, ClientFactory clientFactory) {
 		this.clientFactory = clientFactory;
+		this.factory = GWT.create(MyAutoBeanFactory.class);
 	}
-
+	
 	/**
 	 * Invoked by the ActivityManager to start a new Activity
 	 */
 	@Override
-	public void start(AcceptsOneWidget containerWidget, com.google.gwt.event.shared.EventBus eventBus) {
+	public void start(AcceptsOneWidget containerWidget, com.google.gwt.event.shared.EventBus eventBus) {		
 		tusachView = clientFactory.getMainView();		
 		tusachView.setPresenter(this);
 		tusachView.setInfoMessage("Loading...");
 		
 		containerWidget.setWidget(tusachView.asWidget());
+						
+		checkSession();
 		
-		clientFactory.getBookService().init();
-				
 		loadBooks(null);
 
 		if (refreshTimer != null && refreshTimer.isRunning()) {
@@ -66,6 +84,7 @@ public class MainActivity extends AbstractActivity implements
 		refreshTimer = new Timer() {
 			@Override
 			public void run() {
+				checkSession();
 				refresh();
 			}
 		};
@@ -88,6 +107,68 @@ public class MainActivity extends AbstractActivity implements
 		refreshTimer.cancel();
 	}
 
+	private void checkSession() {
+		log.info("checkSession...");
+		if (System.currentTimeMillis() - lastSessionCheckTime < 60000) {
+			return;
+		}
+		lastSessionCheckTime = System.currentTimeMillis();
+		
+		if (getUser().isLogon()) {
+			if (rechargeRequired) {
+				rechargeRequired = false;
+				rechargeSession();
+			} else {
+				validateSession();
+			}
+		}
+		
+		String sid = Cookies.getCookie(COOKIE_ID);
+		if (sid != null && sid.length() > 0) {
+			try {								
+				// retrieve the user info from session id
+				RequestCallback cb = new RequestCallback() {
+					@Override
+					public void onResponseReceived(Request request, Response response) {
+						try {
+							if (response.getStatusCode() == 200) {
+								log.info("getUser response: " + response.getText());						
+								AutoBean<IUser> bean = AutoBeanCodex.decode(factory, IUser.class, response.getText());
+								User user = new User(bean.as());
+								getUser().update(user);
+								log.info("User bean: " + user);									
+								// store in cookie
+						    Cookies.setCookie(COOKIE_ID, user.getSessionId());		
+						    
+								try {
+									clientFactory.getEventBus().fireEvent(new PropertyChangeEvent(EventTypeEnum.Authentication, "login", user, null));			
+								} catch (Exception ex) {	
+									log.warning(ex.getMessage());			
+								}
+						    
+							} else {
+								log.warning("Error: " + response.getStatusText());
+						    Cookies.removeCookie(COOKIE_ID);													
+							}
+						} catch (Exception ex) {
+							log.warning("Error: " + ex.getMessage());
+					    Cookies.removeCookie(COOKIE_ID);													
+						}
+					}
+					@Override
+					public void onError(Request request, Throwable ex) {
+				    Cookies.removeCookie(COOKIE_ID);;													
+					}				
+				};
+				
+				String url = "/api/user/" + sid;
+				ServiceUtil.executeRequest(RequestBuilder.GET, URL.encode(url), null, cb);				
+			} catch (Exception ex) {
+				// ignore
+			}			
+		}		
+	}
+	
 	public void getSites() {
 		ICallback<List<String>> callback = new ICallback<List<String>>() {
 			@Override
@@ -106,7 +187,7 @@ public class MainActivity extends AbstractActivity implements
 	}
 	
 	public User getUser() {
-		return clientFactory.getBookService().getUser();
+		return clientFactory.getUser();
 	}
 	
 	public List<Book> getBooks() {
@@ -154,6 +235,7 @@ public class MainActivity extends AbstractActivity implements
 		};
 
 		clientFactory.getBookService().createBook(newBook, callback);
+		rechargeRequired = true;
 	}
 	
 	@Override
@@ -174,6 +256,7 @@ public class MainActivity extends AbstractActivity implements
 		Book book = new Book();
 		book.setId(Integer.parseInt(bookId));
 		clientFactory.getBookService().resumeBook(book, callback);
+		rechargeRequired = true;
 		scheduleRefresh(1000);
 	}
 	
@@ -181,6 +264,7 @@ public class MainActivity extends AbstractActivity implements
 	public void download(final String bookId) {		
 		validateSession();				
 		Window.open("/api/downloadBook/" + bookId, "", "");
+		rechargeRequired = true;
 	}
 	
 	@Override
@@ -202,6 +286,7 @@ public class MainActivity extends AbstractActivity implements
 		book.setId(Integer.parseInt(bookId));
 		clientFactory.getBookService().abortBook(book, callback);
 		scheduleRefresh(1000);
+		rechargeRequired = true;
 	}
 
 	@Override
@@ -223,9 +308,50 @@ public class MainActivity extends AbstractActivity implements
 		book.setId(Integer.parseInt(bookId));
 		clientFactory.getBookService().deleteBook(book, callback);
 		scheduleRefresh(1000);
+		rechargeRequired = true;
+	}
+	
+	private void rechargeSession() {
+		ICallback<Integer> callback = new ICallback<Integer>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				String errorMsg = caught.getMessage();
+				tusachView.setErrorMessage(errorMsg);
+			}
+
+			@Override
+			public void onSuccess(Integer v) {
+				if (v <= 0) {
+					userHasLoggedOff();
+				}										
+			}
+		};
+		clientFactory.getBookService().rechargeSession(callback);
 	}
 	
 	private void validateSession() {
+		ICallback<Integer> callback = new ICallback<Integer>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				String errorMsg = caught.getMessage();
+				tusachView.setErrorMessage(errorMsg);
+			}
+
+			@Override
+			public void onSuccess(Integer v) {
+				if (v <= 0) {
+					userHasLoggedOff();
+				}										
+			}
+		};
+		clientFactory.getBookService().validateSession(callback);
+	}
+	
+	private void userHasLoggedOff() {
+		log.info("user has logged off");
+		Cookies.removeCookie(COOKIE_ID);
+		getUser().update(new User());
+		fireEvent(EventTypeEnum.Authentication, "logout", getUser(), null);		
 	}
 	
 	private void scheduleRefresh(int delayMS) {
@@ -335,7 +461,7 @@ public class MainActivity extends AbstractActivity implements
 		} else if (permission == PermissionEnum.Update) {
 			return (isLoggedIn && (isAdmin || (book != null && book.getCreatedBy().equals(user.getName()))));
 		} else if (permission == PermissionEnum.Delete) {
-			return (isLoggedIn && isAdmin);
+			return (isLoggedIn && (isAdmin || (book != null && book.getCreatedBy().equals(user.getName()))));
 		} else if (permission == PermissionEnum.Javascript) {
 			return (isLoggedIn && isAdmin);
 		}
@@ -351,6 +477,10 @@ public class MainActivity extends AbstractActivity implements
 
 			public void onSuccess(User user) {				
 				if (user != null) {
+					getUser().update(user);					
+					// store in cookie
+			    Cookies.setCookie(COOKIE_ID, user.getSessionId());					
+					
 					boolean isAdmin = (user != null && user.isLogon()
 							&& user.getRole().contains("admin"));
 					if (isAdmin) {
@@ -368,81 +498,18 @@ public class MainActivity extends AbstractActivity implements
 	@Override
 	public void logout() {
 		clientFactory.getBookService().logout();
+		userHasLoggedOff();		
 	}
 	
 	private void loadParserScripts() {
-/*		
-		AsyncCallback<ParserScript[]> callback = new AsyncCallback<ParserScript[]>() {
-			public void onFailure(Throwable e) {
-				tusachView.setErrorMessage("Error loading parser scripts. " + e.getMessage());
-			}
-			
-			public void onSuccess(ParserScript[] scripts) {
-				tusachView.setInfoMessage("Loaded " + scripts.length + " parser scripts");
-				currentScripts.clear();
-				currentScripts.addAll(Arrays.asList(scripts));
-				fireEvent(EventTypeEnum.Script, "load", currentScripts);				
-			}
-		};		
-		clientFactory.getBookService().getParserScripts(clientFactory.getUser().getSessionId(), callback);
-*/		
 	}
 
 	@Override
 	public void saveScript(final ParserScript script) {	
-/*		
-		final String oldId = script.getId();
-		AsyncCallback<ParserScript> callback = new AsyncCallback<ParserScript>() {
-			public void onFailure(Throwable caught) {
-				fireEvent(EventTypeEnum.Script, "update", script, caught.getMessage());								
-			}
-			
-			public void onSuccess(ParserScript savedScript) {
-				tusachView.setInfoMessage("Parser script saved.");
-				int index = -1;
-				for (int i=0; i<currentScripts.size(); i++) {
-					if (oldId != null && currentScripts.get(i).getId().equals(oldId)) {
-						index = i;
-						break;
-					}
-				}
-				if (index != -1) {
-					currentScripts.set(index, savedScript);
-				} else {
-					currentScripts.add(savedScript);
-				}	
-				fireEvent(EventTypeEnum.Script, "update", savedScript);
-			}
-		};		
-		clientFactory.getBookService().saveParserScript(clientFactory.getUser().getSessionId(), script, callback);
-*/		
 	}
 
 	@Override
 	public void deleteScript(final String scriptId) {
-/*		
-		AsyncCallback<Void> callback = new AsyncCallback<Void>() {
-			public void onFailure(Throwable caught) {
-				fireEvent(EventTypeEnum.Script, "delete", scriptId, caught.getMessage());								
-			}
-			
-			public void onSuccess(Void v) {
-				tusachView.setInfoMessage("Parser script deleted.");
-				int index = -1;
-				for (int i=0; i<currentScripts.size(); i++) {
-					if (currentScripts.get(i).getId().equals(scriptId)) {
-						index = i;
-						break;
-					}
-				}
-				if (index != -1) {
-					ParserScript deleteScript = currentScripts.remove(index);
-					fireEvent(EventTypeEnum.Script, "delete", deleteScript);
-				} 
-			}
-		};		
-		clientFactory.getBookService().deleteParserScript(clientFactory.getUser().getSessionId(), scriptId, callback);
-*/		
 	}
 	
 	private void fireEvent(EventTypeEnum type, String name, Object value) {

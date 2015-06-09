@@ -1,5 +1,6 @@
 package com.dv.gtusach.client;
 
+import com.dv.gtusach.client.model.User;
 import com.dv.gtusach.client.ui.GTusachView;
 import com.dv.gtusach.client.ui.GTusachViewImpl;
 import com.dv.gtusach.client.ui.LogonView;
@@ -9,12 +10,21 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 
 public class ClientFactoryImpl implements ClientFactory {
-	private static final EventBus eventBus = new SimpleEventBus();
-	private static final PlaceController placeController = new PlaceController(
-			eventBus);
-	private static final LogonView logonView = new LogonViewImpl();
-	private static final GTusachView mainView = new GTusachViewImpl();	
-	private static final IBookService bookService = new BookServiceImpl(eventBus); 
+	private final EventBus eventBus = new SimpleEventBus();
+	private final PlaceController placeController = new PlaceController(eventBus);
+	private final LogonView logonView = new LogonViewImpl();
+	private final GTusachView mainView = new GTusachViewImpl();	
+	private final IBookService bookService; 
+	private final User currentUser = new User("", "");
+
+	public ClientFactoryImpl() {
+		bookService = new BookServiceImpl(this);	
+	}
+	
+	@Override
+	public User getUser() {
+		return currentUser;
+	}
 	
 	@Override
 	public IBookService getBookService() {

@@ -37,87 +37,18 @@ import com.google.web.bindery.event.shared.EventBus;
 
 public class BookServiceImpl implements IBookService {
 	static Logger log = Logger.getLogger("BookServiceImpl");
-	private static final String COOKIE_ID = "thuvien-dv.sid";
-	private static final User currentUser = new User("", "");
-	private static int sessionTimeLeftSec = -1;
-	private static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
-	private Timer timer;
+	//private static final String COOKIE_ID = "thuvien-dv.sid";
+	//private static final User currentUser = new User("", "");
+	//private static int sessionTimeLeftSec = -1;
+	//private static DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.ISO_8601);
+	private ClientFactory clientFactory;
 	private MyAutoBeanFactory factory;
-	private EventBus eventBus;
-	private boolean rechargeRequired = false;
 	
-	public BookServiceImpl(EventBus eventBus) {
-		this.eventBus = eventBus;
+	public BookServiceImpl(ClientFactory clientFactory) {
+		this.clientFactory = clientFactory;
+		this.factory = GWT.create(MyAutoBeanFactory.class);
 	}
 	
-	public void init() {
-		log.info("Initalizing book service...");
-		if (timer != null && timer.isRunning()) {
-			timer.cancel();
-		}
-		timer = new Timer() {
-			@Override
-			public void run() {
-				if (getUser().isLogon()) {
-					if (rechargeRequired) {
-						rechargeRequired = false;
-						doRechargeSession();
-					} else {
-						validateSession();
-					}
-				}
-			}
-		};
-		timer.scheduleRepeating(60000);
-		
-		factory = GWT.create(MyAutoBeanFactory.class);
-		
-		String sid = Cookies.getCookie(COOKIE_ID);
-		if (sid != null && sid.length() > 0) {
-			try {								
-				// retrieve the user info from session id
-				RequestCallback cb = new RequestCallback() {
-					@Override
-					public void onResponseReceived(Request request, Response response) {
-						try {
-							if (response.getStatusCode() == 200) {
-								log.info("getUser response: " + response.getText());						
-								AutoBean<IUser> bean = AutoBeanCodex.decode(factory, IUser.class, response.getText());
-								User user = new User(bean.as());
-								currentUser.update(user);
-								log.info("User bean: " + user);									
-								// store in cookie
-						    Cookies.setCookie("sid", user.getSessionId());		
-						    
-								try {
-									eventBus.fireEvent(new PropertyChangeEvent(EventTypeEnum.Authentication, "login", user, null));			
-								} catch (Exception ex) {	
-									log.warning(ex.getMessage());			
-								}
-						    
-							} else {
-								log.warning("Error: " + response.getStatusText());
-						    Cookies.removeCookie("sid");;													
-							}
-						} catch (Exception ex) {
-							log.warning("Error: " + ex.getMessage());
-					    Cookies.removeCookie("sid");;													
-						}
-					}
-					@Override
-					public void onError(Request request, Throwable ex) {
-				    Cookies.removeCookie("sid");;													
-					}				
-				};
-				
-				String url = "/api/user/" + sid;
-				executeRequest(RequestBuilder.GET, URL.encode(url), null, cb);				
-			} catch (Exception ex) {
-				// ignore
-			}			
-		}		
-	}
-
 	@Override
 	public void getSites(final ICallback<List<String>> callback) {
 		RequestCallback cb = new RequestCallback() {
@@ -165,12 +96,7 @@ public class BookServiceImpl implements IBookService {
 						log.info("login response: " + response.getText());						
 						AutoBean<IUser> bean = AutoBeanCodex.decode(factory, IUser.class, response.getText());
 						User user = new User(bean.as());
-						currentUser.update(user);
-						log.info("User bean: " + user);	
-						
-						// store in cookie
-				    Cookies.setCookie("sid", user.getSessionId());					
-						
+						log.info("User bean: " + user);													
 						callback.onSuccess(user);												
 					} else {
 						log.warning("Error: " + response.getStatusText());
@@ -226,23 +152,16 @@ public class BookServiceImpl implements IBookService {
 			}				
 		};
 		
-		String url = "/api/logout/" + currentUser.getSessionId();
+		String url = "/api/logout/" + getUser().getSessionId();
 		executeRequest(RequestBuilder.GET, URL.encode(url), null, cb);
-		userHasLoggedOff();		
 	}
-	
-	private void userHasLoggedOff() {
-		log.info("user has logged off");
-		Cookies.removeCookie("sid");
-		currentUser.update(new User());
-		eventBus.fireEvent(new PropertyChangeEvent(EventTypeEnum.Authentication, "logout", getUser(), null));		
-	}
-	
+		
 	public User getUser() {
-		return currentUser;
+		return clientFactory.getUser();
 	}
 	
-	private void validateSession() {
+	@Override
+	public void validateSession(final ICallback<Integer> callback) {
 		RequestCallback cb = new RequestCallback() {
 			@Override
 			public void onResponseReceived(Request request, Response response) {
@@ -251,19 +170,19 @@ public class BookServiceImpl implements IBookService {
 						log.info("validateSession response: " + response.getText());
 						JSONWrapper root = new JSONWrapper(response.getText());
 						JSONWrapper value = root.get("sessionTimeRemainingSec");
+						int sessionTimeLeftSec = 0;
 						if (value != null) {
 							sessionTimeLeftSec = value.valueInt();
-						} else {
-							sessionTimeLeftSec = 0;
-						}
-						if (sessionTimeLeftSec <= 0) {
-							userHasLoggedOff();
-						}						
+						} 
+						callback.onSuccess(sessionTimeLeftSec);
 					} else {
 						log.warning("Error: " + response.getStatusText());
+						callback.onFailure(new Exception(response.getStatusText() 
+								+ "(" + response.getStatusCode() + ")"));
 					}
 				} catch (Exception ex) {
 					log.warning("Error: " + ex.getMessage());
+					callback.onFailure(ex);
 				}
 			}
 			@Override
@@ -271,11 +190,12 @@ public class BookServiceImpl implements IBookService {
 			}				
 		};
 		
-		String url = "/api/validate/" + currentUser.getSessionId();
+		String url = "/api/validate/" + getUser().getSessionId();
 		executeRequest(RequestBuilder.GET, URL.encode(url), null, cb);		
 	}
 	
-	private void doRechargeSession() {
+	@Override
+	public void rechargeSession(final ICallback<Integer> callback) {
 		RequestCallback cb = new RequestCallback() {
 			@Override
 			public void onResponseReceived(Request request, Response response) {
@@ -284,27 +204,27 @@ public class BookServiceImpl implements IBookService {
 						log.info("rechargeSession response: " + response.getText());
 						JSONWrapper root = new JSONWrapper(response.getText());
 						JSONWrapper value = root.get("sessionTimeRemainingSec");
+						int sessionTimeLeftSec = 0;
 						if (value != null) {
 							sessionTimeLeftSec = value.valueInt();
-						} else {
-							sessionTimeLeftSec = 0;
-						}
-						if (sessionTimeLeftSec <= 0) {
-							userHasLoggedOff();
-						}						
+						} 
+						callback.onSuccess(sessionTimeLeftSec);
 					} else {
 						log.warning("Error: " + response.getStatusText());
+						callback.onFailure(new Exception(response.getStatusText() 
+								+ "(" + response.getStatusCode() + ")"));
 					}
 				} catch (Exception ex) {
 					log.warning("Error: " + ex.getMessage());
+					callback.onFailure(ex);
 				}
 			}
 			@Override
 			public void onError(Request request, Throwable ex) {
 			}				
 		};
-		if (currentUser.getSessionId().length() != 0) {
-			String url = "/api/recharge/" + currentUser.getSessionId();
+		if (getUser().getSessionId().length() != 0) {
+			String url = "/api/recharge/" + getUser().getSessionId();
 			executeRequest(RequestBuilder.POST, URL.encode(url), null, cb);		
 		}
 	}
@@ -350,11 +270,11 @@ public class BookServiceImpl implements IBookService {
 				try {
 					if (response.getStatusCode() == 200) {
 						String jsonResponse = "{\"books\": " + response.getText() + "}";
-						log.info("getBooks response: +++" + jsonResponse + "+++");						
+						//log.info("getBooks response: +++" + jsonResponse + "+++");						
 						AutoBean<IBookList> bean = AutoBeanCodex.decode(factory, IBookList.class, jsonResponse);
 						for (IBook b: bean.as().getBooks()) {
 							list.add(new Book(b));
-							log.info("Found book: " + new Book(b));
+							//log.info("Found book: " + new Book(b));
 						}
 					} else {
 						throw new Exception(response.getStatusText() 
@@ -426,34 +346,26 @@ public class BookServiceImpl implements IBookService {
 		AutoBean<IBook> bean = factory.create(IBook.class, newBook);	
 		String payload = AutoBeanCodex.encode(bean).getPayload();
 		executeRequest(RequestBuilder.POST, URL.encode(url), payload, cb);
-		rechargeRequired = true;
 	}
 
 	@Override
 	public void abortBook(Book book, final ICallback<Void> callback) {
 		postBook("/api/book/abort", book, callback);
-		rechargeRequired = true;
 	}
 
 	@Override
 	public void resumeBook(Book book, final ICallback<Void> callback) {
 		postBook("/api/book/resume", book, callback);
-		rechargeRequired = true;
 	}
 
 	@Override
 	public void updateBook(Book book, final ICallback<Void> callback) {
 		postBook("/api/book/update", book, callback);
-		rechargeRequired = true;
 	}
 
 	@Override
 	public void deleteBook(Book book, final ICallback<Void> callback) {
 		postBook("/api/book/delete", book, callback);
-	}
-
-	public void rechargeSession() {
-		rechargeRequired = true;
 	}
 	
 	private void postBook(final String url, Book book, final ICallback<Void> callback) {
@@ -514,61 +426,6 @@ public class BookServiceImpl implements IBookService {
 			callback.onError(null, ex);
 		}		
 	}
-/*
-	private <T> void json2java(String json, List<T> javaList, T t) throws JSONException {
-		// expect an array
-		JSONArray arr = parseJSONArray(json);
-		for (int i=0; i<arr.size(); i++) {
-			JSONValue val = arr.get(i);
-			if (val.isObject() != null) {
-				T obj = null;
-				try {
-					obj = (T)t.getClass().newInstance();
-				} catch (Exception ex) {
-					throw new RuntimeException(ex);
-				}
-				json2java(val.isObject(), obj);
-				javaList.add(obj);
-			} else {
-				throw new JSONException("Invalid JSON array, expecting array of objects!");
-			}
-		}
-	}
-	
-	private void json2java(String json, Object javaObj) throws JSONException {
-		JSONObject jsonObj = parseJSONObject(json);
-		json2java(jsonObj, javaObj);
-	}
-	
-	private void json2java(JSONObject jsonObj, Object javaObj) throws JSONException {
-		Field[] fields = javaObj.getClass().getDeclaredFields();
-		for (Field field: fields) {
-			JSONValue value = jsonObj.get(field.getName());
-			if (value == null) {
-				continue;
-			}
-			
-			try {
-				Class type = field.getType();
-				if (type == Date.class) {
-					String dateStr = value.isString().stringValue();
-					field.set(javaObj, dateTimeFormat.parse(dateStr));
-				} else if (type == Boolean.TYPE) {
-					field.set(javaObj, value.isBoolean().booleanValue());				
-				} else if (type == Long.TYPE || type == Integer.TYPE || type == Short.TYPE) {
-					field.set(javaObj, (long)value.isNumber().doubleValue());				
-				} else if (type == Float.TYPE || type == Double.TYPE) {
-					field.set(javaObj, value.isNumber().doubleValue());				
-				}	else if (type == String.class) {
-					field.set(javaObj, value.isString().stringValue());
-				}
-			} catch (Exception ex) {
-				throw new JSONException("Error extracting value for field: " + field.getName() 
-						+ ". " + ex.getMessage());
-			}
-		}
-	}
-*/
 	
 	private JSONArray parseJSONArray(String json) throws JSONException {
 		JSONArray jsonArray;

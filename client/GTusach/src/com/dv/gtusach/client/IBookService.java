@@ -8,14 +8,13 @@ import com.dv.gtusach.client.model.SystemInfo;
 import com.dv.gtusach.client.model.User;
 import com.google.web.bindery.event.shared.EventBus;
 
-public interface IBookService {
-	void init();
-	
+public interface IBookService {	
 	void getSites(ICallback<List<String>> callback);
 	User getUser();
 	void login(String username, String password, ICallback<User> callback);
 	void logout();
-	void rechargeSession();
+	void rechargeSession(ICallback<Integer> callback);
+	void validateSession(ICallback<Integer> callback);
 	
 	void getSystemInfo(ICallback<SystemInfo> callback);
 	
