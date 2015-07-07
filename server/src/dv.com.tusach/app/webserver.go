@@ -54,6 +54,20 @@ func main() {
 
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
+	api.Use(&rest.CorsMiddleware{
+		RejectNonCorsRequests: false,
+		OriginValidator: func(origin string, request *rest.Request) bool {
+			log.Printf("OriginValidator: %s\n", origin)
+			//return origin == "http://my.other.host"
+			return true
+		},
+		AllowedMethods: []string{"GET", "POST", "PUT"},
+		AllowedHeaders: []string{
+			"Accept", "Content-Type", "X-Custom-Header", "Origin"},
+		AccessControlAllowCredentials: true,
+		AccessControlMaxAge:           3600,
+	})
+	
 	router, err := rest.MakeRouter(
 		&rest.Route{"GET", "/systeminfo", GetSystemInfo},
 		&rest.Route{"GET", "/sites", GetSites},
@@ -518,4 +532,69 @@ func loadData() {
 	}
 
 	// init parser scripts
+}
+
+type LogonUser struct {
+	maker.User
+	TimeLeftInSec int
+}
+
+func NewLogonUser(name string) LogonUser {
+	user := LogonUser{}
+	user.Name = name
+	user.SessionId = strconv.FormatInt(time.Now().UnixNano(), 10)
+	user.TimeLeftInSec = 30 * 60
+	return user
+}
+
+type SessionManager struct {
+	sessions map[string]LogonUser
+}
+
+func NewSessionManager() *SessionManager {
+	sm := SessionManager{}
+	sm.sessions = make(map[string]LogonUser)
+	return &sm
+}
+
+func (s *SessionManager) IsLogon(sessionId string) bool {
+	user, exists := s.sessions[sessionId]
+	if exists && user.TimeLeftInSec > 0 {
+		return true
+	}
+	return false
+}
+
+func (s *SessionManager) Login(name string, password string) (*LogonUser, error) {
+	// validate user/password
+
+	newUser := NewLogonUser(name)
+	s.sessions[newUser.SessionId] = newUser
+	return &newUser, nil
+}
+
+func (s *SessionManager) Logout(sessionId string) *LogonUser {
+	user, exist := s.sessions[sessionId]
+	if exist {
+		delete(s.sessions, sessionId)
+		return &user
+	}
+	return nil
+}
+
+func (s *SessionManager) RenewSession(sessionId string) {
+	user, exist := s.sessions[sessionId]
+	if exist && user.TimeLeftInSec > 0 {
+		user.TimeLeftInSec = 30 * 60
+	}
+}
+
+func (s *SessionManager) UpdateSessionTime(numSecs int) {
+	for id, user := range s.sessions {
+		user.TimeLeftInSec -= numSecs
+		if user.TimeLeftInSec <= 0 {
+			log.Printf("Session %s(%s) has expired, removed from cache\n", user.Name, id)
+			delete(s.sessions, id)
+		}
+	}
 }

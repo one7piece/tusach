@@ -1,0 +1,46 @@
+<polymer-element name="main-app">
+<template>
+  <link rel="stylesheet" href="main-app.css">
+
+<core-header-panel flex>
+
+<core-toolbar class="medium-tall">
+  <paper-icon-button id="navicon" icon="menu"></paper-icon-button>
+  <span flex>Tu Sach Kiem Hiep</span>
+  <template if="{{!isLoggedIn}}">
+    <paper-input-decorator id="username" label="Username">
+      <input is="core-input" value="{{username}}">
+    </paper-input-decorator>
+    <paper-input-decorator id="password" label="Password">
+      <input is="core-input" type="password" value="{{password}}">
+    </paper-input-decorator>
+    <paper-icon-button icon="arrow-forward" title="Sign in" style="color: white;" on-click="{{login}}">
+    </paper-icon-button>
+  </template>
+
+  <paper-tabs class="bottom fit" selected="{{selectedIndex}}" self-end on-core-select="{{tabSelectHandler}}">
+    <paper-tab>Bookshelves</paper-tab>
+    <paper-tab>Create Book</paper-tab>
+    <paper-tab>About</paper-tab>
+  </paper-tabs>
+
+</core-toolbar>
+
+<div layout horizontal center-center fit>
+  <core-animated-pages id="pages" selected="{{selectedIndex}}" valueattr="hash"
+        transitions="slide-from-right">
+    <section layout vertical center-center hash="bookShelves">
+      <div>Bookshelves</div>
+    </section>
+    <section layout vertical center-center hash="createBook">
+      <div>Create Book</div>
+    </section>
+    <section layout vertical center-center hash="about">
+      <div>About</div>
+    </section>
+  </core-animated-pages>
+</div>
+
+</core-header-panel>
+</template>
+</polymer-element>

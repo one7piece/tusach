@@ -5,7 +5,6 @@ import (
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	"errors"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	//"golang.org/x/net/html"
 	"encoding/json"

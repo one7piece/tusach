@@ -1,0 +1,7 @@
+{
+	"serverPath" : "c:/dev/dv/tusach/client/tusachdart/build/web",
+	"libraryPath" : "c:/dev/dv/library",
+	"dbFilename" : "c:/dev/dv/library/tusach.db",
+	"ServerBindPort" : 8888
+}
+	

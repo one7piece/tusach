@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	//"golang.org/x/net/html"
 	"encoding/json"
 	"io/ioutil"
 	"os"

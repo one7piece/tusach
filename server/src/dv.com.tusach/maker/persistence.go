@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"dv.com.tusach/util"
 	"errors"
-	_ "github.com/mattn/go-sqlite3"
 	"io/ioutil"
 	"log"
 	"os"
@@ -25,7 +24,7 @@ func InitDB() {
 	log.Printf("opening database %s\n", util.GetConfiguration().DBFilename)
 	_db, err := sql.Open("sqlite3", util.GetConfiguration().DBFilename)
 	if err != nil {
-		log.Fatal("failed to open databse: " + util.GetConfiguration().DBFilename)
+		log.Fatal("failed to open databse: " + util.GetConfiguration().DBFilename + ": " + err.Error())
 		panic(err)
 	}
 	db = _db
