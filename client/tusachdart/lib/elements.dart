@@ -12,6 +12,8 @@ export 'package:core_elements/core_scaffold.dart';
 export 'package:core_elements/core_toolbar.dart';
 export 'package:core_elements/core_dropdown.dart';
 export 'package:core_elements/core_item.dart';
+export 'package:core_elements/core_tooltip.dart';
+export 'package:core_elements/core_list_dart.dart';
 export 'package:core_elements/roboto.dart';
 export 'package:core_elements/core_header_panel.dart';
 export 'package:core_elements/core_animated_pages.dart';

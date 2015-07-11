@@ -1,11 +1,21 @@
 :host-context(body) {
   height: 100%;
   width: 100%;
+  font-family: "RobotoDraft";
+  font-weight: 300;
+  font-size: 12px;
+}
+
+:host /deep/ .title {
+  font-size: 16px;
+  font-style: bold;
+}
+
+:host /deep/ core-list-dart {
+  height: 100%;
 }
 
 :host {
-  font-family: "RobotoDraft";
-  font-weight: 300;
 }
 
 :host /deep/ core-header-panel {
@@ -63,5 +73,6 @@
 }
 
 :host /deep/ core-animated-pages section {
-  background-image: url("/images/background.jpg")
+  background-image: url("/images/background.jpg");
 }
+

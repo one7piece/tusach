@@ -9,8 +9,11 @@ import 'dart:html';
 import 'dart:js';
 import 'package:polymer/polymer.dart';
 import 'package:route_hierarchical/client.dart';
+import 'dart:convert';
 import 'elements.dart';
 import 'package:tusachdart/login_manager.dart';
+import 'package:tusachdart/abstract_page.dart';
+import 'package:tusachdart/bookshelves_list.dart';
 
 /// Element representing the entire app. There should only be one of
 /// these in existence.
@@ -21,6 +24,7 @@ class MainApp extends PolymerElement {
   @observable int selectedIndex;
   @observable String username;
   @observable String password;
+  @observable String errorMessage;
 
   /// The list of pages in our app.
   final List<String> pages = const ['bookShelves', 'createBook', 'About'];
@@ -34,30 +38,27 @@ class MainApp extends PolymerElement {
   CoreAnimatedPages get corePages => $['pages'];
   CoreMenu get menu => $['menu'];
   BodyElement get body => document.body;
+  CoreList get bookList => document.querySelector('* /deep/ #bookList');
 
   domReady() {
     print("main-app domready");
-    // Set up the routes for all the pages.
-    //for (var page in pages) {
-    //router.root.addRoute(name: page, path: page, defaultRoute: false, enter: enterRoute);
-    //}
-    //router.listen();
-  }
-/*
-  /// Updates [selectedPage] and the current route whenever the route changes.
-  void routeChanged() {
-    print("routeChanged: $selectedIndex");
-    if (selectedIndex >= 0) {
-      router.go(pages[selectedIndex], {});
-    }
+    shadowRoot.querySelector('core-header-panel').onKeyUp.listen((e) {
+      if (e.keyCode == KeyCode.ENTER) {
+        loginHandler(e);
+      }
+    });
+    bookList.updateSize(); // required for core-list-dart
   }
 
-  /// Updates [route] whenever we enter a new route.
-  void enterRoute(RouteEvent e) {
-    print("enterRoute: ${e.path}");
+  void loginHandler(Event e) {
+    print("loginHandler - username: $username, password:$password");
+    if (username == null || username.isEmpty || password == null || password.isEmpty) {
+      errorMessage = "User name or password cannot be empty";
+      return;
+    }
+    errorMessage = "";
+    loginManager.login(username, password);
   }
-*/
-  void login() {}
 
   void userHasLogOn() {
     isLoggedIn = loginManager.isLoggedIn;
@@ -66,5 +67,6 @@ class MainApp extends PolymerElement {
 
   void tabSelectHandler() {
     print("tabSelectHandler: $selectedIndex");
+    bookList.updateSize(); // required for core-list-dart
   }
 }
