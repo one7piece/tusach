@@ -1,0 +1,14 @@
+<div class="panel-bookshelf" flex>
+	<md-grid-list
+			md-cols-sm="2" md-cols-md="4" md-cols-lg="6" md-cols-gt-lg="8"
+			md-row-height="100px"
+			md-gutter="4px" md-gutter-gt-sm="4px" >
+		<md-grid-tile ng-repeat="book in bookshelf.books"
+									md-colspan="1">
+			<md-button ng-click="bookshelf.select(book)" aria-label="{{book.title}}">
+				<img src="/images/book.png">
+			</md-button>
+			<md-grid-tile-footer layout-align="center" class="grid-book-title">{{book.titleSummary}}</md-grid-tile-footer>
+		</md-grid-tile>
+	</md-grid-list>
+</div>

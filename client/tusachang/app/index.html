@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>PCP-100</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,500,700,400italic'>
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+
+  <body ng-app="tusachangApp" ng-controller="MainCtrl">
+    <!--[if lte IE 8]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <div>
+      <md-toolbar layout="column">
+        <div flex layout="row" layout-align="start center">
+          <div flex class="title">Tu Sach Kiem Hiep</div>
+          <div layout="row" layout-align="end center">
+            <md-icon md-svg-icon="person"></md-icon>
+            <md-input-container class="toolbar-username">
+              <label>User Name</label>
+              <input type="text">
+            </md-input-container>
+            <md-input-container class="toolbar-password">
+              <label>Password</label>
+              <input type="password">
+            </md-input-container>
+            <md-button class="toolbar-button">
+              <md-tooltip>Login</md-tooltip>
+              <md-icon md-svg-icon="login" ></md-icon>
+            </md-button>
+          </div>
+        </div>
+
+        <md-tabs md-selected="selectedIndex" flex md-dynamic-height md-border-bottom>
+          <md-tab label="Bookshelf" ui-sref="bookshelf">
+          </md-tab>
+          <md-tab label="Create Book" ui-sref="createBook">
+          </md-tab>
+        </md-tabs>
+
+      </md-toolbar>
+
+      <div ui-view></div>
+    </div>
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/angular-touch/angular-touch.js"></script>
+    <script src="bower_components/angular-aria/angular-aria.js"></script>
+    <script src="bower_components/angular-material/angular-material.js"></script>
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+        <!-- build:js({.tmp,app}) scripts/scripts.js -->
+        <script src="scripts/app.js"></script>
+        <script src="scripts/services/book-service.js"></script>
+        <script src="scripts/controllers/main.js"></script>
+        <script src="scripts/controllers/bookshelf.js"></script>
+        <script src="scripts/controllers/bookdetail.js"></script>
+        <!-- endbuild -->
+</body>
+</html>

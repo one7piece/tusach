@@ -1,0 +1,165 @@
+html, body {
+  font-family: 'Roboto', sans-serif;
+  font-size:16px;
+  height:100%;
+  margin: 0px;
+  padding: 0px;
+  overflow: visible;
+}
+
+.title {
+  font-size:24px;
+}
+
+.menu {
+  background-color: transparent;
+  border: none;
+  height: 38px;
+  margin: 16px;
+  width: 36px;
+}
+
+/* Primary content area */
+
+#content {
+  overflow: hidden;
+}
+
+#content  {
+  padding-left: 40px;
+  padding-right: 40px;
+  padding-top: 5px;
+}
+
+#content .md-button.contact {
+  background-color: transparent;
+  border: none;
+  width: 48px;
+  height: 48px;
+  margin: 8px auto 16px 0;
+  position: absolute;
+  top: 10px;
+  right: 40px;
+}
+
+#content .md-button.contact > md-icon {
+  fill:black;
+  width:36px;
+  height:36px;
+}
+
+md-button.menuBtn > md-icon {
+  fill:white;
+  width:24px;
+  height:24px;
+}
+
+#content .md-button.contact:active > md-icon {
+  background-color: #dadada;
+  border-radius: 75%;
+  padding:4px;
+  transition: all 100ms ease-out 30ms;
+}
+
+#content img {
+  display: block;
+  height: auto;
+  max-width: 500px;
+}
+
+/* Utils */
+
+.content-wrapper {
+  position: relative;
+}
+
+
+md-bottom-sheet  md-icon {
+  margin-right:20px;
+}
+
+span.name {
+  font-weight: bold;
+  font-size:1.1em;
+  padding-left:5px;
+}
+
+.border-red {
+	border-style: solid;
+	border-width: 2px;
+	border-color: red;
+}
+
+.border-cyan {
+	border-style: solid;
+	border-width: 2px;
+	border-color: cyan;
+}
+
+.border-yellow {
+	border-style: solid;
+	border-width: 2px;
+	border-color: yellow;
+}
+
+.panel-main {
+	width: 90%;
+	margin: 20px;
+	background-color: white;
+	border-radius: 5px;
+	-webkit-user-select: none;
+  overflow: auto;
+}
+
+.toolbar-button {
+  min-width: 30px;
+}
+
+div[class^="panel-"] {
+	margin-top: 20px;
+	margin-bottom: 20px;
+  overflow : auto;
+}
+
+span[class^="errorMessage-"] {
+	color: red;
+	margin-bottom: 20px;
+}
+
+span[class^="infoMessage-"] {
+	color: blue;
+	margin-bottom: 20px;
+}
+
+md-input-container[class^="toolbar-"] {
+  font-size:14px;
+  width: 100px;
+	color: white;
+}
+
+md-input-container[class^="field-"], div[class^="field-"] {
+  width: 80%;
+}
+
+input[readonly] {
+	color: blue;
+}
+
+md-input-container .md-input {
+  border-color: blue;
+}
+
+.grid-book-title {
+  background-color: transparent;
+  color: blue;
+  height: 35px;
+}
+
+md-bottom-sheet > .md-subheader {
+  font-size: 18px;
+  line-height: 25px;
+}
+
+md-bottom-sheet md-input-container {
+  padding-bottom: 5px;
+}
