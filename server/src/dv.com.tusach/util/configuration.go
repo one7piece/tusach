@@ -15,6 +15,9 @@ type Configuration struct {
 	ServerBindPort    int    `json:serverBindPort`
 	MaxActionBooks    int    `json:maxActiveBooks`
 	SupportedSites    string `json:supportedSites`
+	ProxyURL	  			string `json:proxyURL`
+	ProxyUsername	  	string `json:proxyUsername`
+	ProxyPassword	  	string `json:proxyPassword`
 }
 
 var configFile string

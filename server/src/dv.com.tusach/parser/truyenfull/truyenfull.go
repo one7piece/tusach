@@ -52,8 +52,8 @@ func Validate(url string) (string, error) {
 	}
 
 	m := map[string]string{"validated": strconv.Itoa(validated)}
-	m["batchSize"] = "50"
-	m["batchDelaySec"] = "10"
+	m["batchSize"] = "100"
+	m["batchDelaySec"] = "1"
 	m["url"] = "http://truyenfull.vn"
 	json, _ := json.Marshal(m)
 	return "\nparser-output:" + string(json) + "\n", nil

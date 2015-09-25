@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"dv.com.tusach/util"
 	"errors"
 	"flag"
 	"io/ioutil"
@@ -10,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"golang.org/x/net/proxy"
 )
 
 var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"}
@@ -80,6 +82,24 @@ func findChapterTitle(html string, restr string) string {
 	return title
 }
 
+func setupHttpClient(timeout time.Duration) (*http.Client, error) {
+	proxyUrl := util.GetConfiguration().ProxyURL
+	if (proxyUrl == "") {
+		return &http.Client{Timeout: timeout}, nil
+	}
+	log.Println("Using proxy URL: " + proxyUrl)
+	proxyAuth := proxy.Auth{User: util.GetConfiguration().ProxyUsername,
+		Password: util.GetConfiguration().ProxyPassword}
+	proxyDialer, err := proxy.SOCKS5("tcp", proxyUrl, &proxyAuth, proxy.Direct)
+	if (err != nil) {
+		log.Println("sock5 proxy creation error!", err.Error())
+		return nil, err
+	}
+	transport := &http.Transport{Dial: proxyDialer.Dial}
+	client := &http.Client{Timeout: timeout, Transport: transport}
+	return client, nil
+}
+
 func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries int,
 	headerMap map[string]string, formMap map[string]string) ([]byte, error) {
 	var result []byte
@@ -91,9 +111,12 @@ func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries in
 		timeout = time.Duration(10 * time.Second)
 	}
 
-	client := http.Client{Timeout: timeout}
+	client, err := setupHttpClient(timeout)
+	if err != nil {
+		return nil, err
+	}
+
 	var req *http.Request
-	var err error
 	if formMap != nil {
 		// set form data
 		form := url.Values{}
