@@ -1,14 +1,16 @@
 package main
 
 import (
-	"bytes"
+	//"bytes"
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	//"golang.org/x/net/html"
+	"encoding/json"
 	"io/ioutil"
+	"strconv"
 	"os"
 	"strings"
 )
@@ -48,7 +50,7 @@ func Validate(url string) (string, error) {
 		validated = 1
 	}
 
-	m := map[string]string{"validated": strconv.Itoa(validated)}
+	m := map[string]string{"validated": strconv.Itoa(validated)}	
 	m["batchSize"] = "20"
 	m["batchDelaySec"] = "10"
 	m["url"] = "http://truyenyy.com"
@@ -105,9 +107,9 @@ func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	}
 	textStr := ""
 	*chapterTitle = ""
-	var buffer bytes.Buffer
+	//var buffer bytes.Buffer
 	doc.Find("div#id_noidung_chuong").Each(func(i int, s *goquery.Selection) {
-		textStr, _ := s.Html()
+		textStr, _ = s.Html()
 	})
 
 	chapterHtml := ""

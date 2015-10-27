@@ -15,11 +15,6 @@ import (
 	"time"
 )
 
-type SessionUser struct {
-	user         maker.User
-	expiredInSec int
-}
-
 type MapData struct {
 	data map[string]string `json:data`
 }
@@ -28,10 +23,8 @@ var users []maker.User
 var books []maker.Book
 var scripts []maker.ParserScript
 var eventManagers map[int]util.EventManager
-var sessions map[string]maker.User
-var sessionTimeLeftSecs map[string]int
-
 const sessionExpiredTimeSec = 60 * 60
+var sessionManager *SessionManager
 
 func main() {
 	//f, err := os.OpenFile("webserver.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -49,8 +42,9 @@ func main() {
 
 	// create channels map
 	eventManagers = make(map[int]util.EventManager)
-	sessions = make(map[string]maker.User)
-	sessionTimeLeftSecs = make(map[string]int)
+	sessionManager = NewSessionManager()
+	//sessions = make(map[string]maker.User)
+	//sessionTimeLeftSecs = make(map[string]int)
 
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
@@ -72,7 +66,7 @@ func main() {
 		&rest.Route{"GET", "/systeminfo", GetSystemInfo},
 		&rest.Route{"GET", "/sites", GetSites},
 		&rest.Route{"GET", "/books/:id", GetBooks},
-		&rest.Route{"POST", "/book/:cmd", UpdateBook},
+		&rest.Route{"POST", "/book/:session/:cmd", UpdateBook},
 		&rest.Route{"POST", "/login", Login},
 		&rest.Route{"POST", "/logout/:session", Logout},
 		&rest.Route{"GET", "/user/:session", GetUser},
@@ -96,14 +90,7 @@ func main() {
 	ticker := time.NewTicker(time.Second * 60)
 	go func() {
 		for range ticker.C {
-			for key, value := range sessionTimeLeftSecs {
-				sessionTimeLeftSecs[key] = value - 60
-				if sessionTimeLeftSecs[key] <= 0 {
-					log.Printf("Session %s[%+v] has expired!\n", key, sessions[key])
-					delete(sessions, key)
-					delete(sessionTimeLeftSecs, key)
-				}
-			}
+			sessionManager.UpdateSessionTime(60)
 		}
 	}()
 
@@ -179,30 +166,24 @@ func Login(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	user := getUser(dummy.Name)
-	if user.Name == "" || user.Password != dummy.Password {
-		log.Printf("Wrong user name or password: '%s'/'%s'-'%s'/'%s'\n", user.Name, user.Password, dummy.Name, dummy.Password)
-		rest.Error(w, "Wrong user name or password", 400)
+	logonUser, err := sessionManager.Login(dummy.Name, dummy.Password)
+	if err != nil {
+		rest.Error(w, err.Error(), 400)
 		return
 	}
-	log.Println("login user: " + user.Name)
-	sessionId := strconv.FormatInt(time.Now().UnixNano(), 10)
-	user.SessionId = sessionId
-	user.Password = ""
-	sessions[sessionId] = user
-	sessionTimeLeftSecs[sessionId] = sessionExpiredTimeSec
-	w.WriteJson(user)
+
+	log.Println("login user: " + logonUser.Name)
+	w.WriteJson(logonUser)
 }
 
 func Logout(w rest.ResponseWriter, r *rest.Request) {
 	sessionId := r.PathParam("id")
 	valid := "0"
 
-	if _, ok := sessions[sessionId]; ok {
+	logonUser := sessionManager.Logout(sessionId)
+	if logonUser != nil {
 		valid = "1"
 	}
-	delete(sessions, sessionId)
-	delete(sessionTimeLeftSecs, sessionId)
 	w.WriteJson(map[string]string{"status": valid})
 }
 
@@ -218,8 +199,7 @@ func GetUser(w rest.ResponseWriter, r *rest.Request) {
 
 func ValidateSession(w rest.ResponseWriter, r *rest.Request) {
 	sessionId := r.PathParam("session")
-	secs, ok := sessionTimeLeftSecs[sessionId]
-	if !ok {
+	if !sessionManager.IsLogon(sessionId) {
 		w.WriteJson(map[string]string{"sessionTimeRemainingSec": "0"})
 	} else {
 		w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(secs)})
@@ -228,9 +208,9 @@ func ValidateSession(w rest.ResponseWriter, r *rest.Request) {
 
 func RechargeSession(w rest.ResponseWriter, r *rest.Request) {
 	sessionId := r.PathParam("session")
-	secs, ok := sessionTimeLeftSecs[sessionId]
-	if ok && secs > 0 {
-		sessionTimeLeftSecs[sessionId] = sessionExpiredTimeSec
+	secs := 0
+	if sessionManager.IsLogon(sessionId) {
+		sessionManager.RenewSession(sessionId)
 		secs = sessionExpiredTimeSec
 	}
 	w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(secs)})
@@ -273,10 +253,16 @@ func GetBooks(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
+	sessionId := r.PathParams("session")
 	op := r.PathParam("cmd")
-	log.Printf("UpdateBook: %s", op)
+	log.Printf("UpdateBook: session:%s, op:%s", sessionId, op)
 	if op != "create" && op != "abort" && op != "resume" && op != "update" && op != "delete" {
 		rest.Error(w, "Invalid op value: "+op, 400)
+		return
+	}
+	// validate session
+	if !sessionManager.IsLogon(sessionId) {
+		rest.Error(w, "No permission", 400)
 		return
 	}
 
@@ -461,7 +447,6 @@ func (sink EventSink) HandleEvent(event util.EventData) {
 }
 
 func reloadBook(bookId int) {
-
 	updatedBook, err := maker.LoadBook(bookId)
 	if err != nil {
 		log.Printf("Error loading book: %d - %s\n", bookId, err.Error())
@@ -543,7 +528,7 @@ func NewLogonUser(name string) LogonUser {
 	user := LogonUser{}
 	user.Name = name
 	user.SessionId = strconv.FormatInt(time.Now().UnixNano(), 10)
-	user.TimeLeftInSec = 30 * 60
+	user.TimeLeftInSec = sessionExpiredTimeSec
 	return user
 }
 
@@ -567,6 +552,11 @@ func (s *SessionManager) IsLogon(sessionId string) bool {
 
 func (s *SessionManager) Login(name string, password string) (*LogonUser, error) {
 	// validate user/password
+	user := getUser(name)
+	if user.Name == "" || user.Password != password {
+		log.Printf("Wrong user name or password: '%s'/'%s'-'%s'/'%s'\n", user.Name, user.Password, name, password)
+		return nil, errors.New("Wrong user name or password")
+	}
 
 	newUser := NewLogonUser(name)
 	s.sessions[newUser.SessionId] = newUser
@@ -585,7 +575,7 @@ func (s *SessionManager) Logout(sessionId string) *LogonUser {
 func (s *SessionManager) RenewSession(sessionId string) {
 	user, exist := s.sessions[sessionId]
 	if exist && user.TimeLeftInSec > 0 {
-		user.TimeLeftInSec = 30 * 60
+		user.TimeLeftInSec = sessionExpiredTimeSec
 	}
 }
 
