@@ -45,9 +45,10 @@ func ListDir(root string, filesOnly bool) ([]string, error) {
 	rootPath := strings.TrimRight(root, "/")
 
 	filepath.Walk(root, func(path string, f os.FileInfo, _ error) error {
-		//fmt.Printf("walk: path=%s, filename=%s\n", path, f.Name())
+		//log.Printf("walk: rootPath=%s, path=%s, filename=%s\n", rootPath, path, f.Name())
+		path = strings.Replace(path, "\\", "/", -1);
 		index := strings.LastIndex(path, "/")
-		if path == rootPath || path[0:index] == rootPath {
+		if (path == rootPath) || (index != -1 && path[0:index] == rootPath) {
 			if !f.IsDir() || !filesOnly {
 				filenames = append(filenames, f.Name())
 			}

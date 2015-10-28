@@ -342,7 +342,7 @@ public class BookServiceImpl implements IBookService {
 			}				
 		};
 		
-		String url = "/api/book/create";
+		String url = "/api/book/" + getUser().getSessionId() + "/create";
 		AutoBean<IBook> bean = factory.create(IBook.class, newBook);	
 		String payload = AutoBeanCodex.encode(bean).getPayload();
 		executeRequest(RequestBuilder.POST, URL.encode(url), payload, cb);
@@ -350,22 +350,22 @@ public class BookServiceImpl implements IBookService {
 
 	@Override
 	public void abortBook(Book book, final ICallback<Void> callback) {
-		postBook("/api/book/abort", book, callback);
+		postBook("/api/book/" + getUser().getSessionId() + "/abort", book, callback);
 	}
 
 	@Override
 	public void resumeBook(Book book, final ICallback<Void> callback) {
-		postBook("/api/book/resume", book, callback);
+		postBook("/api/book/" + getUser().getSessionId() + "/resume", book, callback);
 	}
 
 	@Override
 	public void updateBook(Book book, final ICallback<Void> callback) {
-		postBook("/api/book/update", book, callback);
+		postBook("/api/book/" + getUser().getSessionId() + "/update", book, callback);
 	}
 
 	@Override
 	public void deleteBook(Book book, final ICallback<Void> callback) {
-		postBook("/api/book/delete", book, callback);
+		postBook("/api/book/" + getUser().getSessionId() + "/delete", book, callback);
 	}
 	
 	private void postBook(final String url, Book book, final ICallback<Void> callback) {

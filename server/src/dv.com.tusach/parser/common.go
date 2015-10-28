@@ -11,10 +11,82 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/proxy"
+	"encoding/json"
+	"bytes"
 )
 
 var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"}
+
+type SiteParser interface {
+	Validate(url string) (string, error)	
+	Parse(chapterUrl string, inputFile string, outputFile string) (string, error)
+	GetChapterHtml(rawHtml string, chapterTitle *string) (string, error)
+	GetNextPageUrl(rawHtml string, html string) (string, error)
+}
+
+func Execute(p SiteParser) (string, error) {
+	var configFile string
+	var op string
+	var url string
+	var inputFile string
+	var outputFile string
+
+	err := ReadArgs(&configFile, &op, &url, &inputFile, &outputFile)
+	if err != nil {
+		return "", err
+	}
+
+	// load configuration
+	util.LoadConfig(configFile)
+
+	if op == "v" {
+		return p.Validate(url)
+	} else {
+		return p.Parse(url, inputFile, outputFile)
+	}
+}
+
+func DefaultParse(siteParser SiteParser, chapterUrl string, inputFile string, outputFile string, timeoutSec int, numTries int) (string, error) {
+	// load the request
+	headers := map[string]string{}
+	form := map[string]string{}
+	responseBytes, err := ExecuteRequest("GET", chapterUrl, timeoutSec, numTries, headers, form)
+	if err != nil {
+		return "", err
+	}
+	rawHtml := string(responseBytes)
+	// save raw file
+	err = util.SaveFile(inputFile, responseBytes)
+	if err != nil {
+		return "", errors.New("Error saving file: " + inputFile + ". " + err.Error())
+	}
+
+	chapterTitle := ""
+	html, err := siteParser.GetChapterHtml(rawHtml, &chapterTitle)
+	if err != nil {
+		return "", errors.New("Error parsing chapter content from: " + inputFile + ". " + err.Error())
+	}
+	if html == "" {
+		return "", errors.New("Error parsing chapter content from: " + inputFile + ". No data.")
+	}
+
+	nextPageUrl, err := siteParser.GetNextPageUrl(rawHtml, html)
+	if err != nil {
+		return "", errors.New("Error parsing nextPageUrl from: " + inputFile + ". " + err.Error())
+	}
+
+	// write to file
+	err = util.SaveFile(outputFile, []byte(html))
+	if err != nil {
+		return "", errors.New("Error writing to file: " + outputFile + ". " + err.Error())
+	}
+
+	m := map[string]string{"chapterTitle": chapterTitle, "nextPageUrl": nextPageUrl}
+	json, _ := json.Marshal(m)
+	return "\nparser-output:" + string(json) + "\n", nil
+}
 
 func ReadArgs(configFile *string, op *string, url *string, inputFile *string, outputFile *string) error {
 	flag.StringVar(configFile, "configFile", "", "configFile")
@@ -183,3 +255,12 @@ func GetIndexOf(source string, search string, offset int) int {
 	}
 	return index
 }
+
+func ExtractNodeContents(sel *goquery.Selection, buffer *bytes.Buffer) {
+	sel.Contents().Each(func(i int, s *goquery.Selection) {
+		if s.Text() != "" {
+			buffer.WriteString("<br/>")
+			buffer.WriteString(s.Text())
+		}
+	})	
+} 

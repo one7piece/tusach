@@ -8,10 +8,10 @@ import (
 )
 
 func TestPackage(t *testing.T) {
-	util.LoadConfig("/home/dvan/vshared/dv/tusach/server/tusach-config.json")
+	util.LoadConfig("/dev/dv/tusach/server/config-test-win.json")
 
-	url := "http://www.tangthuvien.vn/forum/showthread.php?t=60126"
-	name := "tangthuvien"
+	url := "http://truyencv.com/doc-bo/chuong-2/"
+	name := "truyencv"
 	fmt.Println("executing validate command: " + util.GetParserPath() + "/" + name)
 	cmd := exec.Command(util.GetParserPath()+"/"+name,
 		"-configFile="+util.GetConfigFile(), "-op=v",
@@ -20,22 +20,13 @@ func TestPackage(t *testing.T) {
 	fmt.Println("command output: " + string(out))
 	if err != nil {
 		fmt.Println("Error validating url. " + err.Error())
-		return
 	}
 
-	bookPath := util.GetBookPath(3)
-	/*
-		url := "http://www.tangthuvien.vn/forum/showthread.php?t=60126"
-		site := maker.GetBookSite(url)
-		data, err := site.ExecuteRequest(url)
-		if err != nil {
-			t.Error(err)
-		} else {
-			util.SaveFile(bookPath+"/OEBPS/chapter0001-raw.html", data)
-		}
-	*/
+	bookPath := util.GetBookPath(9999)
 
-	str, err := Parse(bookPath+"/OEBPS/chapter0001-raw.html", bookPath+"/OEBPS/chapter0001.html")
+	site := Truyencv{}
+	
+	str, err := site.Parse(url, bookPath+"/OEBPS/chapter0001-raw.html", bookPath+"/OEBPS/chapter0001.html")
 	if err != nil {
 		t.Error(err)
 	}

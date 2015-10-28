@@ -4,9 +4,8 @@ import (
 	"bytes"
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
-	"errors"
+	//"errors"
 	"github.com/PuerkitoBio/goquery"
-	//"golang.org/x/net/html"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -16,35 +15,20 @@ import (
 )
 
 func main() {
-	var configFile string
-	var op string
-	var url string
-	var inputFile string
-	var outputFile string
-
-	err := parser.ReadArgs(&configFile, &op, &url, &inputFile, &outputFile)
+	site := Truyencv{}
+	str, err := parser.Execute(site)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
-	}
-
-	// load configuration
-	util.LoadConfig(configFile)
-
-	if op == "v" {
-		fmt.Println(Validate(url))
 	} else {
-		str, err := Parse(inputFile, outputFile)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(1)
-		} else {
-			fmt.Println(str)
-		}
-	}
+		fmt.Println(str)
+	}	
 }
 
-func Validate(url string) (string, error) {
+type Truyencv struct {
+}
+
+func (p Truyencv) Validate(url string) (string, error) {
 	validated := 0
 	if strings.Contains(url, "truyencv") {
 		validated = 1
@@ -53,39 +37,16 @@ func Validate(url string) (string, error) {
 	m := map[string]string{"validated": strconv.Itoa(validated)}
 	m["batchSize"] = "50"
 	m["batchDelaySec"] = "10"
+	m["url"] = "http://truyencv.vn"
 	json, _ := json.Marshal(m)
-	return "\nparser-output:" + string(json) + "\n", nil
+	return "\nparser-output:" + string(json) + "\n", nil	
 }
 
-func Parse(inputFile string, outputFile string) (string, error) {
-	data, err := ioutil.ReadFile(inputFile)
-	if err != nil {
-		return "", errors.New("Error reading file: " + inputFile + ". " + err.Error())
-	}
-	rawHtml := string(data)
-	chapterTitle := ""
-	html, err := getChapterHtml(rawHtml, &chapterTitle)
-	if err != nil || html == "" {
-		return "", errors.New("Error parsing chapter content from: " + inputFile + ". " + err.Error())
-	}
-
-	nextPageUrl, err := getNextPageUrl(rawHtml, html)
-	if err != nil {
-		return "", errors.New("Error parsing nextPageUrl from: " + inputFile + ". " + err.Error())
-	}
-
-	// write to file
-	err = util.SaveFile(outputFile, []byte(html))
-	if err != nil {
-		return "", errors.New("Error writing to file: " + outputFile + ". " + err.Error())
-	}
-
-	m := map[string]string{"chapterTitle": chapterTitle, "nextPageUrl": nextPageUrl}
-	json, _ := json.Marshal(m)
-	return "\nparser-output:" + string(json) + "\n", nil
+func (p Truyencv) Parse(chapterUrl string, inputFile string, outputFile string) (string, error) {
+	return parser.DefaultParse(p, chapterUrl, inputFile, outputFile, 10, 2)
 }
 
-func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
+func (p Truyencv) GetChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
 	if err != nil {
 		return "", err
@@ -95,21 +56,26 @@ func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	
 	*chapterTitle = ""
-	doc.Find(".ctitle").Each(func(i int, s *goquery.Selection) {
-		*chapterTitle = s.Text()
-	})
-
 	var buffer bytes.Buffer
-	doc.Find("div#chapter_content").Each(func(i int, s *goquery.Selection) {
-		buffer.WriteString("<br>")
-		nodeText := s.Text()
-		// replace \n with <br>
-		nodeText = strings.Replace(nodeText, "\n", "<br>", -1)
-		buffer.WriteString(nodeText)
-		buffer.WriteString("<br><br><br>")
+	doc.Find("body").Find("div").Each(func(i int, td *goquery.Selection) {
+		clazz, _ := td.Attr("class")
+		if clazz == "chapter" {
+			td.Contents().Each(func(i int, s *goquery.Selection) {
+				if s.Text() != "" {
+					buffer.WriteString("<br/>")
+					buffer.WriteString(s.Text())
+				}
+			})
+		}		
 	})
-
+	
+	index := strings.Index(rawHtml, "id=\"readstory\"")
+	if index > 200 {
+		*chapterTitle = parser.GetChapterTitle(rawHtml[index:])
+	}
+	
 	chapterHtml := ""
 	textStr := buffer.String()
 	if textStr != "" {
@@ -121,16 +87,19 @@ func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	return chapterHtml, nil
 }
 
-func getNextPageUrl(rawHtml string, html string) (string, error) {
+func (p Truyencv) GetNextPageUrl(rawHtml string, html string) (string, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(rawHtml))
 	if err != nil {
 		return "", err
 	}
 	nextPageUrl := ""
-	doc.Find("a.next").Each(func(i int, s *goquery.Selection) {
-		link, _ := s.Attr("href")
-		nextPageUrl = link
-		return
+	doc.Find("a").Each(func(i int, s *goquery.Selection) {
+		title, _ := s.Attr("title")
+		if strings.HasSuffix(title, "Sau") {
+			link, _ := s.Attr("href")
+			nextPageUrl = link
+			return
+		}
 	})
 	return nextPageUrl, nil
 }

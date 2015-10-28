@@ -12,12 +12,20 @@ import (
 	"time"
 )
 
-func initTest(t *testing.T) {
-	util.LoadConfig("/home/dvan/vshared/dv/tusach/server/tusach-config.json")
+func TestAll(t *testing.T) {
+	util.LoadConfig("/dev/dv/tusach/server/config-test-win.json")
+	
+	testBookSites(t)	
+	
+	//testPersistence(t)
 }
 
-func xTestPersistence(t *testing.T) {
-	initTest(t)
+func testBookSites(t *testing.T) {
+	sites := GetBookSites()
+	fmt.Printf("sites: %+v\n", sites)
+}
+
+func testPersistence(t *testing.T) {
 	InitDB()
 	defer func() {
 		if err := recover(); err != nil {
@@ -68,21 +76,7 @@ func xTestPersistence(t *testing.T) {
 	LoadUsers()
 }
 
-func xTestPageLoader(t *testing.T) {
-	initTest(t)
-	url := "http://www.tangthuvien.vn/forum/showthread.php?t=93403&page=19"
-	site := GetBookSite(url)
-	data, err := site.ExecuteRequest(url)
-	if err != nil {
-		t.Error(err)
-	} else {
-		util.SaveFile("/home/dvan/vshared/dv/tusach/chapter2-raw.html", data)
-	}
-}
-
-func TestEpub(t *testing.T) {
-	initTest(t)
-
+func testEpub(t *testing.T) {
 	InitDB()
 
 	defer func() {
@@ -116,9 +110,7 @@ func TestEpub(t *testing.T) {
 	}
 }
 
-func xTestBookMaker(t *testing.T) {
-	initTest(t)
-
+func testBookMaker(t *testing.T) {
 	InitDB()
 
 	defer func() {
@@ -139,6 +131,12 @@ func xTestBookMaker(t *testing.T) {
 	//newBook := Book{Title: "Bat Bai Chien Than", StartPageUrl: "http://www.tangthuvien.vn/forum/showthread.php?t=93403", MaxNumPages: 1}
 	newBook := Book{Title: "Dai De Tinh Ha", StartPageUrl: "http://tunghoanh.com/dai-de-tinh-ha/chuong-1-yfTaaab.html", MaxNumPages: 1}
 
+	site := GetBookSite(newBook.StartPageUrl)
+	if (site.Parser == "") {
+		t.Error("No parser found for url: " + newBook.StartPageUrl)
+		return
+	}
+	
 	newBook.Status = STATUS_WORKING
 	bookId, err := SaveBook(newBook)
 	if err != nil {
@@ -147,7 +145,7 @@ func xTestBookMaker(t *testing.T) {
 	}
 	newBook.ID = bookId
 
-	go CreateBook(bookChannel, newBook, "tangthuvien")
+	//go CreateBook(bookChannel, newBook, site)
 
 	// wait for book to complete
 	for {
@@ -164,7 +162,7 @@ func xTestBookMaker(t *testing.T) {
 	close(bookChannel)
 }
 
-func xTestSqlite3(t *testing.T) {
+func testSqlite3(t *testing.T) {
 	os.Remove(util.GetConfiguration().DBFilename)
 
 	log.Println("opening database...")

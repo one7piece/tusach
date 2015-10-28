@@ -8,8 +8,9 @@
 			<g:HorizontalPanel width="100%">
 				<g:Image url="images/logo.png"/>
 				<g:VerticalPanel height="64px">
-					<g:Label text="TU SACH KIEM HIEP" styleName="title"/>
-					<g:FlowPanel ui:field="siteLinks" styleName="siteLinks">
+			  	<g:Label text="TU SACH KIEM HIEP" styleName="title"/>
+				  <g:Anchor href="/v2/index.html" styleName="siteLinks">Navigate to the new web site version</g:Anchor>
+ 					<g:FlowPanel ui:field="siteLinks" styleName="siteLinks">
 					</g:FlowPanel>
 				</g:VerticalPanel>
 			</g:HorizontalPanel>

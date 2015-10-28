@@ -38,8 +38,9 @@ func main() {
 
 	log.Println("Starting GO web server at " + util.GetConfiguration().ServerBindAddress +
 		":" + strconv.Itoa(util.GetConfiguration().ServerBindPort) +
-		", server path: " + util.GetConfiguration().ServerPath)
-
+		", server path: " + util.GetConfiguration().ServerPath +
+		", server path2: " + util.GetConfiguration().ServerPath2)
+		
 	// create channels map
 	eventManagers = make(map[int]util.EventManager)
 	sessionManager = NewSessionManager()
@@ -86,6 +87,9 @@ func main() {
 	http.HandleFunc("/downloadBook/", downloadBook)
 	// static file handler
 	http.Handle("/", http.FileServer(http.Dir(util.GetConfiguration().ServerPath)))
+	if (util.GetConfiguration().ServerPath2 != "") {
+		http.Handle("/v2/", http.StripPrefix("/v2", http.FileServer(http.Dir(util.GetConfiguration().ServerPath2))))
+	}
 
 	ticker := time.NewTicker(time.Second * 60)
 	go func() {
@@ -189,11 +193,12 @@ func Logout(w rest.ResponseWriter, r *rest.Request) {
 
 func GetUser(w rest.ResponseWriter, r *rest.Request) {
 	sessionId := r.PathParam("session")
-	user, ok := sessions[sessionId]
-	if !ok {
+	user := sessionManager.GetLogonUser(sessionId)
+	if (user.Name == "") {
 		rest.Error(w, "Not logged on", 400)
 		return
 	}
+	user.Password = ""	
 	w.WriteJson(user)
 }
 
@@ -202,7 +207,8 @@ func ValidateSession(w rest.ResponseWriter, r *rest.Request) {
 	if !sessionManager.IsLogon(sessionId) {
 		w.WriteJson(map[string]string{"sessionTimeRemainingSec": "0"})
 	} else {
-		w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(secs)})
+		user := sessionManager.GetLogonUser(sessionId)		
+		w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(user.TimeLeftInSec)})
 	}
 }
 
@@ -253,7 +259,7 @@ func GetBooks(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
-	sessionId := r.PathParams("session")
+	sessionId := r.PathParam("session")
 	op := r.PathParam("cmd")
 	log.Printf("UpdateBook: session:%s, op:%s", sessionId, op)
 	if op != "create" && op != "abort" && op != "resume" && op != "update" && op != "delete" {
@@ -540,6 +546,14 @@ func NewSessionManager() *SessionManager {
 	sm := SessionManager{}
 	sm.sessions = make(map[string]LogonUser)
 	return &sm
+}
+
+func (s *SessionManager) GetLogonUser(sessionId string) LogonUser {
+	user, exists := s.sessions[sessionId]
+	if exists && user.TimeLeftInSec > 0 {
+		return user 
+	}
+	return LogonUser{}
 }
 
 func (s *SessionManager) IsLogon(sessionId string) bool {

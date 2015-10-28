@@ -9,6 +9,7 @@ import (
 
 type Configuration struct {
 	ServerPath        string `json:serverPath`
+	ServerPath2       string `json:serverPath2`
 	LibraryPath       string `json:libraryPath`
 	DBFilename        string `json:dbFilename`
 	ServerBindAddress string `json:serverBindAddress`
