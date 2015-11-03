@@ -28,6 +28,7 @@ angular.module('tusachangApp')
     console.log("isMobile: " + isMobile.any());
     self.desktopMode = (isMobile.any != true);
     $rootScope.desktopMode = self.desktopMode;
+    $state.go("bookshelf");
 
     // for controller As syntax
     $scope.$watch(function(value) {

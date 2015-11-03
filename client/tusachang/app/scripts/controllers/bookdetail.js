@@ -32,8 +32,8 @@ angular.module('tusachangApp')
 			if (operation == "download") {
 				return true;
 			}			
-			if (book.status != 'WORKING' && $rootScope.isLogin 
-					&& ($rootScope.logonUser.name == $scope.book.createdBy 
+			if (book.status != 'WORKING' && $rootScope.isLogin && 
+					($rootScope.logonUser.name == $scope.book.createdBy 
 					|| $rootScope.logonUser.role.indexOf("admin") != -1)) {
 				return true;
 			}

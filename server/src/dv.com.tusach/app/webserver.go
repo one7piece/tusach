@@ -267,13 +267,14 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 	// validate session
-	if !sessionManager.IsLogon(sessionId) {
+	user := sessionManager.GetLogonUser(sessionId)
+	if user.Name == "" {
 		rest.Error(w, "No permission", 400)
 		return
 	}
 
 	if op == "create" {
-		CreateBook(w, r)
+		CreateBook(user, w, r)
 		return
 	}
 
@@ -367,7 +368,7 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteJson(map[string]string{"status": message})
 }
 
-func CreateBook(w rest.ResponseWriter, r *rest.Request) {
+func CreateBook(user LogonUser, w rest.ResponseWriter, r *rest.Request) {
 	newBook := maker.Book{}
 	err := r.DecodeJsonPayload(&newBook)
 	if err != nil {
@@ -386,6 +387,8 @@ func CreateBook(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
+	newBook.CreatedBy = user.Name
+	
 	// prevent too many concurrent books creation
 	numActive := 0
 	for _, book := range books {

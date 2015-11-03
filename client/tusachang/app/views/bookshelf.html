@@ -10,10 +10,10 @@
 									md-colspan="1">
 
 			<md-button ng-if="$root.desktopMode" ng-click="bookshelf.select(book)" aria-label="{{book.title}}">
-				<img src="/images/book.png">
+				<img src="./images/book.png">
 			</md-button>
 			<md-button ng-if="!$root.desktopMode" ng-href="{{bookshelf.getDownloadLink(book)}}" aria-label="{{book.title}}">
-				<img src="/images/book.png">
+				<img src="./images/book.png">
 			</md-button>
 			<md-grid-tile-footer layout-align="center" class="grid-book-title">{{book.titleSummary}}</md-grid-tile-footer>
 		</md-grid-tile>

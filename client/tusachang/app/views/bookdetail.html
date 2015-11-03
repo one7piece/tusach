@@ -49,10 +49,10 @@
     </md-input-container>
 
     <div>
-      <md-button ng-if="book.status != 'WORKING' && book.epubCreated" ng-click="download()" class="md-raised md-primary">Download</md-button>
-      <md-button ng-if="canUpdate('delete')" ng-click="update('delete')" class="md-raised md-warn">Delete</md-button>
-      <md-button ng-if="canUpdate('resume')" ng-click="update('resume')" class="md-raised md-primary">Resume</md-button>
-      <md-button ng-if="canUpdate('update')" ng-click="update('update')" class="md-raised md-primary">Save Changes</md-button>
+      <md-button ng-disabled="book.status == 'WORKING' || !book.epubCreated" ng-click="download()" class="md-raised md-primary">Download</md-button>
+      <md-button ng-disabled="!canUpdate('delete')" ng-click="update('delete')" class="md-raised md-warn">Delete</md-button>
+      <md-button ng-disabled="!canUpdate('resume')" ng-click="update('resume')" class="md-raised md-primary">Resume</md-button>
+      <md-button ng-disabled="!canUpdate('update')" ng-click="update('update')" class="md-raised md-primary">Save Changes</md-button>
     </div>
 
   </div>
