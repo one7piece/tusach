@@ -9,6 +9,7 @@ html, body {
 
 .title {
   font-size:24px;
+  margin-left: 20px;
 }
 
 .menu {
@@ -137,7 +138,39 @@ md-input-container[class^="toolbar-"] {
 	color: white;
 }
 
-md-input-container[class^="field-"], div[class^="field-"] {
+label[class^="toolbar-"] {
+  font-size:14px;
+	color: white;
+}
+
+md-checkbox[class^="toolbar-"] {
+  font-size:14px;
+	color: white;
+	margin-right: 50px;
+}
+
+md-input-container[class^="row-bookdetail"], div[class^="row-bookdetail"] {
+  width: 80%;
+}
+
+md-input-container[class^="field-bookdetail-first"], div[class^="field-bookdetail-first"] {
+	width:400px; 
+	max-width:600px;
+}
+
+md-input-container[class^="field-bookdetail-second"], div[class^="field-bookdetail-second"] {
+	margin-left:20px; 
+	width:400px; 
+	max-width:600px;
+}
+
+md-input-container[class^="field-bookdetail-remaining"], div[class^="field-bookdetail-remaining"] {
+	margin-left:20px; 
+	width:80%; 
+	max-width:600px;
+}
+
+md-input-container[class^="field-createbook"], div[class^="field-createbook"] {
   width: 80%;
 }
 
@@ -162,4 +195,19 @@ md-bottom-sheet > .md-subheader {
 
 md-bottom-sheet md-input-container {
   padding-bottom: 5px;
+}
+
+.panel-createbook {
+  margin-left : 20px;
+  margin-right: 20px;
+}
+
+span[class^="errorMessage-"] {
+	color: red;
+	margin-bottom: 20px;
+}
+
+span[class^="infoMessage-"] {
+	color: blue;
+	margin-bottom: 20px;
 }

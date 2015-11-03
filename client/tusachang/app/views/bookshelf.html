@@ -1,11 +1,18 @@
 <div class="panel-bookshelf" flex>
+	<md-progress-linear ng-if="bookshelf.loading" md-mode="indeterminate"></md-progress-linear>
+	<span ng-if="bookshelf.statusMessage.length > 0" class="{{bookshelf.statusType}}Message-bookshelf">{{bookshelf.statusMessage}}</span>
+
 	<md-grid-list
 			md-cols-sm="2" md-cols-md="4" md-cols-lg="6" md-cols-gt-lg="8"
 			md-row-height="100px"
 			md-gutter="4px" md-gutter-gt-sm="4px" >
 		<md-grid-tile ng-repeat="book in bookshelf.books"
 									md-colspan="1">
-			<md-button ng-click="bookshelf.select(book)" aria-label="{{book.title}}">
+
+			<md-button ng-if="$root.desktopMode" ng-click="bookshelf.select(book)" aria-label="{{book.title}}">
+				<img src="/images/book.png">
+			</md-button>
+			<md-button ng-if="!$root.desktopMode" ng-href="{{bookshelf.getDownloadLink(book)}}" aria-label="{{book.title}}">
 				<img src="/images/book.png">
 			</md-button>
 			<md-grid-tile-footer layout-align="center" class="grid-book-title">{{book.titleSummary}}</md-grid-tile-footer>

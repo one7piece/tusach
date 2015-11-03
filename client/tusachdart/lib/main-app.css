@@ -29,7 +29,7 @@
 }
 
 :host /deep/ #username,#password {
-  width: 100px;
+  width: 75px;
   font-size: 75%;
 }
 

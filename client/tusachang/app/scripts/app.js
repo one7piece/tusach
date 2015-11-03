@@ -1,6 +1,7 @@
 'use strict';
 
 var urlPrefix = 'http://110.175.4.240';
+//var urlPrefix =  '';
 
 /**
  * @ngdoc overview
@@ -46,10 +47,19 @@ angular
       })
       .state('createBook', {
 				url: '/createBook',
-        templateUrl: 'create-book.html',
+        templateUrl: 'views/createbook.html',
         controller: 'CreateBookCtrl as creator'
       });
   }]);
 
-
+angular.module('tusachangApp').factory('myHttpResponseInterceptor', ['$q', '$rootScope', function($q, $rootScope) {
+  return {
+    'responseError': function(response) {
+      if (response.status == 401) {
+        $rootScope.$emit('authentication', 'sessionExpired');
+      }
+      return $q.reject(response);
+    }
+  };
+}]);
 

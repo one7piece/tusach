@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>PCP-100</title>
+    <title>Tu Sach Kiem Hiep</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="">
@@ -20,28 +20,31 @@
     <!-- endbuild -->
   </head>
 
-  <body ng-app="tusachangApp" ng-controller="MainCtrl">
+  <body ng-app="tusachangApp" ng-controller="MainCtrl as mainCtrl">
     <!--[if lte IE 8]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
     <div>
-      <md-toolbar layout="column">
+      <md-toolbar layout="column" class="md-tall">
         <div flex layout="row" layout-align="start center">
           <div flex class="title">Tu Sach Kiem Hiep</div>
           <div layout="row" layout-align="end center">
-            <md-icon md-svg-icon="person"></md-icon>
-            <md-input-container class="toolbar-username">
+            <md-checkbox md-no-ink ng-model="mainCtrl.desktopMode" class="toolbar-desktop-mode">
+              Desktop Mode
+            </md-checkbox>
+            <label class="toolbar-logon-user" ng-if="$root.isLogin == true">{{$root.logonUser.name}}</label>
+            <md-input-container ng-if="$root.isLogin != true" class="toolbar-username">
               <label>User Name</label>
-              <input type="text">
+              <input type="text" ng-model="mainCtrl.username" ng-enter="mainCtrl.signInOut()">
             </md-input-container>
-            <md-input-container class="toolbar-password">
+            <md-input-container ng-if="$root.isLogin != true" class="toolbar-password">
               <label>Password</label>
-              <input type="password">
+              <input type="password" ng-model="mainCtrl.password" ng-enter="mainCtrl.signInOut()">
             </md-input-container>
-            <md-button class="toolbar-button">
-              <md-tooltip>Login</md-tooltip>
-              <md-icon md-svg-icon="login" ></md-icon>
+            <md-button class="toolbar-button" ng-click="mainCtrl.signInOut()">
+              <md-tooltip>{{$root.isLogin ? 'Sign Out' : 'Sign In'}}</md-tooltip>
+              <md-icon md-svg-icon="person" ></md-icon>
             </md-button>
           </div>
         </div>
@@ -75,10 +78,14 @@
 
         <!-- build:js({.tmp,app}) scripts/scripts.js -->
         <script src="scripts/app.js"></script>
+        <script src="scripts/directives/ng-enter.js"></script>
         <script src="scripts/services/book-service.js"></script>
+        <script src="scripts/services/login-service.js"></script>
         <script src="scripts/controllers/main.js"></script>
+        <script src="scripts/controllers/login.js"></script>
         <script src="scripts/controllers/bookshelf.js"></script>
         <script src="scripts/controllers/bookdetail.js"></script>
+        <script src="scripts/controllers/createbook.js"></script>
         <!-- endbuild -->
 </body>
 </html>

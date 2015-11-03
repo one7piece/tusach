@@ -1,42 +1,58 @@
 <md-bottom-sheet class="md-has-header">
+
   <md-subheader>{{book.title}}</md-subheader>
+  
+	<md-progress-linear ng-if="loading" md-mode="indeterminate"></md-progress-linear>
+	<span ng-if="statusMessage.length > 0" class="{{statusType}}Message-bookshelf">{{bookshelf.statusMessage}}</span>
+  
   <div layout="column" layout-align="center center">
-    <md-input-container class="field-bookdetail-statusSummary">
-      <label>Status</label>
-      <input readonly ng-model="book.statusSummary">
-    </md-input-container>
-    <div layout class="field-bookdetail-pages">
-      <md-input-container flex>
+  	<div flex layout="row" class="row-bookdetail">
+	    <md-input-container class="field-bookdetail-first">
+	      <label>Title</label>
+	      <input ng-model="book.title">
+	    </md-input-container>
+	    <md-input-container class="field-bookdetail-second">
+	      <label>Author</label>
+	      <input ng-model="book.author">
+	    </md-input-container>
+  	</div>
+  
+  	<div flex layout="row" class="row-bookdetail">
+	    <md-input-container class="field-bookdetail-first">
+	      <label>Last Update Time</label>
+	      <input readonly ng-model="book.lastUpdatedTime">
+	    </md-input-container>
+	    <md-input-container class="field-bookdetail-remaining">
+	      <label>Status</label>
+	      <input readonly ng-model="book.statusSummary">
+	    </md-input-container>
+	  </div>
+      	    
+    <div flex layout="row" class="row-bookdetail">
+      <md-input-container  class="field-bookdetail-first">
         <label>Current Page No</label>
         <input readonly ng-model="book.currentPageNo">
       </md-input-container>
-      <md-input-container flex>
+      <md-input-container class="field-bookdetail-second">
         <label>Max Num Pages</label>
         <input ng-model="book.maxNumPages">
       </md-input-container>
     </div>
-    <md-input-container class="field-bookdetail-author">
-      <label>Author</label>
-      <input ng-model="book.author">
-    </md-input-container>
-    <md-input-container class="field-bookdetail-createdTime">
-      <label>Created Time</label>
-      <input readonly ng-model="book.createdTime">
-    </md-input-container>
-    <md-input-container class="field-bookdetail-startPageUrl">
+    
+    <md-input-container class="row-bookdetail">
       <label>Start Page URL</label>
       <input readonly ng-model="book.startPageUrl">
     </md-input-container>
-    <md-input-container class="field-bookdetail-currentPageUrl">
+    <md-input-container class="row-bookdetail">
       <label>Current Page URL</label>
       <input ng-model="book.currentPageUrl">
     </md-input-container>
 
     <div>
       <md-button ng-if="book.status != 'WORKING' && book.epubCreated" ng-click="download()" class="md-raised md-primary">Download</md-button>
-      <md-button ng-if="book.status != 'WORKING'" ng-click="delete()" class="md-raised md-warn">Delete</md-button>
-      <md-button ng-if="book.status != 'WORKING'" ng-click="resume()" class="md-raised md-primary">Resume</md-button>
-      <md-button ng-if="book.status != 'WORKING'" ng-click="save()" class="md-raised md-primary">Save Changes</md-button>
+      <md-button ng-if="canUpdate('delete')" ng-click="update('delete')" class="md-raised md-warn">Delete</md-button>
+      <md-button ng-if="canUpdate('resume')" ng-click="update('resume')" class="md-raised md-primary">Resume</md-button>
+      <md-button ng-if="canUpdate('update')" ng-click="update('update')" class="md-raised md-primary">Save Changes</md-button>
     </div>
 
   </div>
