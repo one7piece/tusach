@@ -219,7 +219,7 @@ func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries in
 		n = 1
 	}
 	for i := 0; i < n; i++ {
-		log.Printf("Attempt#%d to load from %s\n", (i + 1), targetUrl)
+		log.Printf("Attempt %d/%d to load from %s\n", (i + 1), n, targetUrl)
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Printf("Error loading from %s. %s\n", targetUrl, err.Error())
