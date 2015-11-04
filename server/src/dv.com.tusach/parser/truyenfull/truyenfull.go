@@ -63,7 +63,7 @@ func Parse(chapterUrl string, inputFile string, outputFile string) (string, erro
 	// load the request
 	headers := map[string]string{}
 	form := map[string]string{}
-	responseBytes, err := parser.ExecuteRequest("GET", chapterUrl, 10, 2, headers, form)
+	responseBytes, err := parser.ExecuteRequest("GET", chapterUrl, 15, 3, headers, form)
 	if err != nil {
 		return "", err
 	}

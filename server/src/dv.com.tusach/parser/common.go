@@ -223,21 +223,27 @@ func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries in
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Printf("Error loading from %s. %s\n", targetUrl, err.Error())
-			return nil, err
-		}
-		defer resp.Body.Close()
-		if err == nil {
+		} else {
+			defer resp.Body.Close()
 			result, err = ioutil.ReadAll(resp.Body)
+			resp.Body.Close()		
+			if result != nil && err == nil {
+				break
+			}	
+			result = nil	
 		}
-		resp.Body.Close()
-		if result != nil {
-			break
-		}
+		time.Sleep(30 * time.Second)
 	}
+	
+	if err != nil {
+		return nil, err
+	}
+	
 	if result == nil || len(result) == 0 {
 		return result, errors.New("No html data loaded")
 	}
-	return result, err
+	
+	return result, nil
 }
 
 func GetUrl(target string, request string) string {
