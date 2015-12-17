@@ -8,8 +8,8 @@
  * Controller of the tusachangApp
  */
 angular.module('tusachangApp')
-	.controller('CreateBookCtrl', ['$rootScope', '$state', '$scope', '$mdBottomSheet', '$interval', 'BookService',
-			function ($rootScope, $state, $scope, $mdBottomSheet, $interval, BookService) {
+	.controller('CreateBookCtrl', ['$rootScope', '$state', '$scope', '$mdDialog', '$interval', 'BookService',
+			function ($rootScope, $state, $scope, $mdDialog, $interval, BookService) {
 
 		var self = this;
 		self.loading = false;
@@ -23,9 +23,22 @@ angular.module('tusachangApp')
 		self.statusType = "info";
 
 		self.create = function() {
+			if (self.firstChapterURL == "") {
+				showAlert($mdDialog, "Invalid Data", "Must specify the book First Chapter URL!");
+				return;
+			}
+			if (self.title == "") {
+				showAlert($mdDialog, "Invalid Data", "Must specify the book Title!");
+				return;
+			}
+
 			self.statusMessage = "Creating book...";
 			self.statusType = "info";
 			var newBook = {startPageUrl: self.firstChapterURL, title: self.title, author: self.author, maxNumPages: self.numPages};
+			self.firstChapterURL = "";
+			self.title = "";
+			self.author = "";
+			self.numPages = 0;
 			BookService.updateBook(newBook, "create", function(ok, value) {
 				if (ok) {
 					self.statusMessage = "";

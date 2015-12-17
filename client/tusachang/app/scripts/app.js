@@ -3,6 +3,18 @@
 var urlPrefix = 'http://110.175.4.240';
 //var urlPrefix =  '';
 
+var showAlert = function($mdDialog, title, message) {
+  $mdDialog.show(
+       $mdDialog.alert()
+         .parent(angular.element(document.querySelector('#popupContainer')))
+         .clickOutsideToClose(true)
+         .title(title)
+         .textContent(message)
+         .ariaLabel('Alert Dialog')
+         .ok('OK')
+     );
+};
+
 /**
  * @ngdoc overview
  * @name tusachangApp

@@ -8,8 +8,8 @@
  * Controller of the tusachangApp
  */
 angular.module('tusachangApp')
-	.controller('BookshelfCtrl', ['$rootScope', '$state', '$scope', '$mdBottomSheet', '$filter', 'BookService',
-			function ($rootScope, $state, $scope, $mdBottomSheet, $filter, BookService) {
+	.controller('BookshelfCtrl', ['$rootScope', '$state', '$scope', '$mdDialog', '$filter', 'BookService',
+			function ($rootScope, $state, $scope, $mdDialog, $filter, BookService) {
 
 		console.log("bookshelfCtrl creating...");
 		var self = this;
@@ -107,10 +107,10 @@ angular.module('tusachangApp')
 			console.log("select book: ", book);
 			if ($rootScope.desktopMode) {
 				$rootScope.selectedBook = book;
-				$mdBottomSheet.show({
-					templateUrl: 'views/bookdetail.html',
-					controller: 'BookDetailCtrl'
-				});
+				//$mdBottomSheet.show({
+				//	templateUrl: 'views/bookdetail.html',
+				//	controller: 'BookDetailCtrl'
+				//});
 			} else {
 				// download book
 			}
@@ -135,12 +135,31 @@ angular.module('tusachangApp')
 		};
 
 		self.update = function(book, operation) {
+			if (operation == 'delete') {
+				var confirm = $mdDialog.confirm()
+						.title("Confirm Delete")
+						.textContent("Do you really want to delete: " + book.title)
+						.ariaLabel('Lucky day')
+						.ok('Yes')
+						.cancel('Cancel');
+				$mdDialog.show(confirm).then(function() {
+					// perform update
+					self.doUpdate(book, operation);
+				}, function() {
+					// cancel
+				});
+			} else {
+				self.doUpdate(book, operation);
+			}
+		};
+
+		self.doUpdate = function(book, operation) {
 			$scope.loading = true;
 			BookService.updateBook(book, operation, function(ok, value) {
 				$scope.loading = false;
 				if (ok) {
 					self.statusMessage = "";
-					if (operation == 'delete') {
+					if (operation == 'delete' || operation == 'resume') {
 						for (var i=0; i<self.books.length; i++) {
 							if (book.id == self.books[i].id) {
 								console.log("remove local cache of book index:" + i + ", " + book.title);
@@ -153,7 +172,7 @@ angular.module('tusachangApp')
 					self.statusType = "error";
 				}
 			});
-		};
+		}
 
 		// watch for reload button click
     $rootScope.$on('reload', function() {
