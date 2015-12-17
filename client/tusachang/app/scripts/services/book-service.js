@@ -14,8 +14,18 @@ angular.module('tusachangApp')
     // AngularJS will instantiate a singleton by calling "new" on this function
     self.sites = [];
     self.books = [];
+    self.abortingBooks = [];
     // cache of sortBy
-    self.sortBy = undefined; 
+    self.cacheProps = {};
+    self.cacheProps.sortRange = [
+				{desc: "Book Title (A..Z)", name:"title", order:"asc"},
+				{desc: "Book Title (Z..A)", name:"title", order:"dsc"},
+				{desc: "Update Time (Oldest first)", name:"time", order:"asc"},
+				{desc: "Update Time (Newest first)", name:"time", order:"dsc"},
+				{desc: "Owner (A..Z)", name:"owner", order:"asc"},
+				{desc: "Owner (Z..A)", name:"owner", order:"dsc"} ];
+    self.cacheProps.sortBy = self.cacheProps.sortRange[3];
+    self.cacheProps.showOnlyMyBooks = true; 
 
     // subscribe to books changes
     self.subscribe = function(scope, callback) {
@@ -24,10 +34,10 @@ angular.module('tusachangApp')
       });
       // clean up
       scope.$on('$destroy', handler);
-    }
+    };
     self.notify = function(name, data) {
       $rootScope.$emit('bookService', {name: name, data: data});
-    }
+    };
 
     self.loadSites = function(callback) {
       if (self.sites.length > 0) {
@@ -105,6 +115,18 @@ angular.module('tusachangApp')
         .success(function(data, status) {
           console.log("BookService.updateBook() - success response, status:" + status, data);
           if (status === 200 && data) {
+            if (operation == 'abort') {
+              self.abortingBooks.push(book);
+              // set timer to remove
+              $timeout(function() {
+                for (var i=0; i<self.abortingBooks.length; i++) {
+                  if (self.abortingBooks[i].id == book.id) {
+                    self.abortingBooks.splice(i, 1);
+                    break;
+                  }
+                }
+              }, 20*1000);
+            }
             callback(true, data);
           } else {
             callback(false, "Failed to " + operation + " book, status=" + status);

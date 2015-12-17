@@ -48,7 +48,7 @@
     <md-list>
       <md-subheader class="md-no-sticky">Pending Books</md-subheader>
       <md-list-item class="md-2-line" ng-repeat="book in creator.books">
-        <md-button ng-click="creator.abort(book)" aria-label="Abort">
+        <md-button ng-disabled="!creator.canAbort(book)" ng-click="creator.abort(book)" aria-label="Abort">
           <md-tooltip>Abort</md-tooltip>
           <md-icon md-svg-src="./images/abort.svg" style="color: red"></md-icon>
         </md-button>

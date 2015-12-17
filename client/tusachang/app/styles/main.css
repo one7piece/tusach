@@ -144,6 +144,10 @@ md-grid-list md-grid-tile figure {
   align-items: flex-start;
 }
 
+md-checkbox {
+  margin-bottom: 0px;
+}
+
 .border-red {
 	border-style: solid;
 	border-width: 2px;

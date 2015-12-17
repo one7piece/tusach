@@ -36,6 +36,15 @@ angular.module('tusachangApp')
 			});
 		};
 
+		self.canAbort = function(book) {
+			for (var i=0; i<BookService.abortingBooks.length; i++) {
+				if (BookService.abortingBooks[i].id == book.id) {
+					return false;
+				}
+			}
+			return true;
+		};
+
 		self.abort = function(book) {
 			BookService.updateBook(book, "abort", function(ok, value) {
 				if (ok) {
@@ -52,11 +61,11 @@ angular.module('tusachangApp')
 			for (var i=0; i<books.length; i++) {
 				if (books[i].status == 'WORKING') {
 					self.books.push(books[i]);
-					books[i].details = books[i].status + " ("
-						+ books[i].currentPageNo + "/" + books[i].maxNumPages + ")";
+					books[i].details = books[i].status + " (" +
+						books[i].currentPageNo + "/" + books[i].maxNumPages + ")";
 				}
 			}
-		}
+		};
 
 		self.load = function() {
 			self.loading = true;

@@ -1,15 +1,20 @@
 <div class="panel-bookshelf" flex>
 	<md-progress-linear ng-if="bookshelf.loading" md-mode="indeterminate"></md-progress-linear>
-	<div layout="row" style="margin-left: 20px; margin-top:5px" layout-align="start end">
+	<div layout="column" style="margin-left: 20px; margin-top:5px" layout-align="start">
 		<div>
-			<md-input-container style="padding:0px;margin:0px;">
-				<md-select ng-model="bookshelf.sortBy" ng-model-options="{trackBy: '$value.desc'}" style="width:100%;" ng-change="bookshelf.sort()">
-					<md-option ng-repeat="option in bookshelf.sortRange" ng-value="{{option}}">{{option.desc}}</md-option>
-				</md-select>
-			</md-input-container>
-		</div>
-		<div style="margin-left: 20px">
 			<span flex ng-if="bookshelf.statusMessage.length > 0" class="{{bookshelf.statusType}}Message-bookshelf">{{bookshelf.statusMessage}}</span>
+		</div>
+		<div layout="row" layout-align="start end">
+			<div>
+				<md-input-container style="padding:0px;margin:0px;">
+					<md-select ng-model="bookshelf.sortBy" ng-model-options="{trackBy: '$value.desc'}" style="width:100%;" ng-change="bookshelf.sort()">
+						<md-option ng-repeat="option in bookshelf.sortRange" ng-value="{{option}}">{{option.desc}}</md-option>
+					</md-select>
+				</md-input-container>
+			</div>
+			<div style="margin-left:10px;">
+				<md-checkbox ng-model="bookshelf.showOnlyMyBooks" ng-change="bookshelf.updateDisplay()" aria-label="checkbox1">My Books Only</md-checkbox>
+			</div>
 		</div>
 	</div>
 
