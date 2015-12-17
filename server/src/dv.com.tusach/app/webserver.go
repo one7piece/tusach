@@ -40,7 +40,7 @@ func main() {
 		":" + strconv.Itoa(util.GetConfiguration().ServerBindPort) +
 		", server path: " + util.GetConfiguration().ServerPath +
 		", server path2: " + util.GetConfiguration().ServerPath2)
-		
+
 	// create channels map
 	eventManagers = make(map[int]util.EventManager)
 	sessionManager = NewSessionManager()
@@ -62,7 +62,7 @@ func main() {
 		AccessControlAllowCredentials: true,
 		AccessControlMaxAge:           3600,
 	})
-	
+
 	router, err := rest.MakeRouter(
 		&rest.Route{"GET", "/systeminfo", GetSystemInfo},
 		&rest.Route{"GET", "/sites", GetSites},
@@ -198,7 +198,7 @@ func GetUser(w rest.ResponseWriter, r *rest.Request) {
 		rest.Error(w, "Not logged on", 400)
 		return
 	}
-	user.Password = ""	
+	user.Password = ""
 	w.WriteJson(user)
 }
 
@@ -207,7 +207,7 @@ func ValidateSession(w rest.ResponseWriter, r *rest.Request) {
 	if !sessionManager.IsLogon(sessionId) {
 		w.WriteJson(map[string]string{"sessionTimeRemainingSec": "0"})
 	} else {
-		user := sessionManager.GetLogonUser(sessionId)		
+		user := sessionManager.GetLogonUser(sessionId)
 		w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(user.TimeLeftInSec)})
 	}
 }
@@ -388,7 +388,7 @@ func CreateBook(user LogonUser, w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	newBook.CreatedBy = user.Name
-	
+
 	// prevent too many concurrent books creation
 	numActive := 0
 	for _, book := range books {
@@ -533,9 +533,10 @@ type LogonUser struct {
 	TimeLeftInSec int
 }
 
-func NewLogonUser(name string) LogonUser {
+func NewLogonUser(name string, role string) LogonUser {
 	user := LogonUser{}
 	user.Name = name
+	user.Role = role
 	user.SessionId = strconv.FormatInt(time.Now().UnixNano(), 10)
 	user.TimeLeftInSec = sessionExpiredTimeSec
 	return user
@@ -554,7 +555,7 @@ func NewSessionManager() *SessionManager {
 func (s *SessionManager) GetLogonUser(sessionId string) LogonUser {
 	user, exists := s.sessions[sessionId]
 	if exists && user.TimeLeftInSec > 0 {
-		return user 
+		return user
 	}
 	return LogonUser{}
 }
@@ -575,7 +576,7 @@ func (s *SessionManager) Login(name string, password string) (*LogonUser, error)
 		return nil, errors.New("Wrong user name or password")
 	}
 
-	newUser := NewLogonUser(name)
+	newUser := NewLogonUser(user.Name, user.Role)
 	s.sessions[newUser.SessionId] = newUser
 	return &newUser, nil
 }

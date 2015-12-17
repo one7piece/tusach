@@ -31,13 +31,12 @@ angular
       function ($mdThemingProvider, $mdIconProvider, $routeProvider, $stateProvider, $httpProvider) {
 
     $mdIconProvider
+    	.iconSet('core', './images/core-icons.svg', 24)
       .icon("person"       , "./images/person.svg")
       .icon("login"       , "./images/logout.svg")
-      .icon("refresh"       , "./images/refresh.svg")
 
     $mdThemingProvider.theme('default')
-      .primaryPalette('blue')
-      .accentPalette('orange');
+      .primaryPalette('blue');
 
     $stateProvider
       .state('bookshelf', {
@@ -62,4 +61,3 @@ angular.module('tusachangApp').factory('myHttpResponseInterceptor', ['$q', '$roo
     }
   };
 }]);
-

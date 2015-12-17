@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Tu Sach Kiem Hiep</title>
+    <title>Tyco</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="">
@@ -27,7 +27,10 @@
 
     <div>
       <md-toolbar flex layout="row" class="md-medium" layout-align="start center">
-        <div flex class="title">Thu Vien Online</div>
+      	<md-button md-no-ink class="border-red" style="min-width: 36px; padding:0px; margin:0px">
+		      <md-icon md-svg-icon="core:arrow-down" style="color:yellow; width:48px; height:48px">?</md-icon>
+      	</md-button>
+        <div flex class="title">Tyco PCP-100</div>
         <div layout="row" ng-if="$root.isLogin != true" layout-align="end center">
           <input type="text" ng-model="mainCtrl.username" ng-enter="mainCtrl.signInOut()" id="username">
           <input type="password" ng-model="mainCtrl.password" ng-enter="mainCtrl.signInOut()" id="password">
@@ -46,13 +49,14 @@
         </div>
       </md-toolbar>
 
-      <md-tabs md-selected="selectedIndex" md-dynamic-height md-border-bottom>
-        <md-tab label="Bookshelf" ui-sref="bookshelf">
-        </md-tab>
-        <md-tab ng-disabled="$root.isLogin != true" label="Create Book" ui-sref="createBook">
-        </md-tab>
-      </md-tabs>
-      <div ui-view></div>
+      <div ng-controller="BookshelfCtrl as bookshelf">
+        <md-input-container style="width:200px; padding:5px;margin:0px;" class="border-yellow">
+  				<label flex-order="1">Sort By</label>
+          <md-select ng-model="bookshelf.sortBy" style="width:100%;">
+  					<md-option ng-repeat="sortBy in bookshelf.sortRange" value="{{sortBy}}">{{sortBy.name}}</md-option>
+  				</md-select>
+  			</md-input-container>
+      </div>
     </div>
 
     <!-- build:js(.) scripts/vendor.js -->

@@ -3,35 +3,42 @@
 	<span ng-if="creator.statusMessage.length > 0" class="{{creator.statusType}}Message-bookshelf">{{creator.statusMessage}}</span>
 
   <div>Supported Sites:</div>
-	<div layout="row" style="margin-left:10px;">
-		<a ng-repeat="site in creator.sites" href="{{site}}" target="_blank" style="margin-right:10px; margin-top:10px; margin-bottom:10px;">{{site}}</a>
+	<div layout="row" layout-wrap style="margin-left:10px;">
+		<div ng-repeat="site in creator.sites">
+			<a href="{{site}}" target="_blank" style="margin-right:10px; margin-top:10px; margin-bottom:10px;">{{site}}</a>
+		</div>
 	</div>
 
-  <md-divider ></md-divider>
-  
-  <div layout="row">
-	  <md-input-container style="width:400px; max-width:500px;">
-	    <label>First Chapter URL</label>
-	    <input ng-model="creator.firstChapterURL">
-	  </md-input-container>
-	  <md-input-container style="margin-left:50px; width:400px; max-width:500px;">
-	    <label>Title</label>
-	    <input ng-model="creator.title">
-	  </md-input-container>
-  </div>
+  <md-divider style="margin-top:10px"></md-divider>
 
-  <div layout="row">
-	  <md-input-container style="width:400px; max-width:500px;">
-	    <label>Author</label>
-	    <input ng-model="creator.author">
-	  </md-input-container>
-	  <md-input-container style="margin-left:50px; width:400px; max-width:500px;">
-	    <label>Num Pages</label>
-	    <input ng-model="creator.numPages">
-	  </md-input-container>
-  </div>
-    
-  <div>
+	<md-grid-list flex md-cols="1" md-cols-sm="1" md-cols-gt-sm="2" md-cols-md="2" md-cols-gt-md="2" md-cols-lg="2" md-cols-gt-lg="2" md-gutter="12px" md-row-height="50px">
+		<md-grid-tile>
+			<md-input-container style="width:400px">
+		    <label>First Chapter URL</label>
+		    <input ng-model="creator.firstChapterURL">
+		  </md-input-container>
+		</md-grid-tile>
+		<md-grid-tile>
+			<md-input-container style="width:400px;">
+		    <label>Title</label>
+		    <input ng-model="creator.title">
+		  </md-input-container>
+		</md-grid-tile>
+		<md-grid-tile>
+			<md-input-container style="width:400px;">
+		    <label>Author</label>
+		    <input ng-model="creator.author">
+		  </md-input-container>
+		</md-grid-tile>
+		<md-grid-tile>
+			<md-input-container style="width:400px;">
+		    <label>Num Pages</label>
+		    <input ng-model="creator.numPages">
+		  </md-input-container>
+		</md-grid-tile>
+	</md-grid-list>
+
+  <div style="margin-top:20px">
     <md-button ng-click="creator.create()" class="md-raised md-primary">Create</md-button>
   </div>
   <span ng-if="statusMessage.length > 0" class="{{statusType}}-message">{{statusMessage}}</span>
@@ -42,11 +49,12 @@
       <md-subheader class="md-no-sticky">Pending Books</md-subheader>
       <md-list-item class="md-2-line" ng-repeat="book in creator.books">
         <md-button ng-click="creator.abort(book)" aria-label="Abort">
-          <img src="./images/abort.png">
+          <md-tooltip>Abort</md-tooltip>
+          <md-icon md-svg-src="./images/abort.svg" style="color: red"></md-icon>
         </md-button>
         <div class="md-list-item-text" layout="column">
-          <h4>{{ book.title }}</h4>
-          <p>{{ book.status }}</p>
+          <p style="color:blue;">{{book.title}} ({{book.currentPageNo}}/{{book.maxNumPages}})</p>
+          <p>{{book.status}} - {{book.lastUpdatedTime | date:'dd/MM/yyyy HH:mm:ss'}}</p>
         </div>
       </md-list-item>
     </md-list>

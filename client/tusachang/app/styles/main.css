@@ -1,6 +1,6 @@
 html, body {
   font-family: 'Roboto', sans-serif;
-  font-size:16px;
+  font-size:14px;
   height:100%;
   margin: 0px;
   padding: 0px;
@@ -8,8 +8,8 @@ html, body {
 }
 
 .title {
-  font-size:24px;
-  margin-left: 20px;
+  font-size:18px;
+  margin-left: 10px;
 }
 
 .menu {
@@ -20,60 +20,43 @@ html, body {
   width: 36px;
 }
 
-/* Primary content area */
-
-#content {
-  overflow: hidden;
-}
-
-#content  {
-  padding-left: 40px;
-  padding-right: 40px;
-  padding-top: 5px;
-}
-
-#content .md-button.contact {
-  background-color: transparent;
-  border: none;
-  width: 48px;
-  height: 48px;
-  margin: 8px auto 16px 0;
-  position: absolute;
-  top: 10px;
-  right: 40px;
-}
-
-#content .md-button.contact > md-icon {
-  fill:black;
-  width:36px;
-  height:36px;
-}
-
 md-button.menuBtn > md-icon {
   fill:white;
   width:24px;
   height:24px;
 }
 
-#content .md-button.contact:active > md-icon {
-  background-color: #dadada;
-  border-radius: 75%;
-  padding:4px;
-  transition: all 100ms ease-out 30ms;
+.toolbar-button {
+  min-width: 20px;
 }
 
-#content img {
-  display: block;
-  height: auto;
-  max-width: 500px;
+#username, #password {
+  padding-left: 5px;
+  font-size:12px;
+  width: 70px;
+  height: 25px;
+  color: blue;
+  margin-right: 10px;
+  border-radius: 3px;
+  background-color: #F0F0F0;
 }
 
-/* Utils */
-
-.content-wrapper {
-  position: relative;
+#label-logon-user {
+  font-size:12px;
 }
 
+md-tabs {
+  background-color: #E8E8E8;
+}
+
+md-toolbar.md-accent > md-tabs.md-default-theme, md-tabs > md-tabs-wrapper > md-tabs-canvas > md-pagination-wrapper > md-tab-item:not([disabled]) {
+  color: white;
+}
+
+md-tabs > md-tabs-wrapper > md-tabs-canvas > md-pagination-wrapper > md-tab-item:not([disabled]).md-active, md-tabs > md-tabs-wrapper > md-tabs-canvas > md-pagination-wrapper > md-tab-item:not([disabled]).md-focused {
+  color: blue;
+  font-weight: bold;
+}
 
 md-bottom-sheet  md-icon {
   margin-right:20px;
@@ -85,24 +68,6 @@ span.name {
   padding-left:5px;
 }
 
-.border-red {
-	border-style: solid;
-	border-width: 2px;
-	border-color: red;
-}
-
-.border-cyan {
-	border-style: solid;
-	border-width: 2px;
-	border-color: cyan;
-}
-
-.border-yellow {
-	border-style: solid;
-	border-width: 2px;
-	border-color: yellow;
-}
-
 .panel-main {
 	width: 90%;
 	margin: 20px;
@@ -112,41 +77,10 @@ span.name {
   overflow: auto;
 }
 
-.toolbar-button {
-  min-width: 30px;
-}
-
 div[class^="panel-"] {
 	margin-top: 20px;
 	margin-bottom: 20px;
   overflow : auto;
-}
-
-span[class^="errorMessage-"] {
-	color: red;
-	margin-bottom: 20px;
-}
-
-span[class^="infoMessage-"] {
-	color: blue;
-	margin-bottom: 20px;
-}
-
-md-input-container[class^="toolbar-"] {
-  font-size:14px;
-  width: 100px;
-	color: white;
-}
-
-label[class^="toolbar-"] {
-  font-size:14px;
-	color: white;
-}
-
-md-checkbox[class^="toolbar-"] {
-  font-size:14px;
-	color: white;
-	margin-right: 50px;
 }
 
 md-input-container[class^="row-bookdetail"], div[class^="row-bookdetail"] {
@@ -154,19 +88,19 @@ md-input-container[class^="row-bookdetail"], div[class^="row-bookdetail"] {
 }
 
 md-input-container[class^="field-bookdetail-first"], div[class^="field-bookdetail-first"] {
-	width:400px; 
+	width:400px;
 	max-width:600px;
 }
 
 md-input-container[class^="field-bookdetail-second"], div[class^="field-bookdetail-second"] {
-	margin-left:20px; 
-	width:400px; 
+	margin-left:20px;
+	width:400px;
 	max-width:600px;
 }
 
 md-input-container[class^="field-bookdetail-remaining"], div[class^="field-bookdetail-remaining"] {
-	margin-left:20px; 
-	width:80%; 
+	margin-left:20px;
+	width:80%;
 	max-width:600px;
 }
 
@@ -182,14 +116,8 @@ md-input-container .md-input {
   border-color: blue;
 }
 
-.grid-book-title {
-  background-color: transparent;
-  color: blue;
-  height: 35px;
-}
-
 md-bottom-sheet > .md-subheader {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 25px;
 }
 
@@ -210,4 +138,26 @@ span[class^="errorMessage-"] {
 span[class^="infoMessage-"] {
 	color: blue;
 	margin-bottom: 20px;
+}
+
+md-grid-list md-grid-tile figure {
+  align-items: flex-start;
+}
+
+.border-red {
+	border-style: solid;
+	border-width: 2px;
+	border-color: red;
+}
+
+.border-cyan {
+	border-style: solid;
+	border-width: 2px;
+	border-color: cyan;
+}
+
+.border-yellow {
+	border-style: solid;
+	border-width: 2px;
+	border-color: yellow;
 }
