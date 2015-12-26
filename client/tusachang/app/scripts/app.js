@@ -1,7 +1,7 @@
 'use strict';
 
-var urlPrefix = 'http://110.175.4.240';
-//var urlPrefix =  '';
+//var urlPrefix = 'http://110.175.4.240';
+var urlPrefix =  '';
 
 var showAlert = function($mdDialog, title, message) {
   $mdDialog.show(

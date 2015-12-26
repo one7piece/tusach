@@ -181,6 +181,13 @@ angular.module('tusachangApp')
     	}
     });
 
+		// listen for login/logout events
+    $rootScope.$on('authentication', function(event, data) {
+      console.log("received event: " + event + ", data:" + data + ", isLogin:" + $rootScope.isLogin);
+			self.showOnlyMyBooks = ($rootScope.isLogin == true);
+			self.updateDisplay();
+    });
+
 		BookService.subscribe($scope, function(event, data) {
 			console.log("bookshelf: received BookService event: " + event);
 			console.log(data);

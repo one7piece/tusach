@@ -25,7 +25,7 @@ angular.module('tusachangApp')
 				{desc: "Owner (A..Z)", name:"owner", order:"asc"},
 				{desc: "Owner (Z..A)", name:"owner", order:"dsc"} ];
     self.cacheProps.sortBy = self.cacheProps.sortRange[3];
-    self.cacheProps.showOnlyMyBooks = true; 
+    self.cacheProps.showOnlyMyBooks = false; 
 
     // subscribe to books changes
     self.subscribe = function(scope, callback) {
@@ -138,7 +138,7 @@ angular.module('tusachangApp')
         });
     };
 
-    self.refreshInterval = 10*1000;
+    self.refreshInterval = 20*1000;
     self.systemInfo = {};
     self.loadSystemInfo = function() {
       //console.log("loading system info...");
