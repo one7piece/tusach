@@ -8,7 +8,7 @@ html, body {
 }
 
 .title {
-  font-size:18px;
+  font-size:16px;
   margin-left: 10px;
 }
 
@@ -36,7 +36,7 @@ md-button.menuBtn > md-icon {
   width: 70px;
   height: 25px;
   color: blue;
-  margin-right: 10px;
+  margin-right: 5px;
   border-radius: 3px;
   background-color: #F0F0F0;
 }
@@ -50,12 +50,14 @@ md-tabs {
 }
 
 md-toolbar.md-accent > md-tabs.md-default-theme, md-tabs > md-tabs-wrapper > md-tabs-canvas > md-pagination-wrapper > md-tab-item:not([disabled]) {
-  color: white;
+  color: black;
+  font-size:12px;
 }
 
 md-tabs > md-tabs-wrapper > md-tabs-canvas > md-pagination-wrapper > md-tab-item:not([disabled]).md-active, md-tabs > md-tabs-wrapper > md-tabs-canvas > md-pagination-wrapper > md-tab-item:not([disabled]).md-focused {
   color: blue;
   font-weight: bold;
+  font-size:12px;
 }
 
 md-bottom-sheet  md-icon {
@@ -164,4 +166,17 @@ md-checkbox {
 	border-style: solid;
 	border-width: 2px;
 	border-color: yellow;
+}
+
+#bookshelf_list {
+  min-height: 300px;
+  width: 100%;
+}
+
+.repeated-item {
+  border-bottom: 1px dotted #757575;
+  box-sizing: border-box;
+  height: 40px;
+  overflow: hidden;
+  margin-right: 16px;
 }

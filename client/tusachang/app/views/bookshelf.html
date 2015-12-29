@@ -12,7 +12,7 @@
 					</md-select>
 				</md-input-container>
 			</div>
-			<div style="margin-left:10px;">
+			<div style="margin-left:5px;">
 				<md-checkbox ng-model="bookshelf.showOnlyMyBooks" ng-change="bookshelf.updateDisplay()" aria-label="checkbox1">My Books Only</md-checkbox>
 			</div>
 		</div>
@@ -20,7 +20,8 @@
 
  <md-content>
     <md-list>
-      <md-list-item class="md-2-line" ng-repeat="book in bookshelf.books">
+		<md-virtual-repeat-container id="bookshelf_list" ng-style="bookshelf.listStyle"">
+      <md-list-item class="md-2-line"  md-virtual-repeat="book in bookshelf.books">
 				<md-button ng-href="{{bookshelf.getDownloadLink(book)}}" style="min-width:58px;height:48px;" aria-label="{{book.title}}">
 					<img src="./images/book.png">
 				</md-button>
@@ -40,6 +41,7 @@
         </md-button>
 
       </md-list-item>
+		</md-virtual-repeat-container>
     </md-list>
   </md-content>
 

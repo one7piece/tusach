@@ -8,8 +8,8 @@
  * Controller of the tusachangApp
  */
 angular.module('tusachangApp')
-	.controller('BookshelfCtrl', ['$rootScope', '$state', '$scope', '$mdDialog', '$filter', 'BookService',
-			function ($rootScope, $state, $scope, $mdDialog, $filter, BookService) {
+	.controller('BookshelfCtrl', ['$rootScope', '$state', '$scope', '$window', '$mdDialog', '$filter', 'BookService',
+			function ($rootScope, $state, $scope, $window, $mdDialog, $filter, BookService) {
 
 		console.log("bookshelfCtrl creating...");
 		var self = this;
@@ -20,6 +20,15 @@ angular.module('tusachangApp')
 		self.sortRange = BookService.cacheProps.sortRange;
 		self.sortBy = BookService.cacheProps.sortBy;
 		self.showOnlyMyBooks = BookService.cacheProps.showOnlyMyBooks;
+		var height_offset = 230;
+		self.listStyle = {
+      height: ($window.innerHeight - height_offset) + 'px'
+    };
+    $window.addEventListener('resize', onResize);
+    function onResize() {
+      self.listStyle.height = ($window.innerHeight - height_offset) + 'px';
+      if(!$scope.$root.$$phase) $scope.$digest();
+    }
 
 		self.sort = function() {
 			if (self.sortBy) {
@@ -67,6 +76,7 @@ angular.module('tusachangApp')
 		}
 
 		self.processBooks = function(books) {
+			console.log("processBooks...");
 			self.books = [];
 			for (var i=0; i<books.length; i++) {
 				var book = books[i];
@@ -80,6 +90,7 @@ angular.module('tusachangApp')
 					self.books.push(book);
 				}
 			}
+
 			self.statusType = "info";
 			self.statusMessage = self.books.length + " books loaded";
 			self.sort();

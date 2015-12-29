@@ -31,7 +31,6 @@ angular
     'ngResource',
     'ngRoute',
     'ngSanitize',
-    'ngTouch',
 		'ui.router'
   ])
   .filter('trusted', ['$sce', function ($sce) {
