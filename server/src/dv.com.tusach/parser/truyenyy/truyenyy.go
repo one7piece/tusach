@@ -29,7 +29,7 @@ type Truyenyy struct {
 
 func (p Truyenyy) Validate(url string) (string, error) {
 	validated := 0
-	if strings.Contains(url, "Truyenyy") {
+	if strings.Contains(url, "truyenyy") {
 		validated = 1
 	}
 
