@@ -72,7 +72,7 @@ func GetBookSites() []string {
 }
 
 func GetBookSite(url string) BookSite {
-	site := BookSite{}
+	site := BookSite{Parser:""}
 	if url == "" {
 		log.Println("Parameter url is empty")
 		return site
@@ -117,8 +117,11 @@ func GetBookSite(url string) BookSite {
 			break
 		}
 	}
-
-	log.Printf("Found book site:[%v] for url:%s\n", site, url)
+	if (site.Parser == "") {
+		log.Printf("No book site found for url: %s\n", url)
+	} else {
+		log.Printf("Found book site:[%v] for url:%s\n", site, url)
+	}
 	return site
 }
 

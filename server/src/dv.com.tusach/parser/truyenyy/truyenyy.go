@@ -4,7 +4,6 @@ import (
 	//"bytes"
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
-	//"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"encoding/json"
@@ -30,7 +29,7 @@ type Truyenyy struct {
 
 func (p Truyenyy) Validate(url string) (string, error) {
 	validated := 0
-	if strings.Contains(url, "Truyenyy") {
+	if strings.Contains(url, "truyenyy") {
 		validated = 1
 	}
 
@@ -59,9 +58,20 @@ func (p Truyenyy) GetChapterHtml(rawHtml string, chapterTitle *string) (string, 
 	textStr := ""
 	*chapterTitle = ""
 	//var buffer bytes.Buffer
-	doc.Find("div#id_noidung_chuong").Each(func(i int, s *goquery.Selection) {
-		textStr, _ = s.Html()
-	})
+	elm := doc.Find("div#id_noidung_chuong").First()
+	if (elm != nil) {
+		textStr, err = elm.Html()
+		if (err == nil) {
+			fmt.Println("******* Chapter Html *******\n" + textStr)
+		} else {
+			return "", err
+		}
+	}
+
+	elm = doc.Find("div#noidungtruyen h1").First()
+	if (elm != nil) {
+		*chapterTitle = elm.Text();
+	}
 
 	chapterHtml := ""
 	if textStr != "" {
@@ -69,7 +79,7 @@ func (p Truyenyy) GetChapterHtml(rawHtml string, chapterTitle *string) (string, 
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	//fmt.Println("chapter title: ", *chapterTitle)
+	fmt.Println("chapter title: ", *chapterTitle)
 	return chapterHtml, nil
 }
 
@@ -79,27 +89,13 @@ func (p Truyenyy) GetNextPageUrl(rawHtml string, html string) (string, error) {
 		return "", err
 	}
 	nextPageUrl := ""
-	doc.Find("body").Find("a").Each(func(i int, s *goquery.Selection) {
-		rel, _ := s.Attr("rel")
-		if rel == "next" {
+	doc.Find("body").Find(".mobi-chuyentrang a").Each(func(i int, s *goquery.Selection) {
+		txt := s.Text()
+		if strings.TrimSpace(txt) == "Sau" {
 			link, _ := s.Attr("href")
 			nextPageUrl = link
 			return
 		}
 	})
-	if nextPageUrl != "" {
-		if strings.HasPrefix(nextPageUrl, "showthread") {
-			nextPageUrl = "forum/" + nextPageUrl
-		} else if strings.HasPrefix(nextPageUrl, "/showthread") {
-			nextPageUrl = "/forum" + nextPageUrl
-		}
-	}
-	if !strings.HasPrefix(nextPageUrl, "http://www.tangthuvien.vn") {
-		if strings.HasPrefix(nextPageUrl, "/") {
-			nextPageUrl = "http://www.tangthuvien.vn" + nextPageUrl
-		} else {
-			nextPageUrl = "http://www.tangthuvien.vn/" + nextPageUrl
-		}
-	}
 	return nextPageUrl, nil
 }
