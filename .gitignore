@@ -20,3 +20,5 @@ tusachang/test
 
 
 server/library/tusach.db
+*.gwt-log
+server/library/books/00009999/OEBPS/chapter0001-raw.html
