@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
-	"errors"
+	//"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"encoding/json"
@@ -15,35 +15,20 @@ import (
 )
 
 func main() {
-	var configFile string
-	var op string
-	var url string
-	var inputFile string
-	var outputFile string
-
-	err := parser.ReadArgs(&configFile, &op, &url, &inputFile, &outputFile)
+	site := Tangthuvien{}
+	str, err := parser.Execute(site)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
-	}
-
-	// load configuration
-	util.LoadConfig(configFile)
-
-	if op == "v" {
-		fmt.Println(Validate(url))
 	} else {
-		str, err := Parse(url, inputFile, outputFile)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(1)
-		} else {
-			fmt.Println(str)
-		}
+		fmt.Println(str)
 	}
 }
 
-func Validate(url string) (string, error) {
+type Tangthuvien struct {
+}
+
+func (p Tangthuvien) Validate(url string) (string, error) {
 	validated := 0
 	if strings.Contains(url, "tangthuvien") {
 		validated = 1
@@ -52,48 +37,16 @@ func Validate(url string) (string, error) {
 	m := map[string]string{"validated": strconv.Itoa(validated)}
 	m["batchSize"] = "50"
 	m["batchDelaySec"] = "10"
+	m["url"] = "http://tangthuvien.com"
 	json, _ := json.Marshal(m)
 	return "\nparser-output:" + string(json) + "\n", nil
 }
 
-func Parse(chapterUrl string, inputFile string, outputFile string) (string, error) {
-	// load the request
-	headers := map[string]string{}
-	form := map[string]string{}
-	responseBytes, err := parser.ExecuteRequest("GET", chapterUrl, 10, 2, headers, form)
-	if err != nil {
-		return "", err
-	}
-	rawHtml := string(responseBytes)
-	// save raw file
-	err = util.SaveFile(inputFile, responseBytes)
-	if err != nil {
-		return "", errors.New("Error saving file: " + inputFile + ". " + err.Error())
-	}
-
-	chapterTitle := ""
-	html, err := getChapterHtml(rawHtml, &chapterTitle)
-	if err != nil || html == "" {
-		return "", errors.New("Error parsing chapter content from: " + inputFile + ". " + err.Error())
-	}
-
-	nextPageUrl, err := getNextPageUrl(rawHtml, html)
-	if err != nil {
-		return "", errors.New("Error parsing nextPageUrl from: " + inputFile + ". " + err.Error())
-	}
-
-	// write to file
-	err = util.SaveFile(outputFile, []byte(html))
-	if err != nil {
-		return "", errors.New("Error writing to file: " + outputFile + ". " + err.Error())
-	}
-
-	m := map[string]string{"chapterTitle": chapterTitle, "nextPageUrl": nextPageUrl}
-	json, _ := json.Marshal(m)
-	return "\nparser-output:" + string(json) + "\n", nil
+func (p Tangthuvien) Parse(chapterUrl string, inputFile string, outputFile string) (string, error) {
+	return parser.DefaultParse(p, chapterUrl, inputFile, outputFile, 10, 2)
 }
 
-func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
+func (p Tangthuvien) GetChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
 	if err != nil {
 		return "", err
@@ -127,32 +80,7 @@ func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 			}
 		}
 	})
-	/*
-		doc.Find(".content").Each(func(i int, s *goquery.Selection) {
-			nodeHtml, err := s.Html()
-			if err == nil {
-				if strings.Index(nodeHtml, "post_message") != -1 {
-					buffer.WriteString("<br>")
-					nodeText := s.Text()
-					// replace \n with <br>
-					nodeText = strings.Replace(nodeText, "\n", "<br>", -1)
-					buffer.WriteString(nodeText)
-					buffer.WriteString("<br><br><br>")
-					// add new page
 
-					str := parser.GetChapterTitle(nodeHtml)
-					if str != "" {
-						if title1 == "" {
-							title1 = str
-							*chapterTitle = title1
-						} else {
-							*chapterTitle = title1 + "/" + str
-						}
-					}
-				}
-			}
-		})
-	*/
 	chapterHtml := ""
 	textStr := buffer.String()
 	if textStr != "" {
@@ -164,7 +92,7 @@ func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	return chapterHtml, nil
 }
 
-func getNextPageUrl(rawHtml string, html string) (string, error) {
+func (p Tangthuvien) GetNextPageUrl(rawHtml string, html string) (string, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(rawHtml))
 	if err != nil {
 		return "", err

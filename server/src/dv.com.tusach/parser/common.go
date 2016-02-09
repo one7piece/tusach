@@ -5,7 +5,7 @@ import (
 	"errors"
 	"flag"
 	"io/ioutil"
-	"log"
+	//"log"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -15,12 +15,13 @@ import (
 	"golang.org/x/net/proxy"
 	"encoding/json"
 	"bytes"
+	"github.com/golang/glog"
 )
 
 var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"}
 
 type SiteParser interface {
-	Validate(url string) (string, error)	
+	Validate(url string) (string, error)
 	Parse(chapterUrl string, inputFile string, outputFile string) (string, error)
 	GetChapterHtml(rawHtml string, chapterTitle *string) (string, error)
 	GetNextPageUrl(rawHtml string, html string) (string, error)
@@ -159,12 +160,12 @@ func setupHttpClient(timeout time.Duration) (*http.Client, error) {
 	if (proxyUrl == "") {
 		return &http.Client{Timeout: timeout}, nil
 	}
-	log.Println("Using proxy URL: " + proxyUrl)
+	glog.Info("Using proxy URL: " + proxyUrl)
 	proxyAuth := proxy.Auth{User: util.GetConfiguration().ProxyUsername,
 		Password: util.GetConfiguration().ProxyPassword}
 	proxyDialer, err := proxy.SOCKS5("tcp", proxyUrl, &proxyAuth, proxy.Direct)
 	if (err != nil) {
-		log.Println("sock5 proxy creation error!", err.Error())
+		glog.Error("sock5 proxy creation error!", err.Error())
 		return nil, err
 	}
 	transport := &http.Transport{Dial: proxyDialer.Dial}
@@ -219,30 +220,31 @@ func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries in
 		n = 1
 	}
 	for i := 0; i < n; i++ {
-		log.Printf("Attempt %d/%d to load from %s\n", (i + 1), n, targetUrl)
+		glog.Info("Attempt %d/%d to load from %s\n", (i + 1), n, targetUrl)
 		resp, err := client.Do(req)
 		if err != nil {
-			log.Printf("Error loading from %s. %s\n", targetUrl, err.Error())
+			glog.Error("Error loading from %s. %s\n", targetUrl, err.Error())
 		} else {
 			defer resp.Body.Close()
 			result, err = ioutil.ReadAll(resp.Body)
-			resp.Body.Close()		
+			resp.Body.Close()
 			if result != nil && err == nil {
 				break
-			}	
-			result = nil	
+			}
+			result = nil
 		}
 		time.Sleep(30 * time.Second)
 	}
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if result == nil || len(result) == 0 {
+		glog.Error("No html data loaded")
 		return result, errors.New("No html data loaded")
 	}
-	
+
 	return result, nil
 }
 
@@ -268,5 +270,5 @@ func ExtractNodeContents(sel *goquery.Selection, buffer *bytes.Buffer) {
 			buffer.WriteString("<br/>")
 			buffer.WriteString(s.Text())
 		}
-	})	
-} 
+	})
+}

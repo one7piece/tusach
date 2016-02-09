@@ -8,12 +8,12 @@ import (
 	"bytes"
 	"dv.com.tusach/util"
 	"github.com/PuerkitoBio/goquery"
-	//"golang.org/x/net/html"
 	"io/ioutil"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+	"github.com/golang/glog"
 )
 
 type MyInt int
@@ -26,6 +26,11 @@ type User struct {
 }
 
 var mymap map[string]User
+
+func TestGLog(t *testing.T) {
+	glog.Info("info....Testing glog logging....")
+	glog.Error("Error...Testing glog logging...")
+}
 
 func xTestGoQuery(t *testing.T) {
 	log.Printf("\nTestGoQuery...")

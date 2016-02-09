@@ -31,7 +31,8 @@ angular
     'ngResource',
     'ngRoute',
     'ngSanitize',
-		'ui.router'
+		'ui.router',
+    'matchmedia-ng'
   ])
   .filter('trusted', ['$sce', function ($sce) {
     return function(url) {

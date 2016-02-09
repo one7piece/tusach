@@ -7,12 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
+	//"log"
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
+	"github.com/golang/glog"
 )
 
 type BookSite struct {
@@ -34,20 +35,20 @@ func GetBookSites() []string {
 	// get list of parsers
 	names, err := util.ListDir(util.GetParserPath(), true)
 	if err != nil {
-		log.Println("Error reading parser directory. " + err.Error())
+		glog.Error("Error reading parser directory. " + err.Error())
 		return sites
 	}
 	for _, name := range names {
 		// call parser to check url support
-		log.Println("executing validate command: " + util.GetParserPath() + "/" + name)
+		//glog.Info("executing validate command: " + util.GetParserPath() + "/" + name)
 		cmd := exec.Command(util.GetParserPath()+"/"+name,
 			"-configFile="+util.GetConfigFile(), "-op=v",
 			"-url=http://dummy.com")
 		out, err := cmd.CombinedOutput()
 		str := string(out)
-		log.Println("validate command output: ", str)
+		//glog.Info("validate command output: ", str)
 		if err != nil {
-			log.Println("Error checking url. " + err.Error())
+			glog.Error("Error checking url. " + err.Error())
 			return sites
 		}
 
@@ -67,33 +68,33 @@ func GetBookSites() []string {
 		}
 	}
 
-	log.Printf("Found book sites: [%v]\n", sites)
+	//glog.Info("Found book sites: [%v]\n", sites)
 	return sites
 }
 
 func GetBookSite(url string) BookSite {
 	site := BookSite{Parser:""}
 	if url == "" {
-		log.Println("Parameter url is empty")
+		glog.Info("Parameter url is empty")
 		return site
 	}
 	// get list of parsers
 	names, err := util.ListDir(util.GetParserPath(), true)
 	if err != nil {
-		log.Println("Error reading parser directory. " + err.Error())
+		glog.Error("Error reading parser directory. " + err.Error())
 		return site
 	}
 	for _, name := range names {
 		// call parser to check url support
-		log.Println("executing validate command: " + util.GetParserPath() + "/" + name)
+		//glog.Info("executing validate command: " + util.GetParserPath() + "/" + name)
 		cmd := exec.Command(util.GetParserPath()+"/"+name,
 			"-configFile="+util.GetConfigFile(), "-op=v",
 			"-url="+url)
 		out, err := cmd.CombinedOutput()
 		str := string(out)
-		log.Println("validate command output: ", str)
+		//log.Println("validate command output: ", str)
 		if err != nil {
-			log.Println("Error validating url. " + err.Error())
+			glog.Error("Error validating url. " + err.Error())
 			return site
 		}
 
@@ -118,9 +119,9 @@ func GetBookSite(url string) BookSite {
 		}
 	}
 	if (site.Parser == "") {
-		log.Printf("No book site found for url: %s\n", url)
+		glog.Error("No book site found for url: %s\n", url)
 	} else {
-		log.Printf("Found book site:[%v] for url:%s\n", site, url)
+		glog.Info("Found book site:[%v] for url:%s\n", site, url)
 	}
 	return site
 }
@@ -136,10 +137,10 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 	em.StartListening(sink)
 
 	go func() {
-		log.Printf("start monitoring book: %d-%s\n", book.ID, book.Title)
+		glog.Info("start monitoring book: %d-%s\n", book.ID, book.Title)
 		for {
 			msg, more := <-c
-			log.Printf("Received message: %s for book: %d, more:%v\n", msg, book.ID, more)
+			glog.Info("Received message: %s for book: %d, more:%v\n", msg, book.ID, more)
 			if msg == "abort" {
 				aborted = true
 				break
@@ -148,7 +149,7 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 				break
 			}
 		}
-		log.Printf("stop monitoring book: %d-%s\n", book.ID, book.Title)
+		glog.Info("stop monitoring book: %d-%s\n", book.ID, book.Title)
 	}()
 
 	url := book.CurrentPageUrl
@@ -178,13 +179,13 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 		if newChapter.Title == "" {
 			newChapter.Title = "Chapter " + strconv.Itoa(newChapter.ChapterNo)
 		}
-		log.Printf("completed chapter: %d:%s, nextPageUrl:%s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
+		glog.Info("completed chapter: %d:%s, nextPageUrl:%s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
 		// save the chapter
 		err = SaveChapter(newChapter)
 		if err != nil {
 			errorMsg = err.Error()
-			log.Println("Error saving chapter. " + errorMsg)
+			glog.Error("Error saving chapter. " + errorMsg)
 			break
 		}
 		book.CurrentPageNo = newChapterNo
@@ -193,7 +194,7 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 
 		// check for no more pages
 		if nextPageUrl == "" {
-			log.Println("No more next page url found.")
+			glog.Info("No more next page url found.")
 			break
 		} else {
 			_, err := saveBook(em, book, false)
@@ -204,7 +205,7 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 		}
 
 		if nextPageUrl == url {
-			log.Println("Internal error. next page url is same as current page url: ", url)
+			glog.Error("Internal error. next page url is same as current page url: ", url)
 			break
 		}
 		url = nextPageUrl
@@ -213,7 +214,7 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 	book.ErrorMsg = errorMsg
 	if book.ErrorMsg != "" {
 		book.Status = STATUS_ERROR
-		log.Println(book.ErrorMsg)
+		glog.Error(book.ErrorMsg)
 	} else if aborted {
 		book.Status = STATUS_ABORTED
 	} else {
@@ -223,14 +224,14 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 	chapters, err := LoadChapters(book.ID)
 	if err != nil {
 		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.ID, err.Error())
-		log.Println(errorMsg)
+		glog.Error(errorMsg)
 		book.ErrorMsg = errorMsg
 		book.Status = STATUS_ERROR
 	} else {
 		err = MakeEpub(book, chapters)
 		if err != nil {
 			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
-			log.Println(errorMsg)
+			glog.Error(errorMsg)
 			book.ErrorMsg = errorMsg
 			book.Status = STATUS_ERROR
 			book.EpubCreated = false
@@ -361,17 +362,19 @@ func MakeEpub(book Book, chapters []Chapter) error {
 	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, util.GetBookPath(book.ID))
 	out, err := cmd.CombinedOutput()
 	str = string(out)
-	log.Println("epub command output: ", str)
+	glog.Info("epub command output: ", str)
 	if err != nil {
+		glog.Error("Error creating epub file. " + err.Error())
 		return errors.New("Error creating epub file. " + err.Error())
 	}
 	str = string(out)
-	log.Println("epub command output: ", str)
+	glog.Info("epub command output: ", str)
 
 	if _, err := os.Stat(epubFile); os.IsNotExist(err) {
+		glog.Error("Error creating epub file. " + epubFile)
 		return errors.New("Error creating epub file: " + epubFile)
 	} else {
-		log.Println("Created epub file: " + epubFile)
+		glog.Info("Created epub file: " + epubFile)
 	}
 
 	return nil
@@ -384,7 +387,7 @@ func CreateChapter(parser string, chapterUrl string, chapter *Chapter) (string, 
 	filename := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
 
 	// call parser to create chapter html
-	log.Printf("Calling parser: %s to create chapter: %s\n", parser, chapterUrl)
+	glog.Info("Calling parser: %s to create chapter: %s\n", parser, chapterUrl)
 
 	cmd := exec.Command(util.GetParserPath()+"/"+parser,
 		"-configFile="+util.GetConfigFile(), "-op=p", "-url="+chapterUrl,
@@ -395,7 +398,7 @@ func CreateChapter(parser string, chapterUrl string, chapter *Chapter) (string, 
 		outStr = string(out)
 	}
 	if err != nil {
-		log.Printf("start parser command output:[\n%s\n]end output\n", outStr)
+		glog.Error("Error executing parser command: " + err.Error() + ". command out: " + outStr)
 		return "", errors.New("Error executing parser command: " + err.Error())
 	}
 

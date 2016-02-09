@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/golang/glog"
 )
 
 type MapData struct {
@@ -36,7 +37,7 @@ func main() {
 
 	loadData()
 
-	log.Println("Starting GO web server at " + util.GetConfiguration().ServerBindAddress +
+	glog.Info("Starting GO web server at " + util.GetConfiguration().ServerBindAddress +
 		":" + strconv.Itoa(util.GetConfiguration().ServerBindPort) +
 		", server path: " + util.GetConfiguration().ServerPath +
 		", server path2: " + util.GetConfiguration().ServerPath2)
@@ -98,7 +99,7 @@ func main() {
 		}
 	}()
 
-	log.Println("GOWebServer started successfully")
+	glog.Info("GOWebServer started successfully")
 
 	if err := http.ListenAndServe(util.GetConfiguration().ServerBindAddress+":"+
 		strconv.Itoa(util.GetConfiguration().ServerBindPort), nil); err != nil {
@@ -130,6 +131,7 @@ func downloadBook(w http.ResponseWriter, r *http.Request) {
 	epubFile := util.GetBookEpubFilename(book.ID, book.Title)
 	data, err := ioutil.ReadFile(epubFile)
 	if err != nil {
+		glog.Error("Failed to read epub file (bookId=" + strconv.Itoa(book.ID) + "): " + err.Error())
 		http.Error(w, "Failed to read epub file: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -161,11 +163,10 @@ func GetSites(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func Login(w rest.ResponseWriter, r *rest.Request) {
-	log.Println("login ")
 	dummy := maker.User{}
 	err := r.DecodeJsonPayload(&dummy)
 	if err != nil {
-		log.Println("Missing or invalid user object")
+		glog.Warning("Missing or invalid user object")
 		rest.Error(w, "Missing or invalid user object", 400)
 		return
 	}
@@ -176,7 +177,7 @@ func Login(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 
-	log.Println("login user: " + logonUser.Name)
+	glog.Info("logged in user: " + logonUser.Name + ", sessionId:" + logonUser.SessionId)
 	w.WriteJson(logonUser)
 }
 
@@ -187,6 +188,7 @@ func Logout(w rest.ResponseWriter, r *rest.Request) {
 	logonUser := sessionManager.Logout(sessionId)
 	if logonUser != nil {
 		valid = "1"
+		glog.Info("logged out user: " + logonUser.Name + ", sessionId:" + logonUser.SessionId)
 	}
 	w.WriteJson(map[string]string{"status": valid})
 }
@@ -224,7 +226,6 @@ func RechargeSession(w rest.ResponseWriter, r *rest.Request) {
 
 func getUser(name string) maker.User {
 	for _, u := range users {
-		log.Printf("parser user: %s\n", u.Name)
 		if u.Name == name {
 			return u
 		}
@@ -234,7 +235,7 @@ func getUser(name string) maker.User {
 
 func GetBooks(w rest.ResponseWriter, r *rest.Request) {
 	idstr := r.PathParam("id")
-	log.Printf("GetBooks: %s", idstr)
+	//log.Printf("GetBooks: %s", idstr)
 	result := []maker.Book{}
 	if idstr == "0" {
 		result = books
@@ -261,14 +262,16 @@ func GetBooks(w rest.ResponseWriter, r *rest.Request) {
 func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 	sessionId := r.PathParam("session")
 	op := r.PathParam("cmd")
-	log.Printf("UpdateBook: session:%s, op:%s", sessionId, op)
+	glog.Info("UpdateBook: session:%s, op:%s", sessionId, op)
 	if op != "create" && op != "abort" && op != "resume" && op != "update" && op != "delete" {
+		glog.Error("Invalid op value: " + op)
 		rest.Error(w, "Invalid op value: "+op, 400)
 		return
 	}
 	// validate session
 	user := sessionManager.GetLogonUser(sessionId)
 	if user.Name == "" {
+		glog.Error("No permission")
 		rest.Error(w, "No permission", 400)
 		return
 	}
@@ -281,12 +284,14 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 	updateBook := maker.Book{}
 	err := r.DecodeJsonPayload(&updateBook)
 	if err != nil {
+		glog.Error("Invalid request book payload: "+err.Error())
 		rest.Error(w, "Invalid request book payload: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	currentBook, err := maker.LoadBook(updateBook.ID)
 	if err != nil {
+		glog.Error("Error loading book: " + strconv.Itoa(updateBook.ID) + ": " + err.Error())
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -363,6 +368,7 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 	message := "OK"
 	if err != nil {
 		message = "ERROR: " + err.Error()
+		glog.Error(err.Error())
 	}
 
 	w.WriteJson(map[string]string{"status": message})
@@ -372,7 +378,7 @@ func CreateBook(user LogonUser, w rest.ResponseWriter, r *rest.Request) {
 	newBook := maker.Book{}
 	err := r.DecodeJsonPayload(&newBook)
 	if err != nil {
-		log.Printf("Invalid request book payload. %v\n", err)
+		glog.Info("Invalid request book payload. %v\n", err)
 		rest.Error(w, "Invalid request book payload: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -397,12 +403,14 @@ func CreateBook(user LogonUser, w rest.ResponseWriter, r *rest.Request) {
 		}
 	}
 	if numActive >= util.GetConfiguration().MaxActionBooks {
+		glog.Error("Too many concurrent books in progress (" + strconv.Itoa(numActive) + ")")
 		rest.Error(w, "Too many concurrent books in progress", 400)
 		return
 	}
 
 	site := maker.GetBookSite(newBook.StartPageUrl)
 	if site.Parser == "" {
+		glog.Error("No parser found for url: "+newBook.StartPageUrl)
 		rest.Error(w, "No parser found for url: "+newBook.StartPageUrl, 400)
 		return
 	}
@@ -411,6 +419,7 @@ func CreateBook(user LogonUser, w rest.ResponseWriter, r *rest.Request) {
 	newBook.CreatedTime = time.Now()
 	bookId, err := maker.SaveBook(newBook)
 	if err != nil {
+		glog.Error("Failed to save book: " + err.Error())
 		rest.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -433,13 +442,15 @@ func (sink EventSink) HandleEvent(event util.EventData) {
 		str := event.Data.(string)
 		bookId, err := strconv.Atoi(str)
 		if err != nil {
+			glog.Fatal("Invalid book id, expecting a number")
+			glog.Flush()
 			panic("Invalid book id, expecting a number")
 			return
 		}
 		reloadBook(bookId)
 		em, ok := eventManagers[bookId]
 		if ok {
-			log.Printf("Book %d completed, closing channel\n", bookId)
+			glog.Info("Book %d completed, closing channel\n", bookId)
 			close(em.Channel)
 			delete(eventManagers, bookId)
 		}
@@ -447,10 +458,12 @@ func (sink EventSink) HandleEvent(event util.EventData) {
 		str := event.Data.(string)
 		bookId, err := strconv.Atoi(str)
 		if err != nil {
+			glog.Fatal("Invalid book id, expecting a number")
+			glog.Flush()
 			panic("Invalid book id, expecting a number")
 			return
 		}
-		log.Printf("Received book updated event for %d, reloading book\n", bookId)
+		glog.Info("Received book updated event for %d, reloading book\n", bookId)
 		reloadBook(bookId)
 	}
 }
@@ -458,7 +471,7 @@ func (sink EventSink) HandleEvent(event util.EventData) {
 func reloadBook(bookId int) {
 	updatedBook, err := maker.LoadBook(bookId)
 	if err != nil {
-		log.Printf("Error loading book: %d - %s\n", bookId, err.Error())
+		glog.Error("Error loading book: %d - %s\n", bookId, err.Error())
 	} else {
 		for i := 0; i < len(books); i++ {
 			if books[i].ID == updatedBook.ID {
@@ -517,7 +530,7 @@ func loadData() {
 		}
 		users = []maker.User{adminUser, dadUser, guestUser}
 	}
-	log.Printf("found %d users\n", len(users))
+	glog.Info("found %d users\n", len(users))
 
 	// load books
 	books, err = maker.LoadBooks()
@@ -572,7 +585,7 @@ func (s *SessionManager) Login(name string, password string) (*LogonUser, error)
 	// validate user/password
 	user := getUser(name)
 	if user.Name == "" || user.Password != password {
-		log.Printf("Wrong user name or password: '%s'/'%s'-'%s'/'%s'\n", user.Name, user.Password, name, password)
+		glog.Warning("Wrong user name or password: '%s'/'%s'-'%s'/'%s'\n", user.Name, user.Password, name, password)
 		return nil, errors.New("Wrong user name or password")
 	}
 
@@ -601,7 +614,7 @@ func (s *SessionManager) UpdateSessionTime(numSecs int) {
 	for id, user := range s.sessions {
 		user.TimeLeftInSec -= numSecs
 		if user.TimeLeftInSec <= 0 {
-			log.Printf("Session %s(%s) has expired, removed from cache\n", user.Name, id)
+			glog.Info("Session %s(%s) has expired, removed from cache\n", user.Name, id)
 			delete(s.sessions, id)
 		}
 	}
