@@ -104,5 +104,12 @@ func (p Luongsonbac) GetNextPageUrl(rawHtml string, html string) (string, error)
 			return
 		}
 	})
+
+	if (nextPageUrl != "") {
+		if !strings.HasPrefix(nextPageUrl, "http://www.lsb-thuquan.eu/index.php/") {
+			nextPageUrl = "http://www.lsb-thuquan.eu/index.php/" + nextPageUrl
+		}
+	}
+
 	return nextPageUrl, nil
 }
