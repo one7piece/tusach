@@ -1,0 +1,8 @@
+{
+	"serverPath" : "/home/dvan/webserver/html/GTusach/war",
+	"serverPath2" : "/home/dvan/webserver/html/tusachang/dist",
+	"libraryPath" : "/home/dvan/webserver/library",
+	"dbFilename" : "/home/dvan/webserver/library/tusach.db",
+	"ServerBindPort" : 8888
+}
+	
