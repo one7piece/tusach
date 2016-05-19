@@ -98,7 +98,7 @@ func (p Luongsonbac) GetNextPageUrl(rawHtml string, html string) (string, error)
 	}
 	nextPageUrl := ""
 	doc.Find("a").Each(func(i int, s *goquery.Selection) {
-		if strings.TrimSpace(s.Text()) == ">>" {
+		if strings.TrimSpace(s.Text()) == "»" {
 			link, _ := s.Attr("href")
 			nextPageUrl = link
 			return
