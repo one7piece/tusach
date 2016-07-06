@@ -66,3 +66,19 @@ type ChapterImage struct {
 	fileName  string
 	imageData []byte
 }
+
+type Persistence interface {
+	InitDB()
+	CloseDB()
+	GetSystemInfo(forceReload bool) (SystemInfo, error)
+	SaveSystemInfo(info SystemInfo) error
+	LoadUsers() ([]User, error)
+	SaveUser(user User) error
+	DeleteUser(userName string) error
+	LoadBooks() ([]Book, error)
+	LoadBook(id int) (Book, error)
+	SaveBook(book Book) (retId int, retErr error)
+	DeleteBook(bookId int) error
+	LoadChapters(bookId int) ([]Chapter, error)
+	SaveChapter(chapter Chapter) error
+}

@@ -1,11 +1,8 @@
 package main
 
 import (
-	"dv.com.tusach/maker"
-	"dv.com.tusach/util"
 	"errors"
 	"flag"
-	"github.com/ant0ine/go-json-rest/rest"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,28 +10,27 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"dv.com.tusach/maker"
+	"dv.com.tusach/persistence"
+	"dv.com.tusach/util"
 	"github.com/golang/glog"
+	"github.com/one7piece/httprest"
 )
 
 type MapData struct {
 	data map[string]string `json:data`
 }
 
+var bookMaker maker.BookMaker
 var users []maker.User
 var books []maker.Book
 var scripts []maker.ParserScript
 var eventManagers map[int]util.EventManager
+
 const sessionExpiredTimeSec = 60 * 60
-var sessionManager *SessionManager
 
 func main() {
-	//f, err := os.OpenFile("webserver.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	//if err != nil {
-	//log.Fatal("error opening file: %v", err)
-	//}
-	//defer f.Close()
-	//log.SetOutput(f)
-
 	loadData()
 
 	glog.Info("Starting GO web server at " + util.GetConfiguration().ServerBindAddress +
@@ -42,69 +38,37 @@ func main() {
 		", server path: " + util.GetConfiguration().ServerPath +
 		", server path2: " + util.GetConfiguration().ServerPath2)
 
+	db := persistence.Sqlite3{}
+	db.InitDB()
+	bookMaker.DB = db
+
 	// create channels map
 	eventManagers = make(map[int]util.EventManager)
-	sessionManager = NewSessionManager()
-	//sessions = make(map[string]maker.User)
-	//sessionTimeLeftSecs = make(map[string]int)
 
-	api := rest.NewApi()
-	api.Use(rest.DefaultDevStack...)
-	api.Use(&rest.CorsMiddleware{
-		RejectNonCorsRequests: false,
-		OriginValidator: func(origin string, request *rest.Request) bool {
-			log.Printf("OriginValidator: %s\n", origin)
-			//return origin == "http://my.other.host"
-			return true
-		},
-		AllowedMethods: []string{"GET", "POST", "PUT"},
-		AllowedHeaders: []string{
-			"Accept", "Content-Type", "X-Custom-Header", "Origin"},
-		AccessControlAllowCredentials: true,
-		AccessControlMaxAge:           3600,
-	})
+	rest := httprest.New()
+	rest.Auth = httprest.JWTAuth{SecretKey: []byte("pi.tusach")}
+	rest.LOGON("/login")
+	//rest.LOGOUT("/logout")
+	rest.GET("/systeminfo", GetSystemInfo)
+	rest.GET("/sites", GetSites)
+	rest.GET("/books/:id", GetBooks)
+	rest.GET("/user", GetUser)
+	rest.POST("/book/:cmd", UpdateBook)
 
-	router, err := rest.MakeRouter(
-		&rest.Route{"GET", "/systeminfo", GetSystemInfo},
-		&rest.Route{"GET", "/sites", GetSites},
-		&rest.Route{"GET", "/books/:id", GetBooks},
-		&rest.Route{"POST", "/book/:session/:cmd", UpdateBook},
-		&rest.Route{"POST", "/login", Login},
-		&rest.Route{"POST", "/logout/:session", Logout},
-		&rest.Route{"GET", "/user/:session", GetUser},
-		&rest.Route{"GET", "/validate/:session", ValidateSession},
-		&rest.Route{"POST", "/recharge/:session", RechargeSession},
-	)
-	if err != nil {
-		log.Fatal("GOWebServer - ERROR! ", err)
-		os.Exit(1)
-	}
-
-	api.SetApp(router)
+	// TODO handle CORS
 
 	// api handler
-	http.Handle("/api/", http.StripPrefix("/api", api.MakeHandler()))
+	http.Handle("/api/", http.StripPrefix("/api", rest.Router))
 	// download file handler
 	http.HandleFunc("/downloadBook/", downloadBook)
 	// static file handler
 	http.Handle("/", http.FileServer(http.Dir(util.GetConfiguration().ServerPath)))
-	if (util.GetConfiguration().ServerPath2 != "") {
-		http.Handle("/v2/", http.StripPrefix("/v2", http.FileServer(http.Dir(util.GetConfiguration().ServerPath2))))
-	}
-
-	ticker := time.NewTicker(time.Second * 60)
-	go func() {
-		for range ticker.C {
-			sessionManager.UpdateSessionTime(60)
-		}
-	}()
 
 	glog.Info("GOWebServer started successfully")
 
 	if err := http.ListenAndServe(util.GetConfiguration().ServerBindAddress+":"+
 		strconv.Itoa(util.GetConfiguration().ServerBindPort), nil); err != nil {
 		log.Fatal("GOWebServer - ERROR! ", err)
-		ticker.Stop()
 		os.Exit(1)
 	}
 }
@@ -139,14 +103,8 @@ func downloadBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Content-Type", "application/epub+zip")
 	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
-	//index := strings.LastIndex(epubFile, "/")
-	//w.Header().Set("Content-Disposition", "attachment; filename=\""+epubFile[index+1:]+"\"")
 
 	w.Write(data)
-}
-
-func GetSystemInfo(w rest.ResponseWriter, r *rest.Request) {
-	w.WriteJson(maker.GetSystemInfo())
 }
 
 func writeJsonMap(w rest.ResponseWriter, name string, value string) {
@@ -155,87 +113,23 @@ func writeJsonMap(w rest.ResponseWriter, name string, value string) {
 	w.WriteJson(m)
 }
 
-func GetSites(w rest.ResponseWriter, r *rest.Request) {
+func GetSystemInfo(ctx *httprest.HttpContext) {
+	info := bookMaker.DB.GetSystemInfo(false)
+	ctx.RespOK(info)
+}
+
+func GetSites(ctx *httprest.HttpContext) {
 	sites := maker.GetBookSites()
-	//siteStr := strings.Join(sites, ",")
-	//writeJsonMap(w, "sites", siteStr)
-	w.WriteJson(sites)
+	ctx.RespOK(sites)
 }
 
-func Login(w rest.ResponseWriter, r *rest.Request) {
-	dummy := maker.User{}
-	err := r.DecodeJsonPayload(&dummy)
-	if err != nil {
-		glog.Warning("Missing or invalid user object")
-		rest.Error(w, "Missing or invalid user object", 400)
-		return
-	}
-
-	logonUser, err := sessionManager.Login(dummy.Name, dummy.Password)
-	if err != nil {
-		rest.Error(w, err.Error(), 400)
-		return
-	}
-
-	glog.Info("logged in user: " + logonUser.Name + ", sessionId:" + logonUser.SessionId)
-	w.WriteJson(logonUser)
+func GetUser(ctx *httprest.HttpContext) {
+	ctx.RespOK(ctx.User)
 }
 
-func Logout(w rest.ResponseWriter, r *rest.Request) {
-	sessionId := r.PathParam("id")
-	valid := "0"
-
-	logonUser := sessionManager.Logout(sessionId)
-	if logonUser != nil {
-		valid = "1"
-		glog.Info("logged out user: " + logonUser.Name + ", sessionId:" + logonUser.SessionId)
-	}
-	w.WriteJson(map[string]string{"status": valid})
-}
-
-func GetUser(w rest.ResponseWriter, r *rest.Request) {
-	sessionId := r.PathParam("session")
-	user := sessionManager.GetLogonUser(sessionId)
-	if (user.Name == "") {
-		rest.Error(w, "Not logged on", 400)
-		return
-	}
-	user.Password = ""
-	w.WriteJson(user)
-}
-
-func ValidateSession(w rest.ResponseWriter, r *rest.Request) {
-	sessionId := r.PathParam("session")
-	if !sessionManager.IsLogon(sessionId) {
-		w.WriteJson(map[string]string{"sessionTimeRemainingSec": "0"})
-	} else {
-		user := sessionManager.GetLogonUser(sessionId)
-		w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(user.TimeLeftInSec)})
-	}
-}
-
-func RechargeSession(w rest.ResponseWriter, r *rest.Request) {
-	sessionId := r.PathParam("session")
-	secs := 0
-	if sessionManager.IsLogon(sessionId) {
-		sessionManager.RenewSession(sessionId)
-		secs = sessionExpiredTimeSec
-	}
-	w.WriteJson(map[string]string{"sessionTimeRemainingSec": strconv.Itoa(secs)})
-}
-
-func getUser(name string) maker.User {
-	for _, u := range users {
-		if u.Name == name {
-			return u
-		}
-	}
-	return maker.User{}
-}
-
-func GetBooks(w rest.ResponseWriter, r *rest.Request) {
-	idstr := r.PathParam("id")
-	//log.Printf("GetBooks: %s", idstr)
+func GetBooks(ctx *httprest.HttpContext) {
+	idstr := ctx.Params.ByName("id")
+	log.Printf("GetBooks: %s", idstr)
 	result := []maker.Book{}
 	if idstr == "0" {
 		result = books
@@ -244,7 +138,7 @@ func GetBooks(w rest.ResponseWriter, r *rest.Request) {
 		for _, s := range arr {
 			id, err := strconv.Atoi(s)
 			if err != nil {
-				rest.Error(w, "Invalid book ID, value must be an integer.", 400)
+				ctx.RespERRString(http.StatusBadRequest, "Invalid book ID, value must be an integer.")
 				return
 			}
 			// find the book
@@ -256,43 +150,35 @@ func GetBooks(w rest.ResponseWriter, r *rest.Request) {
 		}
 	}
 
-	w.WriteJson(result)
+	ctx.RespOK(result)
 }
 
-func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
-	sessionId := r.PathParam("session")
-	op := r.PathParam("cmd")
-	glog.Info("UpdateBook: session:%s, op:%s", sessionId, op)
+func UpdateBook(ctx *httprest.HttpContext) {
+	op := ctx.Params.ByName("cmd")
+	glog.Info("UpdateBook: op:%s", op)
 	if op != "create" && op != "abort" && op != "resume" && op != "update" && op != "delete" {
 		glog.Error("Invalid op value: " + op)
-		rest.Error(w, "Invalid op value: "+op, 400)
-		return
-	}
-	// validate session
-	user := sessionManager.GetLogonUser(sessionId)
-	if user.Name == "" {
-		glog.Error("No permission")
-		rest.Error(w, "No permission", 400)
+		ctx.RespERRString(http.StatusBadRequest, "Invalid op value: "+op)
 		return
 	}
 
 	if op == "create" {
-		CreateBook(user, w, r)
+		CreateBook(ctx)
 		return
 	}
 
 	updateBook := maker.Book{}
 	err := r.DecodeJsonPayload(&updateBook)
 	if err != nil {
-		glog.Error("Invalid request book payload: "+err.Error())
-		rest.Error(w, "Invalid request book payload: "+err.Error(), http.StatusInternalServerError)
+		glog.Error("Invalid request book payload: " + err.Error())
+		ctx.RespERRString(http.StatusInternalServerError, "Invalid request book payload: "+err.Error())
 		return
 	}
 
-	currentBook, err := maker.LoadBook(updateBook.ID)
+	currentBook, err := bookMaker.LoadBook(updateBook.ID)
 	if err != nil {
 		glog.Error("Error loading book: " + strconv.Itoa(updateBook.ID) + ": " + err.Error())
-		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -308,7 +194,7 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 		switch op {
 		case "abort":
 			currentBook.Status = maker.STATUS_ABORTED
-			maker.SaveBook(currentBook)
+			bookMaker.SaveBook(currentBook)
 			for i := 0; i < len(books); i++ {
 				if books[i].ID == currentBook.ID {
 					books[i] = currentBook
@@ -317,7 +203,7 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 			}
 
 		case "update":
-			_, err = maker.SaveBook(updateBook)
+			_, err = bookMaker.SaveBook(updateBook)
 			if err == nil {
 				for i := 0; i < len(books); i++ {
 					if books[i].ID == updateBook.ID {
@@ -329,7 +215,7 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 
 		case "resume":
 			currentBook.Status = maker.STATUS_WORKING
-			_, err := maker.SaveBook(currentBook)
+			_, err := bookMaker.SaveBook(currentBook)
 			if err == nil {
 				for i := 0; i < len(books); i++ {
 					if books[i].ID == currentBook.ID {
@@ -343,7 +229,7 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 				if currentBook.CurrentPageNo <= 0 {
 					url = currentBook.StartPageUrl
 				}
-				site := maker.GetBookSite(url)
+				site := bookMaker.GetBookSite(url)
 				if site.Parser == "" {
 					err = errors.New("No parser found for url: " + currentBook.CurrentPageUrl)
 				} else {
@@ -354,7 +240,7 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 
 		case "delete":
 			var newBooks []maker.Book
-			maker.DeleteBook(updateBook.ID)
+			bookMaker.DeleteBook(updateBook.ID)
 			for i := 0; i < len(books); i++ {
 				if books[i].ID == updateBook.ID {
 					newBooks = append(books[0:i], books[i+1:]...)
@@ -374,22 +260,22 @@ func UpdateBook(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteJson(map[string]string{"status": message})
 }
 
-func CreateBook(user LogonUser, w rest.ResponseWriter, r *rest.Request) {
+func CreateBook(ctx *httprest.HttpContext) {
 	newBook := maker.Book{}
-	err := r.DecodeJsonPayload(&newBook)
+	err := ctx.GetPayload(&newBook)
 	if err != nil {
 		glog.Info("Invalid request book payload. %v\n", err)
-		rest.Error(w, "Invalid request book payload: "+err.Error(), http.StatusInternalServerError)
+		ctx.RespERRString(http.StatusInternalServerError, "Invalid request book payload: "+err.Error())
 		return
 	}
 
 	// validate
 	if newBook.Title == "" {
-		rest.Error(w, "Missing book title", 400)
+		ctx.RespERRString(http.StatusBadRequest, "Missing book title")
 		return
 	}
 	if newBook.StartPageUrl == "" {
-		rest.Error(w, "Missing start page URL", 400)
+		ctx.RespERRString(http.StatusBadRequest, "Missing start page URL")
 		return
 	}
 
@@ -404,23 +290,23 @@ func CreateBook(user LogonUser, w rest.ResponseWriter, r *rest.Request) {
 	}
 	if numActive >= util.GetConfiguration().MaxActionBooks {
 		glog.Error("Too many concurrent books in progress (" + strconv.Itoa(numActive) + ")")
-		rest.Error(w, "Too many concurrent books in progress", 400)
+		ctx.RespERRString(http.StatusBadRequest, "Too many concurrent books in progress")
 		return
 	}
 
-	site := maker.GetBookSite(newBook.StartPageUrl)
+	site := bookMaker.GetBookSite(newBook.StartPageUrl)
 	if site.Parser == "" {
-		glog.Error("No parser found for url: "+newBook.StartPageUrl)
-		rest.Error(w, "No parser found for url: "+newBook.StartPageUrl, 400)
+		glog.Error("No parser found for url: " + newBook.StartPageUrl)
+		ctx.RespERRString(http.StatusBadRequest, "No parser found for url: "+newBook.StartPageUrl)
 		return
 	}
 
 	newBook.Status = maker.STATUS_WORKING
 	newBook.CreatedTime = time.Now()
-	bookId, err := maker.SaveBook(newBook)
+	bookId, err := bookMaker.SaveBook(newBook)
 	if err != nil {
 		glog.Error("Failed to save book: " + err.Error())
-		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
 	newBook.ID = bookId
@@ -430,7 +316,7 @@ func CreateBook(user LogonUser, w rest.ResponseWriter, r *rest.Request) {
 	// schedule goroutine to create book
 	scheduleCreateBook(newBook, site)
 
-	w.WriteJson(newBook)
+	ctx.RespOK(newBook)
 }
 
 type EventSink struct {
@@ -539,83 +425,4 @@ func loadData() {
 	}
 
 	// init parser scripts
-}
-
-type LogonUser struct {
-	maker.User
-	TimeLeftInSec int
-}
-
-func NewLogonUser(name string, role string) LogonUser {
-	user := LogonUser{}
-	user.Name = name
-	user.Role = role
-	user.SessionId = strconv.FormatInt(time.Now().UnixNano(), 10)
-	user.TimeLeftInSec = sessionExpiredTimeSec
-	return user
-}
-
-type SessionManager struct {
-	sessions map[string]LogonUser
-}
-
-func NewSessionManager() *SessionManager {
-	sm := SessionManager{}
-	sm.sessions = make(map[string]LogonUser)
-	return &sm
-}
-
-func (s *SessionManager) GetLogonUser(sessionId string) LogonUser {
-	user, exists := s.sessions[sessionId]
-	if exists && user.TimeLeftInSec > 0 {
-		return user
-	}
-	return LogonUser{}
-}
-
-func (s *SessionManager) IsLogon(sessionId string) bool {
-	user, exists := s.sessions[sessionId]
-	if exists && user.TimeLeftInSec > 0 {
-		return true
-	}
-	return false
-}
-
-func (s *SessionManager) Login(name string, password string) (*LogonUser, error) {
-	// validate user/password
-	user := getUser(name)
-	if user.Name == "" || user.Password != password {
-		glog.Warning("Wrong user name or password: '%s'/'%s'-'%s'/'%s'\n", user.Name, user.Password, name, password)
-		return nil, errors.New("Wrong user name or password")
-	}
-
-	newUser := NewLogonUser(user.Name, user.Role)
-	s.sessions[newUser.SessionId] = newUser
-	return &newUser, nil
-}
-
-func (s *SessionManager) Logout(sessionId string) *LogonUser {
-	user, exist := s.sessions[sessionId]
-	if exist {
-		delete(s.sessions, sessionId)
-		return &user
-	}
-	return nil
-}
-
-func (s *SessionManager) RenewSession(sessionId string) {
-	user, exist := s.sessions[sessionId]
-	if exist && user.TimeLeftInSec > 0 {
-		user.TimeLeftInSec = sessionExpiredTimeSec
-	}
-}
-
-func (s *SessionManager) UpdateSessionTime(numSecs int) {
-	for id, user := range s.sessions {
-		user.TimeLeftInSec -= numSecs
-		if user.TimeLeftInSec <= 0 {
-			glog.Info("Session %s(%s) has expired, removed from cache\n", user.Name, id)
-			delete(s.sessions, id)
-		}
-	}
 }

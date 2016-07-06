@@ -1,0 +1,5 @@
+packages required:
+
+github.com/PuerkitoBio/goquery
+github.com/golang/glog
+golang.org/x/net/proxy

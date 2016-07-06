@@ -2,17 +2,19 @@ package maker
 
 import (
 	"bytes"
-	"dv.com.tusach/util"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	//"log"
+
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"dv.com.tusach/util"
+
 	"github.com/golang/glog"
 )
 
@@ -30,7 +32,11 @@ type HttpService interface {
 	ExecuteRequest(url string) []byte
 }
 
-func GetBookSites() []string {
+type BookMaker struct {
+	DB Persistence
+}
+
+func (bookMaker BookMaker) GetBookSites() []string {
 	sites := []string{}
 	// get list of parsers
 	names, err := util.ListDir(util.GetParserPath(), true)
@@ -72,8 +78,8 @@ func GetBookSites() []string {
 	return sites
 }
 
-func GetBookSite(url string) BookSite {
-	site := BookSite{Parser:""}
+func (bookMaker BookMaker) GetBookSite(url string) BookSite {
+	site := BookSite{Parser: ""}
 	if url == "" {
 		glog.Info("Parameter url is empty")
 		return site
@@ -118,7 +124,7 @@ func GetBookSite(url string) BookSite {
 			break
 		}
 	}
-	if (site.Parser == "") {
+	if site.Parser == "" {
 		glog.Error("No book site found for url: %s\n", url)
 	} else {
 		glog.Info("Found book site:[%v] for url:%s\n", site, url)
@@ -126,7 +132,7 @@ func GetBookSite(url string) BookSite {
 	return site
 }
 
-func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
+func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 	var numPagesLoaded = 0
 	var aborted = false
 	var errorMsg = ""
@@ -169,7 +175,7 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 			newChapterNo = book.CurrentPageNo
 		}
 		newChapter := Chapter{BookId: book.ID, ChapterNo: newChapterNo}
-		nextPageUrl, err := CreateChapter(site.Parser, url, &newChapter)
+		nextPageUrl, err := bookMaker.CreateChapter(site.Parser, url, &newChapter)
 
 		if err != nil {
 			errorMsg = err.Error()
@@ -182,7 +188,7 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 		glog.Info("completed chapter: %d:%s, nextPageUrl:%s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
 		// save the chapter
-		err = SaveChapter(newChapter)
+		err = bookMaker.DB.SaveChapter(newChapter)
 		if err != nil {
 			errorMsg = err.Error()
 			glog.Error("Error saving chapter. " + errorMsg)
@@ -197,7 +203,7 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 			glog.Info("No more next page url found.")
 			break
 		} else {
-			_, err := saveBook(em, book, false)
+			_, err := bookMaker.saveBook(em, book, false)
 			if err != nil {
 				errorMsg = err.Error()
 				break
@@ -221,14 +227,14 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 		book.Status = STATUS_COMPLETED
 	}
 
-	chapters, err := LoadChapters(book.ID)
+	chapters, err := bookMaker.DB.LoadChapters(book.ID)
 	if err != nil {
 		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.ID, err.Error())
 		glog.Error(errorMsg)
 		book.ErrorMsg = errorMsg
 		book.Status = STATUS_ERROR
 	} else {
-		err = MakeEpub(book, chapters)
+		err = bookMaker.MakeEpub(book, chapters)
 		if err != nil {
 			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
 			glog.Error(errorMsg)
@@ -240,11 +246,11 @@ func CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
 		}
 	}
 
-	saveBook(em, book, true)
+	bookMaker.saveBook(em, book, true)
 }
 
-func saveBook(manager *util.EventManager, book Book, done bool) (int, error) {
-	id, err := SaveBook(book)
+func (bookMaker BookMaker) saveBook(manager *util.EventManager, book Book, done bool) (int, error) {
+	id, err := bookMaker.DB.SaveBook(book)
 	// notify channel
 	if done {
 		manager.Push(util.EventData{Name: "book.done", Data: strconv.Itoa(book.ID)})
@@ -254,7 +260,7 @@ func saveBook(manager *util.EventManager, book Book, done bool) (int, error) {
 	return id, err
 }
 
-func MakeEpub(book Book, chapters []Chapter) error {
+func (bookMaker BookMaker) MakeEpub(book Book, chapters []Chapter) error {
 	if book.CurrentPageNo == 0 {
 		return errors.New("Book has no chapters")
 	}
@@ -380,7 +386,7 @@ func MakeEpub(book Book, chapters []Chapter) error {
 	return nil
 }
 
-func CreateChapter(parser string, chapterUrl string, chapter *Chapter) (string, error) {
+func (bookMaker BookMaker) CreateChapter(parser string, chapterUrl string, chapter *Chapter) (string, error) {
 	var nextPageUrl = ""
 
 	rawFilename := util.GetRawChapterFilename(chapter.BookId, chapter.ChapterNo)

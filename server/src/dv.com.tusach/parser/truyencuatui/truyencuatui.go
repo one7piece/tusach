@@ -99,6 +99,12 @@ func (p Truyencuatui) GetNextPageUrl(rawHtml string, html string) (string, error
 		}
 		return
 	})
-
+	if !strings.HasPrefix(nextPageUrl, "http://") {
+		if strings.HasPrefix(nextPageUrl, "/") {
+			nextPathUrl = "http://www.truyencuatui.net" + nextPageUrl
+		} else {
+			nextPathUrl = "http://www.truyencuatui.net/" + nextPageUrl
+		}
+	}
 	return nextPageUrl, nil
 }
