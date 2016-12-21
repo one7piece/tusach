@@ -70,7 +70,7 @@ func (p Truyencuatui) GetChapterHtml(rawHtml string, chapterTitle *string) (stri
 		}
 	}
 
-	elm = doc.Find("div[class='title']").First()
+	elm = doc.Find("h1[class='title']").First()
 	if elm != nil {
 		*chapterTitle = elm.Text()
 	}
