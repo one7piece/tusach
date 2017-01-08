@@ -1,7 +1,7 @@
 package util
 
 import (
-	"fmt"
+	"dv.com.tusach/logger"
 )
 
 type EventData struct {
@@ -37,7 +37,7 @@ func CreateEventManager(c EventChannel, bufferSize int) *EventManager {
 				break
 			}
 		}
-		fmt.Println("EventManager - inbound channel is closed")
+		logger.Debug("EventManager - inbound channel is closed")
 		// close the outbound channel
 		close(mgr.outChannel)
 	}(&em)
@@ -47,24 +47,24 @@ func CreateEventManager(c EventChannel, bufferSize int) *EventManager {
 		for ev := range mgr.outChannel {
 			mgr.dispatch(ev)
 		}
-		fmt.Println("EventManager - outbound channel is closed")
+		logger.Debug("EventManager - outbound channel is closed")
 	}(&em)
 
 	return &em
 }
 
 func (em *EventManager) StartListening(listener EventHandler) {
-	fmt.Printf("address of listener: %d\n", &listener)
+	logger.Debug("address of listener: %d\n", &listener)
 	/*
 		for _, l := range em.listeners {
 			if l == listener {
-				fmt.Println("ignore duplicate listener")
+				logger.Debug("ignore duplicate listener")
 				return
 			}
 		}
 	*/
 	em.listeners = append(em.listeners, listener)
-	//fmt.Printf("added listener, count=%d\n", len(em.listeners))
+	//logger.Debug("added listener, count=%d\n", len(em.listeners))
 }
 
 func (em *EventManager) StopListening(listener EventHandler) {
@@ -78,7 +78,7 @@ func (em *EventManager) StopListening(listener EventHandler) {
 	if index != -1 {
 		em.listeners = append(em.listeners[:index], em.listeners[index+1:]...)
 	} else {
-		fmt.Println("StopListening() - Not found")
+		logger.Debug("StopListening() - Not found")
 	}
 }
 
@@ -88,7 +88,7 @@ func (em *EventManager) Push(event EventData) {
 		return
 	}
 
-	fmt.Printf("pushing: %s[%v]\n", event.Name, event.Data)
+	logger.Debug("pushing: %s[%v]\n", event.Name, event.Data)
 	if em.doPush(event) {
 		<-em.Channel
 	}
@@ -96,7 +96,7 @@ func (em *EventManager) Push(event EventData) {
 
 // dispatch the event to the listeners
 func (em *EventManager) dispatch(event EventData) {
-	fmt.Printf("dispatching: %s[%v] to %d listeners\n", event.Name, event.Data, len(em.listeners))
+	logger.Debug("dispatching: %s[%v] to %d listeners\n", event.Name, event.Data, len(em.listeners))
 	for _, l := range em.listeners {
 		l.HandleEvent(event)
 	}
@@ -107,7 +107,7 @@ func (em *EventManager) dispatch(event EventData) {
 func (em *EventManager) doPush(event EventData) (ok bool) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("recover from panic: ", err)
+			logger.Debug("recover from panic: ", err)
 			ok = false
 			em.Closed = true
 		}

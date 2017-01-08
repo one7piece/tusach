@@ -5,6 +5,7 @@ import (
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	//"errors"
+	"dv.com.tusach/logger"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -21,6 +22,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	} else {
+		fmt.Println(str)
 		fmt.Println(str)
 	}
 }
@@ -63,7 +65,7 @@ func (p Luongsonbac) GetChapterHtml(rawHtml string, chapterTitle *string) (strin
 	doc.Find("td[class='alt1']").Each(func(i int, sel *goquery.Selection) {
 		sel.Find("div[class='maincontent']").Each(func(i int, sel2 *goquery.Selection) {
 			html, _ := sel.Html()
-			fmt.Println("Html\n" + html);
+			logger.Debug("Html\n" + html)
 			buffer.WriteString(html)
 			buffer.WriteString("<br><br><br>")
 			// add new page
@@ -76,7 +78,7 @@ func (p Luongsonbac) GetChapterHtml(rawHtml string, chapterTitle *string) (strin
 					*chapterTitle = title1 + "/" + str
 				}
 			}
-			return;
+			return
 		})
 	})
 
@@ -87,7 +89,7 @@ func (p Luongsonbac) GetChapterHtml(rawHtml string, chapterTitle *string) (strin
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	//fmt.Println("chapter title: ", *chapterTitle)
+	logger.Debugf("chapter title: ", *chapterTitle)
 	return chapterHtml, nil
 }
 
@@ -105,7 +107,7 @@ func (p Luongsonbac) GetNextPageUrl(rawHtml string, html string) (string, error)
 		}
 	})
 
-	if (nextPageUrl != "") {
+	if nextPageUrl != "" {
 		if !strings.HasPrefix(nextPageUrl, "http://www.lsb-thuquan.eu/index.php/") {
 			nextPageUrl = "http://www.lsb-thuquan.eu/index.php/" + nextPageUrl
 		}

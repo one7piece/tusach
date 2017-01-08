@@ -32,6 +32,7 @@ angular
     'ngRoute',
     'ngSanitize',
 		'ui.router',
+    "base64",
     'matchmedia-ng'
   ])
   .filter('trusted', ['$sce', function ($sce) {
@@ -61,12 +62,29 @@ angular
         templateUrl: 'views/createbook.html',
         controller: 'CreateBookCtrl as creator'
       });
+      
+      $httpProvider.interceptors.push('myHttpRequestInterceptor');
+      $httpProvider.interceptors.push('myHttpResponseInterceptor');
   }]);
+
+angular.module('tusachangApp').factory('myHttpRequestInterceptor', ['$injector', function($injector) {
+  return {
+    'request': function(config) {
+      console.log("inject auth header...")
+      config.headers['Content-Type'] = "application/json";
+      var LoginService = $injector.get('LoginService');
+      if (LoginService.isLogin && !config.headers['Authorization']) {
+        config.headers['Authorization'] = LoginService.session.Token;
+      }
+      return config;
+    }
+  };
+}]);
 
 angular.module('tusachangApp').factory('myHttpResponseInterceptor', ['$q', '$rootScope', function($q, $rootScope) {
   return {
     'responseError': function(response) {
-      if (response.status == 401) {
+      if (response.status == 401 || response.status == 403) {
         $rootScope.$emit('authentication', 'sessionExpired');
       }
       return $q.reject(response);

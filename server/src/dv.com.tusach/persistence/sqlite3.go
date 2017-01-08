@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"reflect"
@@ -12,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"dv.com.tusach/logger"
 	"dv.com.tusach/maker"
 	"dv.com.tusach/util"
 	_ "github.com/mattn/go-sqlite3"
@@ -24,12 +24,12 @@ type Sqlite3 struct {
 	info maker.SystemInfo
 }
 
-func (sqlite Sqlite3) InitDB() {
+func (sqlite *Sqlite3) InitDB() {
 	sqlite.db = nil
-	log.Printf("opening database %s\n", util.GetConfiguration().DBFilename)
+	logger.Infof("opening database %s\n", util.GetConfiguration().DBFilename)
 	_db, err := sql.Open("sqlite3", util.GetConfiguration().DBFilename)
 	if err != nil {
-		log.Fatal("failed to open databse: " + util.GetConfiguration().DBFilename + ": " + err.Error())
+		logger.Error("failed to open databse: " + util.GetConfiguration().DBFilename + ": " + err.Error())
 		panic(err)
 	}
 	sqlite.db = _db
@@ -48,20 +48,20 @@ func (sqlite Sqlite3) InitDB() {
 	}
 }
 
-func (sqlite Sqlite3) CloseDB() {
+func (sqlite *Sqlite3) CloseDB() {
 	if sqlite.db != nil {
 		sqlite.db.Close()
 	}
 }
 
-func (sqlite Sqlite3) createTable(tableName string, tableType reflect.Type) {
+func (sqlite *Sqlite3) createTable(tableName string, tableType reflect.Type) {
 	stmt := "create table if not exists " + tableName + " ("
 	for i := 0; i < tableType.NumField(); i++ {
 		field := tableType.Field(i)
 		persist := isPersistentField(tableType, field.Name)
 		if persist {
 			colName := field.Name
-			//log.Printf("parsing field: %s:%s\n", field.Name, field.Type.Name())
+			//logger.Infof("parsing field: %s:%s\n", field.Name, field.Type.Name())
 			var colType string
 			switch field.Type.Kind() {
 			case reflect.Int:
@@ -78,14 +78,14 @@ func (sqlite Sqlite3) createTable(tableName string, tableType reflect.Type) {
 		}
 	}
 	stmt += ")"
-	log.Printf("executing creating table query: %s\n", stmt)
+	logger.Infof("executing creating table query: %s\n", stmt)
 	_, err := sqlite.db.Exec(stmt)
 	if err != nil {
-		log.Printf("failed to create table: %s\n", err)
+		logger.Infof("failed to create table: %s\n", err)
 	}
 }
 
-func (sqlite Sqlite3) GetSystemInfo(forceReload bool) (maker.SystemInfo, error) {
+func (sqlite *Sqlite3) GetSystemInfo(forceReload bool) (maker.SystemInfo, error) {
 	if forceReload {
 		records, err := sqlite.loadRecords(reflect.TypeOf(maker.SystemInfo{}), "systeminfo", "", nil)
 		if err != nil {
@@ -93,15 +93,15 @@ func (sqlite Sqlite3) GetSystemInfo(forceReload bool) (maker.SystemInfo, error) 
 		}
 		if len(records) > 0 {
 			sqlite.info = records[0].(maker.SystemInfo)
-			log.Printf("Found systeminfo: %+v\n", sqlite.info)
+			logger.Infof("Found systeminfo: %+v\n", sqlite.info)
 		} else {
-			log.Printf("No systeminfo found\n")
+			logger.Infof("No systeminfo found\n")
 		}
 	}
 	return sqlite.info, nil
 }
 
-func (sqlite Sqlite3) SaveSystemInfo(info maker.SystemInfo) error {
+func (sqlite *Sqlite3) SaveSystemInfo(info maker.SystemInfo) error {
 	records, err := sqlite.loadRecords(reflect.TypeOf(maker.SystemInfo{}), "systeminfo", "", nil)
 	if err != nil {
 		return err
@@ -116,7 +116,7 @@ func (sqlite Sqlite3) SaveSystemInfo(info maker.SystemInfo) error {
 	return nil
 }
 
-func (sqlite Sqlite3) LoadUsers() ([]maker.User, error) {
+func (sqlite *Sqlite3) LoadUsers() ([]maker.User, error) {
 	records, err := sqlite.loadRecords(reflect.TypeOf(maker.User{}), "user", "", nil)
 	if err != nil {
 		return []maker.User{}, err
@@ -125,15 +125,15 @@ func (sqlite Sqlite3) LoadUsers() ([]maker.User, error) {
 	for i := 0; i < len(records); i++ {
 		user := records[i].(maker.User)
 		users = append(users, user)
-		log.Printf("Found user: %+v\n", user)
+		logger.Infof("Found user: %+v\n", user)
 	}
 	if len(users) == 0 {
-		log.Printf("No users found\n")
+		logger.Infof("No users found\n")
 	}
 	return users, nil
 }
 
-func (sqlite Sqlite3) SaveUser(user maker.User) error {
+func (sqlite *Sqlite3) SaveUser(user maker.User) error {
 	args := []interface{}{user.Name}
 	records, err := sqlite.loadRecords(reflect.TypeOf(maker.User{}), "user", "Name=?", args)
 	if err != nil {
@@ -149,13 +149,13 @@ func (sqlite Sqlite3) SaveUser(user maker.User) error {
 	return nil
 }
 
-func (sqlite Sqlite3) DeleteUser(userName string) error {
+func (sqlite *Sqlite3) DeleteUser(userName string) error {
 	args := []interface{}{userName}
 	err := sqlite.deleteRecords("user", "Name=?", args)
 	return err
 }
 
-func (sqlite Sqlite3) LoadBook(id int) (maker.Book, error) {
+func (sqlite *Sqlite3) LoadBook(id int) (maker.Book, error) {
 	args := []interface{}{id}
 	records, err := sqlite.loadRecords(reflect.TypeOf(maker.Book{}), "book", "ID=?", args)
 	if err != nil {
@@ -167,7 +167,7 @@ func (sqlite Sqlite3) LoadBook(id int) (maker.Book, error) {
 	return maker.Book{}, nil
 }
 
-func (sqlite Sqlite3) LoadBooks() ([]maker.Book, error) {
+func (sqlite *Sqlite3) LoadBooks() ([]maker.Book, error) {
 	records, err := sqlite.loadRecords(reflect.TypeOf(maker.Book{}), "book", "", nil)
 	if err != nil {
 		return []maker.Book{}, err
@@ -176,20 +176,20 @@ func (sqlite Sqlite3) LoadBooks() ([]maker.Book, error) {
 	for i := 0; i < len(records); i++ {
 		book := records[i].(maker.Book)
 		books = append(books, book)
-		log.Printf("Found book: %+v\n", book)
+		logger.Infof("Found book: %+v\n", book)
 	}
 	if len(books) == 0 {
-		log.Printf("No books found\n")
+		logger.Infof("No books found\n")
 	}
 	return books, nil
 }
 
-func (sqlite Sqlite3) SaveBook(book maker.Book) (retId int, retErr error) {
+func (sqlite *Sqlite3) SaveBook(book maker.Book) (retId int, retErr error) {
 
 	var newBookId = 0
 	defer func() {
 		if err := recover(); err != nil {
-			//log.Printf("Recover from panic: %s\n", err)
+			//logger.Infof("Recover from panic: %s\n", err)
 			if newBookId > 0 {
 				sqlite.DeleteBook(newBookId)
 			}
@@ -235,7 +235,7 @@ func (sqlite Sqlite3) SaveBook(book maker.Book) (retId int, retErr error) {
 		if retErr == nil {
 			// create book dir
 			dirPath := util.GetBookPath(book.ID)
-			log.Println("Creating book dir: ", dirPath)
+			logger.Infof("Creating book dir: ", dirPath)
 			os.MkdirAll(dirPath, 0777)
 			if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 				panic("Error creating directory: " + dirPath)
@@ -264,8 +264,8 @@ func (sqlite Sqlite3) SaveBook(book maker.Book) (retId int, retErr error) {
 	return book.ID, retErr
 }
 
-func (sqlite Sqlite3) DeleteBook(bookId int) error {
-	log.Println("Deleting book: ", bookId)
+func (sqlite *Sqlite3) DeleteBook(bookId int) error {
+	logger.Infof("Deleting book: ", bookId)
 	// TODO need locking here
 
 	// delete all chapters of book
@@ -288,7 +288,7 @@ func (sqlite Sqlite3) DeleteBook(bookId int) error {
 	return err
 }
 
-func (sqlite Sqlite3) LoadChapters(bookId int) ([]maker.Chapter, error) {
+func (sqlite *Sqlite3) LoadChapters(bookId int) ([]maker.Chapter, error) {
 	var records []interface{}
 	var err error
 	if bookId > 0 {
@@ -305,10 +305,10 @@ func (sqlite Sqlite3) LoadChapters(bookId int) ([]maker.Chapter, error) {
 	for i := 0; i < len(records); i++ {
 		chapter := records[i].(maker.Chapter)
 		chapters = append(chapters, chapter)
-		//log.Printf("Found chapter: %+v\n", chapter)
+		//logger.Infof("Found chapter: %+v\n", chapter)
 	}
 	if len(chapters) == 0 {
-		log.Printf("No chapter found\n")
+		logger.Infof("No chapter found\n")
 	} else {
 		// sort chapters by ChapterNo
 		sort.Sort(maker.ByChapterNo(chapters))
@@ -319,12 +319,12 @@ func (sqlite Sqlite3) LoadChapters(bookId int) ([]maker.Chapter, error) {
 	return chapters, nil
 }
 
-func (sqlite Sqlite3) SaveChapter(chapter maker.Chapter) error {
+func (sqlite *Sqlite3) SaveChapter(chapter maker.Chapter) error {
 	/*
 		filepath := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
 		err := ioutil.WriteFile(filepath, chapter.Html, 0777)
 		if err != nil {
-			log.Println("error writing chapter file: ", filepath, err)
+			logger.Infof("error writing chapter file: ", filepath, err)
 			return err
 		}
 	*/
@@ -344,7 +344,7 @@ func (sqlite Sqlite3) SaveChapter(chapter maker.Chapter) error {
 	return err
 }
 
-func (sqlite Sqlite3) loadRecords(tableType reflect.Type, tableName string, whereStr string, args []interface{}) ([]interface{}, error) {
+func (sqlite *Sqlite3) loadRecords(tableType reflect.Type, tableName string, whereStr string, args []interface{}) ([]interface{}, error) {
 	fieldNames := []string{}
 	for i := 0; i < tableType.NumField(); i++ {
 		field := tableType.Field(i)
@@ -358,10 +358,10 @@ func (sqlite Sqlite3) loadRecords(tableType reflect.Type, tableName string, wher
 	if whereStr != "" {
 		query += " WHERE " + whereStr
 	}
-	log.Printf("executing query: %s\n", query)
+	logger.Infof("executing query: %s\n", query)
 	rows, err := sqlite.db.Query(query, args...)
 	if err != nil {
-		log.Fatal("Error executing query. ", err)
+		logger.Errorf("Error executing query. ", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -389,7 +389,7 @@ func (sqlite Sqlite3) loadRecords(tableType reflect.Type, tableName string, wher
 				} else {
 					colval = colValues[i]
 				}
-				//log.Printf("scan col field: %s=%v\n", field.Name, colval)
+				//logger.Infof("scan col field: %s=%v\n", field.Name, colval)
 				v := db2field(field.Type, colval)
 				recordValue.FieldByName(field.Name).Set(reflect.ValueOf(v))
 			}
@@ -399,10 +399,10 @@ func (sqlite Sqlite3) loadRecords(tableType reflect.Type, tableName string, wher
 	return records, nil
 }
 
-func (sqlite Sqlite3) insertRecord(tableName string, value reflect.Value) error {
+func (sqlite *Sqlite3) insertRecord(tableName string, value reflect.Value) error {
 	tx, err := sqlite.db.Begin()
 	if err != nil {
-		log.Println("failed to start transaction.", err)
+		logger.Infof("failed to start transaction.", err)
 		return err
 	}
 
@@ -429,15 +429,15 @@ func (sqlite Sqlite3) insertRecord(tableName string, value reflect.Value) error 
 
 	pstmt, err := tx.Prepare(insertStr)
 	if err != nil {
-		log.Println("failed to prepare insert.", err)
+		logger.Infof("failed to prepare insert.", err)
 		return err
 	}
 	defer pstmt.Close()
 
-	log.Println("executing insert: ", insertStr)
+	logger.Infof("executing insert: ", insertStr)
 	_, err = pstmt.Exec(params...)
 	if err != nil {
-		log.Println("failed to execute insert.", err)
+		logger.Infof("failed to execute insert.", err)
 		return err
 	}
 
@@ -445,10 +445,10 @@ func (sqlite Sqlite3) insertRecord(tableName string, value reflect.Value) error 
 	return nil
 }
 
-func (sqlite Sqlite3) updateRecord(tableName string, value reflect.Value, whereStr string, whereArgs []interface{}) error {
+func (sqlite *Sqlite3) updateRecord(tableName string, value reflect.Value, whereStr string, whereArgs []interface{}) error {
 	tx, err := sqlite.db.Begin()
 	if err != nil {
-		log.Println("failed to start transaction.", err)
+		logger.Infof("failed to start transaction.", err)
 		return err
 	}
 
@@ -473,15 +473,15 @@ func (sqlite Sqlite3) updateRecord(tableName string, value reflect.Value, whereS
 
 	pstmt, err := tx.Prepare(updateStr)
 	if err != nil {
-		log.Println("failed to prepare update.", err)
+		logger.Infof("failed to prepare update.", err)
 		return err
 	}
 	defer pstmt.Close()
 
-	log.Println("executing update: ", updateStr)
+	logger.Infof("executing update: ", updateStr)
 	_, err = pstmt.Exec(params...)
 	if err != nil {
-		log.Println("failed to execute update.", err)
+		logger.Infof("failed to execute update.", err)
 		return err
 	}
 
@@ -489,14 +489,14 @@ func (sqlite Sqlite3) updateRecord(tableName string, value reflect.Value, whereS
 	return nil
 }
 
-func (sqlite Sqlite3) deleteRecords(tableName string, whereStr string, whereArgs []interface{}) error {
+func (sqlite *Sqlite3) deleteRecords(tableName string, whereStr string, whereArgs []interface{}) error {
 	if whereStr == "" {
 		return errors.New("Missing where string!")
 	}
 
 	tx, err := sqlite.db.Begin()
 	if err != nil {
-		log.Println("failed to start transaction.", err)
+		logger.Infof("failed to start transaction.", err)
 		return err
 	}
 
@@ -507,15 +507,15 @@ func (sqlite Sqlite3) deleteRecords(tableName string, whereStr string, whereArgs
 
 	pstmt, err := tx.Prepare(deleteStr)
 	if err != nil {
-		log.Println("failed to prepare delete.", err)
+		logger.Infof("failed to prepare delete.", err)
 		return err
 	}
 	defer pstmt.Close()
 
-	log.Println("executing delete: ", deleteStr)
+	logger.Infof("executing delete: ", deleteStr)
 	_, err = pstmt.Exec(whereArgs...)
 	if err != nil {
-		log.Println("failed to execute delete.", err)
+		logger.Infof("failed to execute delete.", err)
 		return err
 	}
 

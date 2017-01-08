@@ -6,14 +6,14 @@ import (
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	//"errors"
+	"dv.com.tusach/logger"
 	"encoding/json"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 func main() {
@@ -23,6 +23,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	} else {
+		fmt.Println(str)
 		fmt.Println(str)
 	}
 }
@@ -65,7 +66,7 @@ func (p Truyencuatui) GetChapterHtml(rawHtml string, chapterTitle *string) (stri
 	if elm != nil {
 		html, err := elm.Html()
 		if err == nil {
-			fmt.Println("Html\n" + html)
+			logger.Debugf("page html: %s", html)
 			buffer.WriteString(html)
 		}
 	}
@@ -82,7 +83,7 @@ func (p Truyencuatui) GetChapterHtml(rawHtml string, chapterTitle *string) (stri
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	//fmt.Println("chapter title: ", *chapterTitle)
+	logger.Infof("chapter title: %s", *chapterTitle)
 	return chapterHtml, nil
 }
 
@@ -101,9 +102,9 @@ func (p Truyencuatui) GetNextPageUrl(rawHtml string, html string) (string, error
 	})
 	if !strings.HasPrefix(nextPageUrl, "http://") {
 		if strings.HasPrefix(nextPageUrl, "/") {
-			nextPathUrl = "http://www.truyencuatui.net" + nextPageUrl
+			nextPageUrl = "http://www.truyencuatui.net" + nextPageUrl
 		} else {
-			nextPathUrl = "http://www.truyencuatui.net/" + nextPageUrl
+			nextPageUrl = "http://www.truyencuatui.net/" + nextPageUrl
 		}
 	}
 	return nextPageUrl, nil

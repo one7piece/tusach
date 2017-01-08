@@ -1,6 +1,7 @@
 package util
 
 import (
+	"dv.com.tusach/logger"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,16 +10,19 @@ import (
 
 type Configuration struct {
 	ServerPath        string `json:serverPath`
-	ServerPath2       string `json:serverPath2`
 	LibraryPath       string `json:libraryPath`
 	DBFilename        string `json:dbFilename`
 	ServerBindAddress string `json:serverBindAddress`
 	ServerBindPort    int    `json:serverBindPort`
 	MaxActionBooks    int    `json:maxActiveBooks`
 	SupportedSites    string `json:supportedSites`
-	ProxyURL	  			string `json:proxyURL`
-	ProxyUsername	  	string `json:proxyUsername`
-	ProxyPassword	  	string `json:proxyPassword`
+	ProxyURL          string `json:proxyURL`
+	ProxyUsername     string `json:proxyUsername`
+	ProxyPassword     string `json:proxyPassword`
+	LogLevel          string `json:logLevel`
+	LogFile           string `json:logFile`
+	LogMaxSizeMB      int    `json:logMaxSizeMB`
+	LogMaxBackups     int    `json:logMaxBackups`
 }
 
 var configFile string
@@ -88,4 +92,16 @@ func LoadConfig(filename string) {
 	if configuration.MaxActionBooks == 0 {
 		configuration.MaxActionBooks = 2
 	}
+	if configuration.LogLevel == "" {
+		configuration.LogLevel = "info"
+	}
+	level := logger.LevelInfo
+	if configuration.LogLevel == "debug" {
+		level = 0
+	} else if configuration.LogLevel == "warn" {
+		level = 2
+	} else if configuration.LogLevel == "error" {
+		level = 3
+	}
+	logger.Init(level, configuration.LogFile)
 }

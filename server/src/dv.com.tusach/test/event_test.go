@@ -13,7 +13,7 @@ type EventSink struct {
 }
 
 func (sink EventSink) HandleEvent(event util.EventData) {
-	fmt.Printf("received: %s[%v]\n", event.Name, event.Data)
+	logger.Debugf("received: %s[%v]\n", event.Name, event.Data)
 }
 
 func TestEvent(t *testing.T) {
@@ -22,7 +22,7 @@ func TestEvent(t *testing.T) {
 	sinks := [10]EventSink{}
 	for i := 0; i < 10; i++ {
 		sinks[i] = EventSink{em}
-		fmt.Printf("address of sink: %d\n", &sinks[i])
+		logger.Debugf("address of sink: %d\n", &sinks[i])
 		em.StartListening(sinks[i])
 	}
 	for i := 0; i < 10; i++ {

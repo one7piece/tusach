@@ -12,14 +12,14 @@ func TestPackage(t *testing.T) {
 
 	url := "http://www.lsb-thuquan.eu/index.php/kiem-than-tam-tac-gia-thuy-bach-van-134324220.html?page=2&ipp=10"
 	name := "luongsonbac"
-	fmt.Println("executing validate command: " + util.GetParserPath() + "/" + name)
+	logger.Debug("executing validate command: " + util.GetParserPath() + "/" + name)
 	cmd := exec.Command(util.GetParserPath()+"/"+name,
 		"-configFile="+util.GetConfigFile(), "-op=v",
 		"-url="+url)
 	out, err := cmd.CombinedOutput()
-	fmt.Println("command output: " + string(out))
+	logger.Debug("command output: " + string(out))
 	if err != nil {
-		fmt.Println("Error validating url. " + err.Error())
+		logger.Debug("Error validating url. " + err.Error())
 	}
 
 	bookPath := util.GetBookPath(9999)
@@ -30,5 +30,6 @@ func TestPackage(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	fmt.Println(str)
 	fmt.Println(str)
 }

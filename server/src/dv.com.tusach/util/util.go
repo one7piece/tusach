@@ -1,8 +1,8 @@
 package util
 
 import (
+	"dv.com.tusach/logger"
 	"errors"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,7 +21,7 @@ func ExtractError(err interface{}) error {
 }
 
 func SaveFile(filename string, data []byte) error {
-	log.Println("saving file: ", filename)
+	logger.Info("saving file: ", filename)
 	fo, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -45,15 +45,15 @@ func ListDir(root string, filesOnly bool) ([]string, error) {
 	rootPath := strings.TrimRight(root, "/")
 
 	filepath.Walk(root, func(path string, f os.FileInfo, _ error) error {
-		//log.Printf("walk: rootPath=%s, path=%s, filename=%s\n", rootPath, path, f.Name())
-		path = strings.Replace(path, "\\", "/", -1);
+		//logger.Infof("walk: rootPath=%s, path=%s, filename=%s\n", rootPath, path, f.Name())
+		path = strings.Replace(path, "\\", "/", -1)
 		index := strings.LastIndex(path, "/")
 		if (path == rootPath) || (index != -1 && path[0:index] == rootPath) {
 			if !f.IsDir() || !filesOnly {
 				filenames = append(filenames, f.Name())
 			}
 		} else {
-			//fmt.Println("ignore sub directory walk: " + path)
+			//logger.Debug("ignore sub directory walk: " + path)
 			return filepath.SkipDir
 		}
 		return nil

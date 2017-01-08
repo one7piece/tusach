@@ -5,9 +5,10 @@ import (
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	//"errors"
+	"dv.com.tusach/logger"
+	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -21,6 +22,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	} else {
+		fmt.Println(str)
 		fmt.Println(str)
 	}
 }
@@ -88,7 +90,7 @@ func (p Tangthuvien) GetChapterHtml(rawHtml string, chapterTitle *string) (strin
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	//fmt.Println("chapter title: ", *chapterTitle)
+	logger.Debugf("chapter title: ", *chapterTitle)
 	return chapterHtml, nil
 }
 

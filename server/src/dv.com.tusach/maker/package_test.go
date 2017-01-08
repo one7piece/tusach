@@ -2,10 +2,10 @@ package maker
 
 import (
 	"database/sql"
+	"dv.com.tusach/logger"
 	"dv.com.tusach/util"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"log"
 	"os"
 	"runtime"
 	"testing"
@@ -14,15 +14,15 @@ import (
 
 func TestAll(t *testing.T) {
 	util.LoadConfig("/dev/dv/tusach/server/config-test-win.json")
-	
-	testBookSites(t)	
-	
+
+	testBookSites(t)
+
 	//testPersistence(t)
 }
 
 func testBookSites(t *testing.T) {
 	sites := GetBookSites()
-	fmt.Printf("sites: %+v\n", sites)
+	logger.Debugf("sites: %+v\n", sites)
 }
 
 func testPersistence(t *testing.T) {
@@ -30,12 +30,12 @@ func testPersistence(t *testing.T) {
 	defer func() {
 		if err := recover(); err != nil {
 			CloseDB()
-			log.Printf("Recover from panic: %s\n", err)
+			logger.Infof("Recover from panic: %s\n", err)
 			trace := make([]byte, 1024)
 			count := runtime.Stack(trace, true)
-			log.Printf("Stack of %d bytes: %s\n", count, trace)
+			logger.Infof("Stack of %d bytes: %s\n", count, trace)
 		} else {
-			log.Println("Closing DB...")
+			logger.Info("Closing DB...")
 			CloseDB()
 		}
 
@@ -49,17 +49,17 @@ func testPersistence(t *testing.T) {
 	book := Book{Title: "Gia Thien", Author: "Than Dong"}
 	bookId, err := SaveBook(book)
 	if err != nil {
-		log.Println("Error saving book.", err)
+		logger.Infof("Error saving book.", err)
 	} else {
 		book.ID = bookId
-		log.Println("Saved book ID: ", book.ID)
+		logger.Infof("Saved book ID: ", book.ID)
 	}
 	LoadBooks()
 
 	chapter1 := Chapter{BookId: book.ID, ChapterNo: 1, Title: "Chuong 1", Html: []byte("<html></html>")}
 	err = SaveChapter(chapter1)
 	if err != nil {
-		log.Println("Error saving chapter.", err)
+		logger.Infof("Error saving chapter.", err)
 	} else {
 		LoadChapters(0)
 	}
@@ -81,13 +81,13 @@ func testEpub(t *testing.T) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("Recover from panic: %s\n", err)
+			logger.Infof("Recover from panic: %s\n", err)
 			CloseDB()
 			trace := make([]byte, 1024)
 			count := runtime.Stack(trace, true)
-			log.Printf("Stack of %d bytes: %s\n", count, trace)
+			logger.Infof("Stack of %d bytes: %s\n", count, trace)
 		} else {
-			log.Println("Closing DB...")
+			logger.Info("Closing DB...")
 			CloseDB()
 		}
 	}()
@@ -115,13 +115,13 @@ func testBookMaker(t *testing.T) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("Recover from panic: %s\n", err)
+			logger.Infof("Recover from panic: %s\n", err)
 			CloseDB()
 			trace := make([]byte, 1024)
 			count := runtime.Stack(trace, true)
-			log.Printf("Stack of %d bytes: %s\n", count, trace)
+			logger.Infof("Stack of %d bytes: %s\n", count, trace)
 		} else {
-			log.Println("Closing DB...")
+			logger.Info("Closing DB...")
 			CloseDB()
 		}
 	}()
@@ -132,11 +132,11 @@ func testBookMaker(t *testing.T) {
 	newBook := Book{Title: "Dai De Tinh Ha", StartPageUrl: "http://tunghoanh.com/dai-de-tinh-ha/chuong-1-yfTaaab.html", MaxNumPages: 1}
 
 	site := GetBookSite(newBook.StartPageUrl)
-	if (site.Parser == "") {
+	if site.Parser == "" {
 		t.Error("No parser found for url: " + newBook.StartPageUrl)
 		return
 	}
-	
+
 	newBook.Status = STATUS_WORKING
 	bookId, err := SaveBook(newBook)
 	if err != nil {
@@ -158,14 +158,14 @@ func testBookMaker(t *testing.T) {
 			break
 		}
 	}
-	log.Println("closing channel.")
+	logger.Info("closing channel.")
 	close(bookChannel)
 }
 
 func testSqlite3(t *testing.T) {
 	os.Remove(util.GetConfiguration().DBFilename)
 
-	log.Println("opening database...")
+	logger.Info("opening database...")
 	db, err := sql.Open("sqlite3", util.GetConfiguration().DBFilename)
 	if err != nil {
 		t.Errorf("failed to open databse foo.db.", err)
@@ -174,14 +174,14 @@ func testSqlite3(t *testing.T) {
 	defer func() {
 		if err := recover(); err != nil {
 			db.Close()
-			log.Printf("Recover from panic: %s\n", err)
+			logger.Infof("Recover from panic: %s\n", err)
 			trace := make([]byte, 1024)
 			count := runtime.Stack(trace, true)
-			log.Printf("Stack of %d bytes: %s\n", count, trace)
+			logger.Infof("Stack of %d bytes: %s\n", count, trace)
 		}
 	}()
 
-	log.Println("creating table foo...")
+	logger.Info("creating table foo...")
 	stmt := `
 		create table foo (id integer not null primary key, name text); 
 		delete from foo;
@@ -191,7 +191,7 @@ func testSqlite3(t *testing.T) {
 		t.Errorf("failed to create table foo.", err)
 	}
 
-	log.Println("start transaction...")
+	logger.Info("start transaction...")
 	tx, err := db.Begin()
 	if err != nil {
 		t.Errorf("failed to start transaction.", err)
@@ -201,14 +201,14 @@ func testSqlite3(t *testing.T) {
 		t.Errorf("failed to prepare statement.", err)
 	}
 	defer pstmt.Close()
-	log.Println("executing inserts...")
+	logger.Info("executing inserts...")
 	for i := 0; i < 100; i++ {
 		_, err = pstmt.Exec(i, fmt.Sprintf("Hello%03d", i))
 		if err != nil {
 			t.Errorf("failed to execute statement.", err)
 		}
 	}
-	log.Println("end transaction...")
+	logger.Info("end transaction...")
 	tx.Commit()
 
 	rows, err := db.Query("select id, name from foo")
@@ -220,7 +220,7 @@ func testSqlite3(t *testing.T) {
 		var id int
 		var name string
 		rows.Scan(&id, &name)
-		log.Printf("found row: %d, %s\n", id, name)
+		logger.Infof("found row: %d, %s\n", id, name)
 	}
 	rows.Close()
 

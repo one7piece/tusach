@@ -9,7 +9,8 @@
     "angular-route": "^1.5.0",
     "angular-sanitize": "^1.5.0",
     "angular-material": "^1.0",
-    "angular-ui-router": "^0.2.15",
+    "angular-ui-router": "^0.3",
+    "angular-base64" : "^2.0",
     "matchmedia-ng": "^1.0"
   },
   "devDependencies": {

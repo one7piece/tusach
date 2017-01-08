@@ -6,16 +6,16 @@ import (
 	"flag"
 	"io/ioutil"
 	//"log"
+	"bytes"
+	"dv.com.tusach/logger"
+	"encoding/json"
+	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/proxy"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
 	"time"
-	"github.com/PuerkitoBio/goquery"
-	"golang.org/x/net/proxy"
-	"encoding/json"
-	"bytes"
-	"github.com/golang/glog"
 )
 
 var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"}
@@ -157,15 +157,15 @@ func findChapterTitle(html string, restr string) string {
 
 func setupHttpClient(timeout time.Duration) (*http.Client, error) {
 	proxyUrl := util.GetConfiguration().ProxyURL
-	if (proxyUrl == "") {
+	if proxyUrl == "" {
 		return &http.Client{Timeout: timeout}, nil
 	}
-	glog.Info("Using proxy URL: " + proxyUrl)
+	logger.Info("Using proxy URL: " + proxyUrl)
 	proxyAuth := proxy.Auth{User: util.GetConfiguration().ProxyUsername,
 		Password: util.GetConfiguration().ProxyPassword}
 	proxyDialer, err := proxy.SOCKS5("tcp", proxyUrl, &proxyAuth, proxy.Direct)
-	if (err != nil) {
-		glog.Error("sock5 proxy creation error!", err.Error())
+	if err != nil {
+		logger.Errorf("sock5 proxy creation error! %q", err)
 		return nil, err
 	}
 	transport := &http.Transport{Dial: proxyDialer.Dial}
@@ -220,10 +220,10 @@ func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries in
 		n = 1
 	}
 	for i := 0; i < n; i++ {
-		glog.Info("Attempt %d/%d to load from %s\n", (i + 1), n, targetUrl)
+		logger.Infof("Attempt %d/%d to load from %s\n", (i + 1), n, targetUrl)
 		resp, err := client.Do(req)
 		if err != nil {
-			glog.Error("Error loading from %s. %s\n", targetUrl, err.Error())
+			logger.Errorf("Error loading from %s. %s\n", targetUrl, err.Error())
 		} else {
 			defer resp.Body.Close()
 			result, err = ioutil.ReadAll(resp.Body)
@@ -241,7 +241,7 @@ func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries in
 	}
 
 	if result == nil || len(result) == 0 {
-		glog.Error("No html data loaded")
+		logger.Error("No html data loaded")
 		return result, errors.New("No html data loaded")
 	}
 

@@ -8,8 +8,8 @@
  * Controller of the tusachangApp
  */
 angular.module('tusachangApp')
-	.controller('BookshelfCtrl', ['$rootScope', '$state', '$scope', '$window', '$mdDialog', '$filter', 'BookService',
-			function ($rootScope, $state, $scope, $window, $mdDialog, $filter, BookService) {
+	.controller('BookshelfCtrl', ['$rootScope', '$state', '$scope', '$window', '$mdDialog', '$filter', 'LoginService', 'BookService',
+			function ($rootScope, $state, $scope, $window, $mdDialog, $filter, LoginService, BookService) {
 
 		console.log("bookshelfCtrl creating...");
 		var self = this;
@@ -78,10 +78,11 @@ angular.module('tusachangApp')
 		self.processBooks = function(books) {
 			console.log("processBooks...");
 			self.books = [];
+			var logonUser = LoginService.getLogonUser();
 			for (var i=0; i<books.length; i++) {
 				var book = books[i];
 				var display = (book.status != "WORKING") &&
-					((self.showOnlyMyBooks == true && book.createdBy == $rootScope.logonUser.name) || self.showOnlyMyBooks == false);
+					((self.showOnlyMyBooks == true && book.createdBy == logonUser.name) || self.showOnlyMyBooks == false);
 				//console.log("display: " + display + ", " + book.title);
 				if (display) {
 					var pageStr = book.currentPageNo + "/" + book.maxNumPages;
@@ -133,13 +134,13 @@ angular.module('tusachangApp')
 
 		self.canUpdate = function(book, operation) {
 			//console.log("canUpdate: " + book.title + ", status:" + book.status
-			//	+ ", isLogin:" + $rootScope.isLogin + ", role:" + $rootScope.logonUser.role);
+			//	+ ", isLogin:" + LoginService.isLogin + ", role:" + $rootScope.logonUser.role);
 			if (operation == "download") {
 				return true;
 			}
-			if (book.status != 'WORKING' && $rootScope.isLogin &&
-					($rootScope.logonUser.name == book.createdBy
-					|| $rootScope.logonUser.role.indexOf("admin") != -1)) {
+			var logonUser = LoginService.getLogonUser();
+			if (book.status != 'WORKING' && LoginService.isLogin &&
+					(logonUser.name == book.createdBy || logonUser.role == "admin")) {
 				return true;
 			}
 			return false;
@@ -194,8 +195,8 @@ angular.module('tusachangApp')
 
 		// listen for login/logout events
     $rootScope.$on('authentication', function(event, data) {
-      console.log("received event: " + event + ", data:" + data + ", isLogin:" + $rootScope.isLogin);
-			self.showOnlyMyBooks = ($rootScope.isLogin == true);
+      console.log("received event: " + event + ", data:" + data + ", isLogin:" + LoginService.isLogin);
+			self.showOnlyMyBooks = (LoginService.isLogin == true);
 			self.updateDisplay();
     });
 

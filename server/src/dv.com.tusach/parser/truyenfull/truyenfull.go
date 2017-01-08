@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	//"log"
+	"dv.com.tusach/logger"
 	"os"
 	"strconv"
 	"strings"
@@ -33,13 +34,14 @@ func main() {
 	util.LoadConfig(configFile)
 
 	if op == "v" {
-		fmt.Println(Validate(url))
+		logger.Debug(Validate(url))
 	} else {
 		str, err := Parse(url, inputFile, outputFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		} else {
+			fmt.Println(str)
 			fmt.Println(str)
 		}
 	}
@@ -132,7 +134,7 @@ func getChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	//fmt.Println("chapter title: ", *chapterTitle)
+	logger.Debugf("chapter title: ", *chapterTitle)
 	return chapterHtml, nil
 }
 

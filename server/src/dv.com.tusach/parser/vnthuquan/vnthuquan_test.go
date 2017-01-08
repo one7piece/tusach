@@ -17,6 +17,6 @@ func TestPackage(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	} else {
-		fmt.Println(outstr)
+		logger.Debug(outstr)
 	}
 }

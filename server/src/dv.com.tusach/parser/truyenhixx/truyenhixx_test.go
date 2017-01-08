@@ -25,5 +25,6 @@ func TestPackage(t *testing.T) {
 		t.Error(err)
 	}
 	fmt.Println(str)
+	fmt.Println(str)
 
 }

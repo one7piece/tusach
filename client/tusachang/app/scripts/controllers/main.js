@@ -38,35 +38,35 @@ angular.module('tusachangApp')
     });
 
     // listen for login/logout events
-    $rootScope.$on('authentication', function(event, data) {
-      console.log("received event: " + event + ", data:" + data + ", isLogin:" + $rootScope.isLogin);
+    $rootScope.$on('authentication', function(event, type) {
+      console.log("received event: " + event + ", type:" + type);
       var errorMessage = "";
-      if (data == 'sessionExpired') {
-        LoginService.updateCookie(false);
+      if (type == 'sessionExpired') {
         errorMessage = "Your session has expired!";
       }
 
-      if ($rootScope.isLogin != true) {
+      if (LoginService.isLogin != true) {
         if ($state.current.name != 'bookshelf') {
-          $state.go('bookshelf', {'message':errorMessage});
+          //$state.go('bookshelf', {'message':errorMessage});
         }
 			}
 
     });
 
     self.signInOut = function() {
-      if ($rootScope.isLogin != true) {
+      if (LoginService.isLogin != true) {
         console.log("sign in with " + self.username + "/" + self.password);
-        LoginService.doLogin(self.username, self.password, function(ok, errorMessage) {
-          if (ok) {
-          } else {
-            console.log("Failed to login! " + errorMessage);
-          }
-        });
+        LoginService.doLogin(self.username, self.password);
       } else {
-        LoginService.doLogout(function(ok, errorMessage) {
-        });
+        LoginService.doLogout();
       }
     };
 
+    self.isLogin = function() {
+      return LoginService.isLogin;
+    };
+
+    self.logonUser = function() {
+      return LoginService.getLogonUser();
+    }
   }]);

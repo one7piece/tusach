@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"log"
+	"dv.com.tusach/logger"
 	"reflect"
 	"time"
 	"unicode"
@@ -86,6 +86,6 @@ func lowerInitial(s string) string {
 		return s
 	}
 	r, n := utf8.DecodeRuneInString(s)
-	log.Printf("DecodeRuneInString(%s) -> r=%+v, n=%d\n", s, r, n)
+	logger.Infof("DecodeRuneInString(%s) -> r=%+v, n=%d\n", s, r, n)
 	return string(unicode.ToLower(r)) + s[n:]
 }

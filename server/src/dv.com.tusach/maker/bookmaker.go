@@ -6,16 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"dv.com.tusach/logger"
 	"dv.com.tusach/util"
-
-	"github.com/golang/glog"
 )
 
 type BookSite struct {
@@ -41,20 +39,20 @@ func (bookMaker BookMaker) GetBookSites() []string {
 	// get list of parsers
 	names, err := util.ListDir(util.GetParserPath(), true)
 	if err != nil {
-		glog.Error("Error reading parser directory. " + err.Error())
+		logger.Error("Error reading parser directory. " + err.Error())
 		return sites
 	}
 	for _, name := range names {
 		// call parser to check url support
-		//glog.Info("executing validate command: " + util.GetParserPath() + "/" + name)
+		logger.Info("executing validate command: " + util.GetParserPath() + "/" + name)
 		cmd := exec.Command(util.GetParserPath()+"/"+name,
 			"-configFile="+util.GetConfigFile(), "-op=v",
 			"-url=http://dummy.com")
 		out, err := cmd.CombinedOutput()
 		str := string(out)
-		//glog.Info("validate command output: ", str)
+		logger.Infof("validate command output: %s", str)
 		if err != nil {
-			glog.Error("Error checking url. " + err.Error())
+			logger.Error("Error checking url. " + err.Error())
 			return sites
 		}
 
@@ -63,9 +61,9 @@ func (bookMaker BookMaker) GetBookSites() []string {
 		for _, line := range lines {
 			if strings.HasPrefix(line, "parser-output:") {
 				jsonstr := line[len("parser-output:"):]
-				//log.Printf("Found json: %s\n", jsonstr)
+				//logger.Debugf("Found json: %s\n", jsonstr)
 				json.Unmarshal([]byte(jsonstr), &m)
-				//log.Printf("%v, validated: %s\n", m, m["validated"])
+				//logger.Debugf("%v, validated: %s\n", m, m["validated"])
 				break
 			}
 		}
@@ -74,33 +72,32 @@ func (bookMaker BookMaker) GetBookSites() []string {
 		}
 	}
 
-	//glog.Info("Found book sites: [%v]\n", sites)
+	logger.Infof("Found book sites: [%v]\n", sites)
 	return sites
 }
 
 func (bookMaker BookMaker) GetBookSite(url string) BookSite {
 	site := BookSite{Parser: ""}
 	if url == "" {
-		glog.Info("Parameter url is empty")
+		logger.Info("Parameter url is empty")
 		return site
 	}
 	// get list of parsers
 	names, err := util.ListDir(util.GetParserPath(), true)
 	if err != nil {
-		glog.Error("Error reading parser directory. " + err.Error())
+		logger.Error("Error reading parser directory. " + err.Error())
 		return site
 	}
 	for _, name := range names {
 		// call parser to check url support
-		//glog.Info("executing validate command: " + util.GetParserPath() + "/" + name)
 		cmd := exec.Command(util.GetParserPath()+"/"+name,
 			"-configFile="+util.GetConfigFile(), "-op=v",
 			"-url="+url)
 		out, err := cmd.CombinedOutput()
 		str := string(out)
-		//log.Println("validate command output: ", str)
+		//logger.Infof("validate command output: ", str)
 		if err != nil {
-			glog.Error("Error validating url. " + err.Error())
+			logger.Error("Error validating url. " + err.Error())
 			return site
 		}
 
@@ -109,13 +106,13 @@ func (bookMaker BookMaker) GetBookSite(url string) BookSite {
 		for _, line := range lines {
 			if strings.HasPrefix(line, "parser-output:") {
 				jsonstr := line[len("parser-output:"):]
-				//log.Printf("Found json: %s\n", jsonstr)
+				//logger.Infof("Found json: %s\n", jsonstr)
 				json.Unmarshal([]byte(jsonstr), &m)
-				//log.Printf("%v, validated: %s\n", m, m["validated"])
+				//logger.Infof("%v, validated: %s\n", m, m["validated"])
 				break
 			}
 		}
-		//log.Printf("validated: %s\n", m["validated"])
+		//logger.Infof("validated: %s\n", m["validated"])
 		if m["validated"] == "1" {
 			site.Parser = name
 			site.BatchSize, _ = strconv.Atoi(m["batchSsize"])
@@ -125,9 +122,9 @@ func (bookMaker BookMaker) GetBookSite(url string) BookSite {
 		}
 	}
 	if site.Parser == "" {
-		glog.Error("No book site found for url: %s\n", url)
+		logger.Errorf("No book site found for url: %s\n", url)
 	} else {
-		glog.Info("Found book site:[%v] for url:%s\n", site, url)
+		logger.Infof("Found book site:[%v] for url:%s\n", site, url)
 	}
 	return site
 }
@@ -143,10 +140,10 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 	em.StartListening(sink)
 
 	go func() {
-		glog.Info("start monitoring book: %d-%s\n", book.ID, book.Title)
+		logger.Infof("start monitoring book: %d-%s\n", book.ID, book.Title)
 		for {
 			msg, more := <-c
-			glog.Info("Received message: %s for book: %d, more:%v\n", msg, book.ID, more)
+			logger.Infof("Received message: %s for book: %d, more:%v\n", msg, book.ID, more)
 			if msg == "abort" {
 				aborted = true
 				break
@@ -155,7 +152,7 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 				break
 			}
 		}
-		glog.Info("stop monitoring book: %d-%s\n", book.ID, book.Title)
+		logger.Infof("stop monitoring book: %d-%s\n", book.ID, book.Title)
 	}()
 
 	url := book.CurrentPageUrl
@@ -185,13 +182,13 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 		if newChapter.Title == "" {
 			newChapter.Title = "Chapter " + strconv.Itoa(newChapter.ChapterNo)
 		}
-		glog.Info("completed chapter: %d:%s, nextPageUrl:%s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
+		logger.Infof("completed chapter: %d:%s, nextPageUrl:%s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
 		// save the chapter
 		err = bookMaker.DB.SaveChapter(newChapter)
 		if err != nil {
 			errorMsg = err.Error()
-			glog.Error("Error saving chapter. " + errorMsg)
+			logger.Error("Error saving chapter. " + errorMsg)
 			break
 		}
 		book.CurrentPageNo = newChapterNo
@@ -200,7 +197,7 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 
 		// check for no more pages
 		if nextPageUrl == "" {
-			glog.Info("No more next page url found.")
+			logger.Info("No more next page url found.")
 			break
 		} else {
 			_, err := bookMaker.saveBook(em, book, false)
@@ -211,7 +208,7 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 		}
 
 		if nextPageUrl == url {
-			glog.Error("Internal error. next page url is same as current page url: ", url)
+			logger.Errorf("Internal error. next page url is same as current page url: %s", url)
 			break
 		}
 		url = nextPageUrl
@@ -220,7 +217,7 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 	book.ErrorMsg = errorMsg
 	if book.ErrorMsg != "" {
 		book.Status = STATUS_ERROR
-		glog.Error(book.ErrorMsg)
+		logger.Error(book.ErrorMsg)
 	} else if aborted {
 		book.Status = STATUS_ABORTED
 	} else {
@@ -230,14 +227,14 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 	chapters, err := bookMaker.DB.LoadChapters(book.ID)
 	if err != nil {
 		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.ID, err.Error())
-		glog.Error(errorMsg)
+		logger.Error(errorMsg)
 		book.ErrorMsg = errorMsg
 		book.Status = STATUS_ERROR
 	} else {
 		err = bookMaker.MakeEpub(book, chapters)
 		if err != nil {
 			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
-			glog.Error(errorMsg)
+			logger.Error(errorMsg)
 			book.ErrorMsg = errorMsg
 			book.Status = STATUS_ERROR
 			book.EpubCreated = false
@@ -368,19 +365,19 @@ func (bookMaker BookMaker) MakeEpub(book Book, chapters []Chapter) error {
 	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, util.GetBookPath(book.ID))
 	out, err := cmd.CombinedOutput()
 	str = string(out)
-	glog.Info("epub command output: ", str)
+	logger.Infof("epub command output: %s", str)
 	if err != nil {
-		glog.Error("Error creating epub file. " + err.Error())
+		logger.Errorf("Error creating epub file. " + err.Error())
 		return errors.New("Error creating epub file. " + err.Error())
 	}
 	str = string(out)
-	glog.Info("epub command output: ", str)
+	logger.Infof("epub command output: %s", str)
 
 	if _, err := os.Stat(epubFile); os.IsNotExist(err) {
-		glog.Error("Error creating epub file. " + epubFile)
+		logger.Error("Error creating epub file. " + epubFile)
 		return errors.New("Error creating epub file: " + epubFile)
 	} else {
-		glog.Info("Created epub file: " + epubFile)
+		logger.Info("Created epub file: " + epubFile)
 	}
 
 	return nil
@@ -393,7 +390,7 @@ func (bookMaker BookMaker) CreateChapter(parser string, chapterUrl string, chapt
 	filename := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
 
 	// call parser to create chapter html
-	glog.Info("Calling parser: %s to create chapter: %s\n", parser, chapterUrl)
+	logger.Infof("Calling parser: %s to create chapter: %s\n", parser, chapterUrl)
 
 	cmd := exec.Command(util.GetParserPath()+"/"+parser,
 		"-configFile="+util.GetConfigFile(), "-op=p", "-url="+chapterUrl,
@@ -404,7 +401,7 @@ func (bookMaker BookMaker) CreateChapter(parser string, chapterUrl string, chapt
 		outStr = string(out)
 	}
 	if err != nil {
-		glog.Error("Error executing parser command: " + err.Error() + ". command out: " + outStr)
+		logger.Error("Error executing parser command: " + err.Error() + ". command out: " + outStr)
 		return "", errors.New("Error executing parser command: " + err.Error())
 	}
 

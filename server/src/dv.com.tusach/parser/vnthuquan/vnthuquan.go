@@ -2,6 +2,7 @@ package main
 
 import (
 	//"bytes"
+	"dv.com.tusach/logger"
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	"encoding/json"
@@ -9,7 +10,7 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
-	"log"
+	//"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -36,13 +37,14 @@ func main() {
 	util.LoadConfig(configFile)
 
 	if op == "v" {
-		fmt.Println(Validate(url))
+		logger.Debug(Validate(url))
 	} else {
 		str, err := Parse(url, inputFile, outputFile)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		} else {
+			fmt.Println(str)
 			fmt.Println(str)
 		}
 	}
@@ -134,7 +136,7 @@ func executeRequest(chapterUrl string, requestData string) (string, error) {
 			return "", err
 		}
 		responseHtml = string(response)
-		log.Printf("loaded html:\n%s\n", responseHtml)
+		logger.Infof("loaded html:\n%s\n", responseHtml)
 
 		/*
 			if strings.Index(responseHtml, "<html") == -1 {
@@ -187,7 +189,7 @@ func getChapterHtml(chapterUrl string, requestData string, rawHtml string, chapt
 			}
 		})
 
-		log.Println("found chapter request id: " + requestData)
+		logger.Info("found chapter request id: " + requestData)
 		if requestData == "" || !strings.HasPrefix(requestData, "tuaid=") {
 			return "", errors.New("Invalid or No chapter request id found")
 		}

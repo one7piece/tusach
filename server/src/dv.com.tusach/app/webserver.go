@@ -4,17 +4,16 @@ import (
 	"errors"
 	"flag"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"dv.com.tusach/logger"
 	"dv.com.tusach/maker"
 	"dv.com.tusach/persistence"
 	"dv.com.tusach/util"
-	"github.com/golang/glog"
 	"github.com/one7piece/httprest"
 )
 
@@ -28,31 +27,59 @@ var books []maker.Book
 var scripts []maker.ParserScript
 var eventManagers map[int]util.EventManager
 
-const sessionExpiredTimeSec = 60 * 60
+const sessionExpiredTimeSec = 24 * 60 * 60
+
+type LoginHandler struct {
+}
+
+func (h LoginHandler) Validate(username string, password string) bool {
+	for _, u := range users {
+		if u.Name == username && u.Password == password {
+			return true
+		}
+	}
+	return false
+}
+
+func (h LoginHandler) GetRoles(username string) []string {
+	roles := []string{}
+	for _, u := range users {
+		if u.Name == username {
+			roles = append(roles, u.Role)
+			break
+		}
+	}
+	return roles
+}
 
 func main() {
-	loadData()
-
-	glog.Info("Starting GO web server at " + util.GetConfiguration().ServerBindAddress +
-		":" + strconv.Itoa(util.GetConfiguration().ServerBindPort) +
-		", server path: " + util.GetConfiguration().ServerPath +
-		", server path2: " + util.GetConfiguration().ServerPath2)
 
 	db := persistence.Sqlite3{}
 	db.InitDB()
-	bookMaker.DB = db
+	bookMaker.DB = &db
+
+	loadData()
+	logger.Infof("Starting GO web server, configuration: %+v", util.GetConfiguration())
 
 	// create channels map
 	eventManagers = make(map[int]util.EventManager)
 
 	rest := httprest.New()
-	rest.Auth = httprest.JWTAuth{SecretKey: []byte("pi.tusach")}
-	rest.LOGON("/login")
+	rest.Auth = httprest.JWTAuth{TimeoutSec: sessionExpiredTimeSec, SecretKey: []byte("pi.tusach"), Handler: LoginHandler{}}
+	/*
+		// setup cors
+		rest.CorsPt = cors.New(cors.Options{
+			Debug:          true,
+			AllowedOrigins: []string{"*"},
+			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders: []string{"Accept", "Content-Type", "Authorization", "X-Custom-Header", "Origin"}})
+	*/
+	rest.LOGON("/login", Login)
 	//rest.LOGOUT("/logout")
-	rest.GET("/systeminfo", GetSystemInfo)
-	rest.GET("/sites", GetSites)
-	rest.GET("/books/:id", GetBooks)
-	rest.GET("/user", GetUser)
+	rest.GET(false, "/systeminfo", GetSystemInfo)
+	rest.GET(false, "/sites", GetSites)
+	rest.GET(false, "/books/:id", GetBooks)
+	rest.GET(true, "/user", GetUser)
 	rest.POST("/book/:cmd", UpdateBook)
 
 	// TODO handle CORS
@@ -64,11 +91,11 @@ func main() {
 	// static file handler
 	http.Handle("/", http.FileServer(http.Dir(util.GetConfiguration().ServerPath)))
 
-	glog.Info("GOWebServer started successfully")
+	logger.Info("GOWebServer started successfully")
 
 	if err := http.ListenAndServe(util.GetConfiguration().ServerBindAddress+":"+
 		strconv.Itoa(util.GetConfiguration().ServerBindPort), nil); err != nil {
-		log.Fatal("GOWebServer - ERROR! ", err)
+		logger.Errorf("GOWebServer - ERROR! ", err)
 		os.Exit(1)
 	}
 }
@@ -95,7 +122,7 @@ func downloadBook(w http.ResponseWriter, r *http.Request) {
 	epubFile := util.GetBookEpubFilename(book.ID, book.Title)
 	data, err := ioutil.ReadFile(epubFile)
 	if err != nil {
-		glog.Error("Failed to read epub file (bookId=" + strconv.Itoa(book.ID) + "): " + err.Error())
+		logger.Error("Failed to read epub file (bookId=" + strconv.Itoa(book.ID) + "): " + err.Error())
 		http.Error(w, "Failed to read epub file: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -107,19 +134,27 @@ func downloadBook(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+func Login(ctx *httprest.HttpContext) {
+	logger.Info("user " + ctx.User.Name + " has logged on")
+}
+
+/*
 func writeJsonMap(w rest.ResponseWriter, name string, value string) {
 	m := map[string]map[string]string{}
 	m["map"] = map[string]string{name: value}
 	w.WriteJson(m)
 }
-
+*/
 func GetSystemInfo(ctx *httprest.HttpContext) {
-	info := bookMaker.DB.GetSystemInfo(false)
+	info, err := bookMaker.DB.GetSystemInfo(false)
+	if err != nil {
+		ctx.RespERRString(http.StatusInternalServerError, err.Error())
+	}
 	ctx.RespOK(info)
 }
 
 func GetSites(ctx *httprest.HttpContext) {
-	sites := maker.GetBookSites()
+	sites := bookMaker.GetBookSites()
 	ctx.RespOK(sites)
 }
 
@@ -128,8 +163,8 @@ func GetUser(ctx *httprest.HttpContext) {
 }
 
 func GetBooks(ctx *httprest.HttpContext) {
-	idstr := ctx.Params.ByName("id")
-	log.Printf("GetBooks: %s", idstr)
+	idstr := ctx.GetParam("id")
+	logger.Debugf("GetBooks - id:%s", idstr)
 	result := []maker.Book{}
 	if idstr == "0" {
 		result = books
@@ -154,10 +189,10 @@ func GetBooks(ctx *httprest.HttpContext) {
 }
 
 func UpdateBook(ctx *httprest.HttpContext) {
-	op := ctx.Params.ByName("cmd")
-	glog.Info("UpdateBook: op:%s", op)
+	op := ctx.GetParam("cmd")
+	logger.Infof("UpdateBook - op:%s", op)
 	if op != "create" && op != "abort" && op != "resume" && op != "update" && op != "delete" {
-		glog.Error("Invalid op value: " + op)
+		logger.Error("Invalid op value: " + op)
 		ctx.RespERRString(http.StatusBadRequest, "Invalid op value: "+op)
 		return
 	}
@@ -168,16 +203,16 @@ func UpdateBook(ctx *httprest.HttpContext) {
 	}
 
 	updateBook := maker.Book{}
-	err := r.DecodeJsonPayload(&updateBook)
+	err := ctx.GetPayload(&updateBook)
 	if err != nil {
-		glog.Error("Invalid request book payload: " + err.Error())
+		logger.Error("Invalid request book payload: " + err.Error())
 		ctx.RespERRString(http.StatusInternalServerError, "Invalid request book payload: "+err.Error())
 		return
 	}
 
-	currentBook, err := bookMaker.LoadBook(updateBook.ID)
+	currentBook, err := bookMaker.DB.LoadBook(updateBook.ID)
 	if err != nil {
-		glog.Error("Error loading book: " + strconv.Itoa(updateBook.ID) + ": " + err.Error())
+		logger.Error("Error loading book: " + strconv.Itoa(updateBook.ID) + ": " + err.Error())
 		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -194,7 +229,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		switch op {
 		case "abort":
 			currentBook.Status = maker.STATUS_ABORTED
-			bookMaker.SaveBook(currentBook)
+			bookMaker.DB.SaveBook(currentBook)
 			for i := 0; i < len(books); i++ {
 				if books[i].ID == currentBook.ID {
 					books[i] = currentBook
@@ -203,7 +238,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 			}
 
 		case "update":
-			_, err = bookMaker.SaveBook(updateBook)
+			_, err = bookMaker.DB.SaveBook(updateBook)
 			if err == nil {
 				for i := 0; i < len(books); i++ {
 					if books[i].ID == updateBook.ID {
@@ -215,7 +250,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 
 		case "resume":
 			currentBook.Status = maker.STATUS_WORKING
-			_, err := bookMaker.SaveBook(currentBook)
+			_, err := bookMaker.DB.SaveBook(currentBook)
 			if err == nil {
 				for i := 0; i < len(books); i++ {
 					if books[i].ID == currentBook.ID {
@@ -240,7 +275,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 
 		case "delete":
 			var newBooks []maker.Book
-			bookMaker.DeleteBook(updateBook.ID)
+			bookMaker.DB.DeleteBook(updateBook.ID)
 			for i := 0; i < len(books); i++ {
 				if books[i].ID == updateBook.ID {
 					newBooks = append(books[0:i], books[i+1:]...)
@@ -254,17 +289,17 @@ func UpdateBook(ctx *httprest.HttpContext) {
 	message := "OK"
 	if err != nil {
 		message = "ERROR: " + err.Error()
-		glog.Error(err.Error())
+		logger.Error(err.Error())
 	}
 
-	w.WriteJson(map[string]string{"status": message})
+	ctx.RespOK(map[string]string{"status": message})
 }
 
 func CreateBook(ctx *httprest.HttpContext) {
 	newBook := maker.Book{}
 	err := ctx.GetPayload(&newBook)
 	if err != nil {
-		glog.Info("Invalid request book payload. %v\n", err)
+		logger.Infof("Invalid request book payload. %v\n", err)
 		ctx.RespERRString(http.StatusInternalServerError, "Invalid request book payload: "+err.Error())
 		return
 	}
@@ -279,7 +314,7 @@ func CreateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	newBook.CreatedBy = user.Name
+	newBook.CreatedBy = ctx.User.Name
 
 	// prevent too many concurrent books creation
 	numActive := 0
@@ -289,23 +324,23 @@ func CreateBook(ctx *httprest.HttpContext) {
 		}
 	}
 	if numActive >= util.GetConfiguration().MaxActionBooks {
-		glog.Error("Too many concurrent books in progress (" + strconv.Itoa(numActive) + ")")
+		logger.Error("Too many concurrent books in progress (" + strconv.Itoa(numActive) + ")")
 		ctx.RespERRString(http.StatusBadRequest, "Too many concurrent books in progress")
 		return
 	}
 
 	site := bookMaker.GetBookSite(newBook.StartPageUrl)
 	if site.Parser == "" {
-		glog.Error("No parser found for url: " + newBook.StartPageUrl)
+		logger.Error("No parser found for url: " + newBook.StartPageUrl)
 		ctx.RespERRString(http.StatusBadRequest, "No parser found for url: "+newBook.StartPageUrl)
 		return
 	}
 
 	newBook.Status = maker.STATUS_WORKING
 	newBook.CreatedTime = time.Now()
-	bookId, err := bookMaker.SaveBook(newBook)
+	bookId, err := bookMaker.DB.SaveBook(newBook)
 	if err != nil {
-		glog.Error("Failed to save book: " + err.Error())
+		logger.Error("Failed to save book: " + err.Error())
 		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -328,15 +363,14 @@ func (sink EventSink) HandleEvent(event util.EventData) {
 		str := event.Data.(string)
 		bookId, err := strconv.Atoi(str)
 		if err != nil {
-			glog.Fatal("Invalid book id, expecting a number")
-			glog.Flush()
+			logger.Errorf("Invalid book id, expecting a number")
 			panic("Invalid book id, expecting a number")
 			return
 		}
 		reloadBook(bookId)
 		em, ok := eventManagers[bookId]
 		if ok {
-			glog.Info("Book %d completed, closing channel\n", bookId)
+			logger.Infof("Book %d completed, closing channel\n", bookId)
 			close(em.Channel)
 			delete(eventManagers, bookId)
 		}
@@ -344,20 +378,19 @@ func (sink EventSink) HandleEvent(event util.EventData) {
 		str := event.Data.(string)
 		bookId, err := strconv.Atoi(str)
 		if err != nil {
-			glog.Fatal("Invalid book id, expecting a number")
-			glog.Flush()
+			logger.Errorf("Invalid book id, expecting a number")
 			panic("Invalid book id, expecting a number")
 			return
 		}
-		glog.Info("Received book updated event for %d, reloading book\n", bookId)
+		logger.Infof("Received book updated event for %d, reloading book\n", bookId)
 		reloadBook(bookId)
 	}
 }
 
 func reloadBook(bookId int) {
-	updatedBook, err := maker.LoadBook(bookId)
+	updatedBook, err := bookMaker.DB.LoadBook(bookId)
 	if err != nil {
-		glog.Error("Error loading book: %d - %s\n", bookId, err.Error())
+		logger.Errorf("Error loading book: %d - %s\n", bookId, err.Error())
 	} else {
 		for i := 0; i < len(books); i++ {
 			if books[i].ID == updatedBook.ID {
@@ -374,52 +407,58 @@ func scheduleCreateBook(book maker.Book, site maker.BookSite) {
 	em := util.CreateEventManager(c, 1)
 	em.StartListening(EventSink{manager: em})
 	eventManagers[book.ID] = *em
-	go maker.CreateBook(c, book, site)
+	go bookMaker.CreateBook(c, book, site)
 }
 
 func loadData() {
+	var logLevel string
+	var logFile string
 	var configFile string
 	flag.StringVar(&configFile, "configFile", "", "Configuration file name")
+	flag.StringVar(&logLevel, "logLevel", "info", "logLevel")
+	flag.StringVar(&logFile, "logFile", "", "logFile")
 	flag.Parse()
 
 	if configFile == "" {
-		log.Fatal("GOWebserver - ERROR! missing parameter: configFile")
+		logger.Debug("GOWebserver - ERROR! missing parameter: configFile")
 		os.Exit(1)
 	}
+
 	//now := time.Now()
 
 	// load configuration
 	util.LoadConfig(configFile)
-	maker.InitDB()
+
+	logger.Debugf("loaded configuration: %+v", util.GetConfiguration())
 
 	// init users
 	var err error
-	users, err = maker.LoadUsers()
+	users, err = bookMaker.DB.LoadUsers()
 	if err != nil {
 		panic("Error loading users! " + err.Error())
 	}
 	if len(users) != 3 {
 		adminUser := maker.User{Name: "admin", Password: "spidey", Role: "administrator"}
-		err = maker.SaveUser(adminUser)
+		err = bookMaker.DB.SaveUser(adminUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
 		dadUser := maker.User{Name: "vinhvan", Password: "colong", Role: "user"}
-		err = maker.SaveUser(dadUser)
+		err = bookMaker.DB.SaveUser(dadUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
 		guestUser := maker.User{Name: "guest", Password: "password", Role: "user"}
-		err = maker.SaveUser(guestUser)
+		err = bookMaker.DB.SaveUser(guestUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
 		users = []maker.User{adminUser, dadUser, guestUser}
 	}
-	glog.Info("found %d users\n", len(users))
+	logger.Infof("users=%d", len(users))
 
 	// load books
-	books, err = maker.LoadBooks()
+	books, err = bookMaker.DB.LoadBooks()
 	if err != nil {
 		panic("Error loading books! " + err.Error())
 	}

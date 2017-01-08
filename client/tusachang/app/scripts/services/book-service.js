@@ -25,7 +25,7 @@ angular.module('tusachangApp')
 				{desc: "Owner (A..Z)", name:"owner", order:"asc"},
 				{desc: "Owner (Z..A)", name:"owner", order:"dsc"} ];
     self.cacheProps.sortBy = self.cacheProps.sortRange[3];
-    self.cacheProps.showOnlyMyBooks = false; 
+    self.cacheProps.showOnlyMyBooks = false;
 
     // subscribe to books changes
     self.subscribe = function(scope, callback) {
@@ -47,23 +47,23 @@ angular.module('tusachangApp')
       console.log("loading sites...");
       var header = {headers: {'Content-Type': 'application/json'}};
       $http.get(urlPrefix + '/api/sites', header)
-        .success(function(data, status) {
-          console.log("BookService.loadSites() - success response, status:" + status, data);
-          if (status === 200 && data) {
-            self.sites = data;
+        .then(function success(response) {
+          console.log("BookService.loadSites() - success response:", response);
+          if (response.status === 200 && response.data) {
+            self.sites = response.data;
             if (callback) {
               callback(true, self.sites);
             }
           } else {
             if (callback) {
-              callback(false, "Failed to load sites, status=" + status);
+              callback(false, "Failed to load sites, status=" + response.status);
             }
           }
         })
-        .error(function(data, status) {
-          console.log("BookService.loadSites() - error response, status:" + status);
+        .catch(function error(response) {
+          console.log("BookService.loadSites() - error response:", response);
           if (callback) {
-            callback(false, "Failed to load sites, status=" + status);
+            callback(false, "Failed to load sites, status=" + response.status);
           }
         });
     };
@@ -72,7 +72,7 @@ angular.module('tusachangApp')
       console.log("loading all books...");
       var header = {headers: {'Content-Type': 'application/json'}};
       $http.get(urlPrefix + '/api/books/0', header)
-        .then(function successCallback(response) {
+        .then(function success(response) {
           if (response.status == 200 && response.data) {
             self.books = response.data;
             if (callback) {
@@ -82,7 +82,8 @@ angular.module('tusachangApp')
               self.notify('books', self.books);
             }
           }
-        }, function errorCallback(response) {
+        })
+        .catch(function error(response) {
           if (callback) {
             callback(false, "Failed to load books, status=" + response.status);
           }
@@ -93,28 +94,28 @@ angular.module('tusachangApp')
       console.log("download book: " + book);
       var header = {headers: {'Content-Type': 'application/json'}};
       $http.get(urlPrefix + '/api/books/0', header)
-        .success(function(data, status) {
-          console.log("BookService.loadBooks() - success response, status:" + status, data);
-          if (status === 200 && data) {
-            self.books = data;
+        .then(function(response) {
+          console.log("BookService.loadBooks() - success response:", response);
+          if (response.status === 200 && response.data) {
+            self.books = response.data;
             callback(true, self.books);
           } else {
-            callback(false, "Failed to load books, status=" + status);
+            callback(false, "Failed to load books, status=" + response.status);
           }
         })
-        .error(function(data, status) {
-          console.log("BookService.loadBooks() - error response, status:" + status);
-          callback(false, "Failed to load books, status=" + status);
+        .catch(function error(response) {
+          console.log("BookService.loadBooks() - error response, status:" + response.status);
+          callback(false, "Failed to load books, status=" + response.status);
         });
     };
 
     self.updateBook = function(book, operation, callback) {
       console.log(operation + " book: " + book);
-      var header = {headers: {'Content-Type': 'application/json'}};
-      $http.post(urlPrefix + '/api/book/' + $rootScope.logonUser.sessionId + "/" + operation, book, header)
-        .success(function(data, status) {
-          console.log("BookService.updateBook() - success response, status:" + status, data);
-          if (status === 200 && data) {
+      //var header = {headers: {'Content-Type': 'application/json'}};
+      $http.post(urlPrefix + '/api/book/' + operation, book)
+        .then(function success(response) {
+          console.log("BookService.updateBook() - success response:", response);
+          if (response.status === 200 && response.data) {
             if (operation == 'abort') {
               self.abortingBooks.push(book);
               // set timer to remove
@@ -127,14 +128,14 @@ angular.module('tusachangApp')
                 }
               }, 20*1000);
             }
-            callback(true, data);
+            callback(true, response.data);
           } else {
-            callback(false, "Failed to " + operation + " book, status=" + status);
+            callback(false, "Failed to " + operation + " book, status=" + response.status);
           }
         })
-        .error(function(data, status) {
-          console.log("BookService.updateBook() - error response, status:" + status, data);
-          callback(false, "Failed to " + operation + " book, status=" + status);
+        .catch(function error(response) {
+          console.log("BookService.updateBook() - error response:", response);
+          callback(false, "Failed to " + operation + " book, status=" + response.status);
         });
     };
 
@@ -144,22 +145,22 @@ angular.module('tusachangApp')
       //console.log("loading system info...");
       var header = {headers: {'Content-Type': 'application/json'}};
       $http.get(urlPrefix + '/api/systeminfo', header)
-        .success(function(data, status) {
-          //console.log("BookService.loadSystemInfo() - success response, status:" + status, data);
-          if (status === 200 && data) {
+        .then(function success(response) {
+          console.log("BookService.loadSystemInfo() - success response:", response);
+          if (response.status === 200 && response.data) {
             // schedule book reload
-            var reloadBooks = (self.systemInfo.bookLastUpdateTime != data.bookLastUpdateTime);
-            self.systemInfo = data;
+            var reloadBooks = (self.systemInfo.bookLastUpdateTime != response.data.bookLastUpdateTime);
+            self.systemInfo = response.data;
             if (reloadBooks) {
               self.loadBooks(null);
             }
           } else {
-            console.log("Failed to load systemInfo, status=" + status);
+            console.log("Failed to load systemInfo, status=" + response.status);
           }
           $timeout(self.loadSystemInfo, self.refreshInterval);
         })
-        .error(function(data, status) {
-          console.log("Failed to load systemInfo, status=" + status);
+        .catch(function error(response) {
+          console.log("error load systemInfo: ", response);
           $timeout(self.loadSystemInfo, self.refreshInterval);
         });
     };

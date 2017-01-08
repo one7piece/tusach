@@ -5,6 +5,7 @@ import (
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	//"errors"
+	"dv.com.tusach/logger"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -21,6 +22,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	} else {
+		fmt.Println(str)
 		fmt.Println(str)
 	}
 }
@@ -45,7 +47,7 @@ func (p Goctruyen) Validate(url string) (string, error) {
 func (p Goctruyen) Parse(chapterUrl string, inputFile string, outputFile string) (string, error) {
 	return parser.DefaultParse(p, chapterUrl, inputFile, outputFile, 10, 2)
 }
-	
+
 func (p Goctruyen) GetChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
 	if err != nil {
@@ -63,20 +65,20 @@ func (p Goctruyen) GetChapterHtml(rawHtml string, chapterTitle *string) (string,
 		clazz, _ := sel.Attr("class")
 		if clazz == "content" {
 			sel.Find("div[class='author']").Each(func(i int, sel2 *goquery.Selection) {
-				*chapterTitle = sel2.Find("h3").First().Text()	
+				*chapterTitle = sel2.Find("h3").First().Text()
 				parser.ExtractNodeContents(sel2, &buffer)
 			})
 			sel.Find("p[class='detailcontent']").Each(func(i int, sel2 *goquery.Selection) {
 				html, _ := sel2.Html()
-				fmt.Println("Html\n" + html);
+				logger.Debug("Html\n" + html)
 				buffer.WriteString(html)
-			})			
-									
+			})
+
 			return
 		}
 	})
 
-	if (*chapterTitle == "") {
+	if *chapterTitle == "" {
 		index := strings.Index(rawHtml, "class=\"detailcontent\"")
 		if index > 200 {
 			*chapterTitle = parser.GetChapterTitle(rawHtml[index-200:])
@@ -90,7 +92,7 @@ func (p Goctruyen) GetChapterHtml(rawHtml string, chapterTitle *string) (string,
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	//fmt.Println("chapter title: ", *chapterTitle)
+	logger.Debugf("chapter title: ", *chapterTitle)
 	return chapterHtml, nil
 }
 

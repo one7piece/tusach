@@ -5,6 +5,7 @@ import (
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	//"errors"
+	"dv.com.tusach/logger"
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -57,18 +58,18 @@ func (p Webtruyen) GetChapterHtml(rawHtml string, chapterTitle *string) (string,
 		return "", err
 	}
 
-	*chapterTitle = "";
+	*chapterTitle = ""
 	elm := doc.Find("h3[class='detailchapter']").First()
 	if elm != nil {
 		*chapterTitle = elm.Text()
 	}
 
 	var buffer bytes.Buffer
-	elm = doc.Find("div[id='detailcontent']").First()
+	elm = doc.Find("div[id='content']").First()
 	if elm != nil {
-		html, err := elm.Html();
-		if (err == nil) {
-			fmt.Println("Html\n" + html)
+		html, err := elm.Html()
+		if err == nil {
+			logger.Debugf("page html: %s" + html)
 			buffer.WriteString(html)
 		}
 	}
@@ -80,7 +81,7 @@ func (p Webtruyen) GetChapterHtml(rawHtml string, chapterTitle *string) (string,
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	fmt.Println("chapter title: ", *chapterTitle)
+	logger.Infof("chapter title: %s", *chapterTitle)
 	return chapterHtml, nil
 }
 

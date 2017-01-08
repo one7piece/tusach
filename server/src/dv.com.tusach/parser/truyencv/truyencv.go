@@ -5,11 +5,12 @@ import (
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	//"errors"
-	"github.com/PuerkitoBio/goquery"
+	"dv.com.tusach/logger"
 	"encoding/json"
+	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
 	"os"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -22,7 +23,8 @@ func main() {
 		os.Exit(1)
 	} else {
 		fmt.Println(str)
-	}	
+		fmt.Println(str)
+	}
 }
 
 type Truyencv struct {
@@ -39,7 +41,7 @@ func (p Truyencv) Validate(url string) (string, error) {
 	m["batchDelaySec"] = "10"
 	m["url"] = "http://truyencv.vn"
 	json, _ := json.Marshal(m)
-	return "\nparser-output:" + string(json) + "\n", nil	
+	return "\nparser-output:" + string(json) + "\n", nil
 }
 
 func (p Truyencv) Parse(chapterUrl string, inputFile string, outputFile string) (string, error) {
@@ -56,7 +58,7 @@ func (p Truyencv) GetChapterHtml(rawHtml string, chapterTitle *string) (string, 
 	if err != nil {
 		return "", err
 	}
-	
+
 	*chapterTitle = ""
 	var buffer bytes.Buffer
 	doc.Find("body").Find("div").Each(func(i int, td *goquery.Selection) {
@@ -68,14 +70,14 @@ func (p Truyencv) GetChapterHtml(rawHtml string, chapterTitle *string) (string, 
 					buffer.WriteString(s.Text())
 				}
 			})
-		}		
+		}
 	})
-	
+
 	index := strings.Index(rawHtml, "id=\"readstory\"")
 	if index > 200 {
 		*chapterTitle = parser.GetChapterTitle(rawHtml[index:])
 	}
-	
+
 	chapterHtml := ""
 	textStr := buffer.String()
 	if textStr != "" {
@@ -83,7 +85,7 @@ func (p Truyencv) GetChapterHtml(rawHtml string, chapterTitle *string) (string, 
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	//fmt.Println("chapter title: ", *chapterTitle)
+	logger.Debugf("chapter title: ", *chapterTitle)
 	return chapterHtml, nil
 }
 

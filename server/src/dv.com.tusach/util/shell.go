@@ -2,8 +2,8 @@ package util
 
 import (
 	"bytes"
+	"dv.com.tusach/logger"
 	"errors"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -15,7 +15,7 @@ import (
 func killProcess(cmdStr string) {
 	lines, err := execCmd2(exec.Command("ps"), cmdStr)
 	if err != nil {
-		log.Printf("Error executing ps command: %v\n", err)
+		logger.Infof("Error executing ps command: %v\n", err)
 		return
 	}
 	pid := -1
@@ -27,16 +27,16 @@ func killProcess(cmdStr string) {
 		}
 	}
 	if pid != -1 {
-		log.Printf("Found pid %d for command: %s\n", pid, cmdStr)
+		logger.Infof("Found pid %d for command: %s\n", pid, cmdStr)
 		process, err := os.FindProcess(pid)
 		if err != nil {
-			log.Printf("Could not find process with pid %d\n", pid)
+			logger.Infof("Could not find process with pid %d\n", pid)
 			return
 		}
-		log.Printf("Killing process %d\n", pid)
+		logger.Infof("Killing process %d\n", pid)
 		process.Kill()
 	} else {
-		log.Printf("No pid found for command: %s\n", cmdStr)
+		logger.Infof("No pid found for command: %s\n", cmdStr)
 	}
 }
 
@@ -47,7 +47,7 @@ func isProcessAlive(pid int) bool {
 	}
 
 	err = process.Signal(syscall.Signal(0))
-	log.Printf("process.Signal on pid %d returned: [%v]\n", pid, err)
+	logger.Infof("process.Signal on pid %d returned: [%v]\n", pid, err)
 	if err == nil || err.Error() == "operation not permitted" {
 		return true
 	}

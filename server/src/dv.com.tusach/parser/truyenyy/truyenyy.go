@@ -2,14 +2,15 @@ package main
 
 import (
 	//"bytes"
+	"dv.com.tusach/logger"
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
+	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"encoding/json"
 	"io/ioutil"
-	"strconv"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	} else {
+		fmt.Println(str)
 		fmt.Println(str)
 	}
 }
@@ -59,18 +61,18 @@ func (p Truyenyy) GetChapterHtml(rawHtml string, chapterTitle *string) (string, 
 	*chapterTitle = ""
 	//var buffer bytes.Buffer
 	elm := doc.Find("div#id_noidung_chuong").First()
-	if (elm != nil) {
+	if elm != nil {
 		textStr, err = elm.Html()
-		if (err == nil) {
-			fmt.Println("******* Chapter Html *******\n" + textStr)
+		if err == nil {
+			logger.Debug("******* Chapter Html *******\n" + textStr)
 		} else {
 			return "", err
 		}
 	}
 
 	elm = doc.Find("div#noidungtruyen h1").First()
-	if (elm != nil) {
-		*chapterTitle = elm.Text();
+	if elm != nil {
+		*chapterTitle = elm.Text()
 	}
 
 	chapterHtml := ""
@@ -79,7 +81,7 @@ func (p Truyenyy) GetChapterHtml(rawHtml string, chapterTitle *string) (string, 
 		index := strings.Index(templateHtml, "</body>")
 		chapterHtml = templateHtml[0:index] + textStr + "</body></html>"
 	}
-	fmt.Println("chapter title: ", *chapterTitle)
+	logger.Debugf("chapter title: ", *chapterTitle)
 	return chapterHtml, nil
 }
 

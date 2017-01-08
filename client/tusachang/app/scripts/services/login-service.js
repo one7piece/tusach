@@ -8,125 +8,114 @@
  * Service in the tusachangApp.
  */
 angular.module('tusachangApp')
-	.service('LoginService', ['$rootScope', '$cookies', '$http', function ($rootScope, $cookies, $http) {
+	.service('LoginService', ['$rootScope', '$window', '$http', '$base64', function ($rootScope, $window, $http, $base64) {
 			// AngularJS will instantiate a singleton by calling "new" on this function
 			var self = this;
-
-			$rootScope.logonUser = {name: "", role:"", sessionId: ""};
-
-			var sessionId = $cookies.get('tusachangApp.sessionid');
-			if (sessionId != undefined && sessionId != null && sessionId != "") {
-				$rootScope.logonUser.sessionId = sessionId;
-			}
-			// validate the session id with server
-			$rootScope.isLogin = false;
-			console.log("login-service - isLogin:" + $rootScope.isLogin
-				+ ", sessionId:" + $rootScope.logonUser.sessionId);
-
-			self.doValidateSession = function(callback) {
-				var header = {headers: {'Content-Type': 'application/json'}};
-				$http.get(urlPrefix + '/api/user/' + $rootScope.logonUser.sessionId, header)
-					.success(function (data, status) {
-						console.log("doValidateSession, status:" + status + ", ",  data);
-						if (status == 200 && data && data.sessionId && data.sessionId != "") {
-							$rootScope.logonUser = data;
-							$rootScope.isLogin = true;
-						}
-						self.updateCookie($rootScope.isLogin);
-						// emit login event
-						$rootScope.$emit('authentication');
-						if (callback) {
-							callback(status == 200, status);
-						}
-					})
-					.error(function (data, status) {
-						self.updateCookie(false);
-						// emit login event
-						$rootScope.$emit('authentication');
-						if (callback) {
-							callback(false, status);
-						}
-					});
+			var SESSION_ID = "tusach.session";
+			self.saveSession = function (session) {
+				console.log("saveSession:", session);
+				if (session) {
+					self.session = session;
+				} else {
+					self.session = {};
+				}
+				self.isLogin = (self.session.Token && self.session.Token.length > 0);
+				if (self.isLogin) {
+					console.log("save session data: [" + angular.fromJson(self.session) + "]");
+					$window.sessionStorage.setItem(SESSION_ID, JSON.stringify(self.session, null, " "));
+				} else {
+					$window.sessionStorage.removeItem(SESSION_ID);
+				}
 			};
 
-			if ($rootScope.logonUser.sessionId != "") {
-				self.doValidateSession(null);
+			var savedData = $window.sessionStorage.getItem(SESSION_ID);
+			console.log("LoginService instantiated, retrieved session data: ", savedData);
+			if (savedData) {
+				try {
+					self.session = JSON.parse(savedData);
+				} catch (err) {
+					console.log("Error retrieving saved session", err);
+					self.saveSession();
+				}
+			} else {
+				self.session = {};
+			}
+			self.isLogin = (self.session.Token && self.session.Token.length > 0);
+
+			self.getLogonUser = function() {
+				if (self.isLogin) {
+	        return {name: self.session.Username, role: self.session.Roles[0]};
+	      } else {
+	        return {name: "", role: ""};
+	      }
+			};
+
+			self.getToken = function() {
+				if (self.isLogin) {
+					return self.session.Token;
+				} else {
+					return "";
+				}
 			}
 
 			self.doLogin = function (username, password, callback) {
 				console.log("doLogin - urlPrefix:" + urlPrefix);
-				var body = {name: username, password: password};
-				var header = {headers: {'Content-Type': 'application/json'}};
-				$rootScope.isLogin = false;
-				$rootScope.logonUser.sessionId = "";
-				$rootScope.logonUser.name = "";
-
-				$http.post(urlPrefix + '/api/login', body, header)
-					.success(function (data, status) {
+				self.isLogin = false;
+				self.session = {};
+				var authstr = "Authorization " + $base64.encode(unescape(encodeURIComponent(username + ":" + password)));
+				var config = {headers: {'Authorization': authstr}};
+				console.log("header config: ", config);
+				$http.post(urlPrefix + '/api/login', "", config)
+					.then(function success(response) {
 						var errorMsg = "";
-						if (status == 200 && data && data.sessionId && data.sessionId != "") {
-							console.log("success login, status:" + status + ", data:", data);
-							$rootScope.logonUser = data;
-							$rootScope.isLogin = true;
+						console.log("success response:", response);
+						if (response.status == 200 && response.data) {
+							console.log("success login:", response.data);
+							self.saveSession(response.data);
 							// emit login event
-							$rootScope.$emit('authentication');
+							$rootScope.$emit('authentication', 'login');
 						} else {
-							errorMsg = "Error logging in to server: " + status;
-							if (data) {
-								errorMsg = data.status;
+							self.saveSession();
+							errorMsg = "Error logging in to server: " + response.status;
+							if (response.data) {
+								errorMsg = response.data;
 							}
-							console.log("error login, status:" + status + ", msg:" + errorMsg);
+							console.log("error login, status:" + response.status + ", msg:" + errorMsg);
 						}
-						callback($rootScope.isLogin, errorMsg);
-						self.updateCookie($rootScope.isLogin);
+						if (callback) {
+							callback(self.session.Token != "", errorMsg);
+						}
 					})
-					.error(function (data, status) {
-						console.log("error login, status:" + status + ", data:", data);
-						var errorMsg = "Error logging in to server: " + status;
-						callback(false, errorMsg);
-						self.updateCookie(false);
+					.catch(function error(response) {
+						console.log("error login: ", response);
+						if (callback) {
+							var errorMsg = "Error logging in to server: " + response.status;
+							callback(false, errorMsg);
+						}
 					});
 			};
 
 			self.doLogout = function (callback) {
-				self.updateCookie(false);
-
-				var header = {headers: {'Content-Type': 'application/json'}};
-				$http.post(urlPrefix + '/api/logout/' + $rootScope.logonUser.sessionId, header)
-					.success(function (data, status) {
-						console.log("success logout, status:" + status);
+				$http.post(urlPrefix + '/api/logout', "")
+					.then(function success(response) {
+						console.log("success logout, status:", response);
 						if (callback) {
-							if (data) {
-								callback(status == 200, data.status);
+							if (response.data) {
+								callback(response.status == 200);
 							} else {
-								callback(false, "Failed to logout, status=" + status);
+								callback(false, "Failed to logout, status=" + response.status);
 							}
 						}
 					})
-					.error(function (data, status) {
-						console.log("error logout, status:" + status);
+					.catch(function error(response) {
+						console.log("error logout, status:", response);
 						if (callback) {
-							callback(false, "Failed to logout, status=" + status);
+							callback(false, "Failed to logout, status=" + response.status);
 						}
 					});
-
+				self.saveSession();
 				// emit logout event
 				$rootScope.$emit('authentication', 'logout');
-			};
-
-			self.updateCookie = function (isLogin) {
-				if (isLogin) {
-					// set expire in 30 minutes
-					var expireDate = new Date();
-					var expirePeriod = 60 * 60 * 1000;
-					expireDate.setDate(expireDate.getTime() + expirePeriod);
-					$cookies.put('tusachangApp.sessionid', $rootScope.logonUser.sessionId, {expires: expireDate});
-				} else {
-					$cookies.remove('tusachangApp.sessionid');
-					$rootScope.logonUser.sessionId = "";
-					$rootScope.logonUser.name = "";
-					$rootScope.isLogin = false;
-				}
 			};
 
 		}]);
