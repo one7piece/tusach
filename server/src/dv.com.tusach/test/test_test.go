@@ -1,15 +1,12 @@
 package test
 
 import (
-	"fmt"
-	"log"
-	"reflect"
-	//"strconv"
 	"bytes"
+	"dv.com.tusach/logger"
 	"dv.com.tusach/util"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/golang/glog"
 	"io/ioutil"
+	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -26,11 +23,6 @@ type User struct {
 }
 
 var mymap map[string]User
-
-func TestGLog(t *testing.T) {
-	glogger.Info("info....Testing glog logging....")
-	glogger.Error("Error...Testing glog logging...")
-}
 
 func xTestGoQuery(t *testing.T) {
 	logger.Infof("\nTestGoQuery...")

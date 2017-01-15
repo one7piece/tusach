@@ -54,10 +54,6 @@ func (h LoginHandler) GetRoles(username string) []string {
 
 func main() {
 
-	db := persistence.Sqlite3{}
-	db.InitDB()
-	bookMaker.DB = &db
-
 	loadData()
 	logger.Infof("Starting GO web server, configuration: %+v", util.GetConfiguration())
 
@@ -205,7 +201,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 	updateBook := maker.Book{}
 	err := ctx.GetPayload(&updateBook)
 	if err != nil {
-		logger.Error("Invalid request book payload: " + err.Error())
+		logger.Errorf("Invalid request book payload [%s] %v\n", ctx.R.Body, err)
 		ctx.RespERRString(http.StatusInternalServerError, "Invalid request book payload: "+err.Error())
 		return
 	}
@@ -299,7 +295,7 @@ func CreateBook(ctx *httprest.HttpContext) {
 	newBook := maker.Book{}
 	err := ctx.GetPayload(&newBook)
 	if err != nil {
-		logger.Infof("Invalid request book payload. %v\n", err)
+		logger.Errorf("Invalid request book payload [%s] %v\n", ctx.R.Body, err)
 		ctx.RespERRString(http.StatusInternalServerError, "Invalid request book payload: "+err.Error())
 		return
 	}
@@ -430,6 +426,10 @@ func loadData() {
 	util.LoadConfig(configFile)
 
 	logger.Debugf("loaded configuration: %+v", util.GetConfiguration())
+
+	db := persistence.Ql{}
+	db.InitDB()
+	bookMaker.DB = &db
 
 	// init users
 	var err error

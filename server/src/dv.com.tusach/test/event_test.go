@@ -1,8 +1,8 @@
 package test
 
 import (
+	"dv.com.tusach/logger"
 	"dv.com.tusach/util"
-	"fmt"
 	"strconv"
 	"testing"
 	"time"

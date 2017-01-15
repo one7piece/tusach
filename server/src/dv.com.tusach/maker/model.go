@@ -71,7 +71,7 @@ type Persistence interface {
 	InitDB()
 	CloseDB()
 	GetSystemInfo(forceReload bool) (SystemInfo, error)
-	SaveSystemInfo(info SystemInfo) error
+	SaveSystemInfo(info SystemInfo)
 	LoadUsers() ([]User, error)
 	SaveUser(user User) error
 	DeleteUser(userName string) error

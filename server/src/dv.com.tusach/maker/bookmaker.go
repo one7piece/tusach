@@ -44,13 +44,13 @@ func (bookMaker BookMaker) GetBookSites() []string {
 	}
 	for _, name := range names {
 		// call parser to check url support
-		logger.Info("executing validate command: " + util.GetParserPath() + "/" + name)
+		logger.Debug("executing validate command: " + util.GetParserPath() + "/" + name)
 		cmd := exec.Command(util.GetParserPath()+"/"+name,
 			"-configFile="+util.GetConfigFile(), "-op=v",
 			"-url=http://dummy.com")
 		out, err := cmd.CombinedOutput()
 		str := string(out)
-		logger.Infof("validate command output: %s", str)
+		logger.Debugf("validate command output: %s", str)
 		if err != nil {
 			logger.Error("Error checking url. " + err.Error())
 			return sites
@@ -72,14 +72,14 @@ func (bookMaker BookMaker) GetBookSites() []string {
 		}
 	}
 
-	logger.Infof("Found book sites: [%v]\n", sites)
+	logger.Debugf("Found book sites: [%v]\n", sites)
 	return sites
 }
 
 func (bookMaker BookMaker) GetBookSite(url string) BookSite {
 	site := BookSite{Parser: ""}
 	if url == "" {
-		logger.Info("Parameter url is empty")
+		logger.Warn("Parameter url is empty")
 		return site
 	}
 	// get list of parsers
@@ -143,7 +143,7 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 		logger.Infof("start monitoring book: %d-%s\n", book.ID, book.Title)
 		for {
 			msg, more := <-c
-			logger.Infof("Received message: %s for book: %d, more:%v\n", msg, book.ID, more)
+			logger.Debugf("Received message: %s for book: %d, more:%v\n", msg, book.ID, more)
 			if msg == "abort" {
 				aborted = true
 				break
