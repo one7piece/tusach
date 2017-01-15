@@ -15,11 +15,3 @@ tusachang/bower_components
 tusachang/node_modules
 tusachang/test
 dist/*
-
-
-
-
-
-server/library/tusach.db
-*.gwt-log
-server/library/books/00009999/OEBPS/chapter0001-raw.html
