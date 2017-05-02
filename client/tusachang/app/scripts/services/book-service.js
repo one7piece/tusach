@@ -69,10 +69,10 @@ angular.module('tusachangApp')
     };
 
     self.loadBooks = function(callback) {
-      console.log("loading all books...");
       var header = {headers: {'Content-Type': 'application/json'}};
       $http.get(urlPrefix + '/api/books/0', header)
         .then(function success(response) {
+          console.log("loaded all books: ", response.data);
           if (response.status == 200 && response.data) {
             self.books = response.data;
             if (callback) {
@@ -139,19 +139,20 @@ angular.module('tusachangApp')
         });
     };
 
-    self.refreshInterval = 20*1000;
+    self.refreshInterval = 10*1000;
     self.systemInfo = {};
     self.loadSystemInfo = function() {
       //console.log("loading system info...");
       var header = {headers: {'Content-Type': 'application/json'}};
       $http.get(urlPrefix + '/api/systeminfo', header)
         .then(function success(response) {
-          console.log("BookService.loadSystemInfo() - success response:", response);
+          //console.log("BookService.loadSystemInfo() - success response:", response);
           if (response.status === 200 && response.data) {
             // schedule book reload
             var reloadBooks = (self.systemInfo.bookLastUpdateTime != response.data.bookLastUpdateTime);
             self.systemInfo = response.data;
             if (reloadBooks) {
+              console.log("bookLastUpdateTime has changed to: " + response.data.bookLastUpdateTime);
               self.loadBooks(null);
             }
           } else {

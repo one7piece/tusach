@@ -1,9 +1,9 @@
 {
-	"serverPath" : "/home/dvan/dev/tusach/server/dist/html",
-	"libraryPath" : "/home/dvan/dev/tusach/server/dist/library",
-	"dbFilename" : "/home/dvan/dev/tusach/server/dist/library/tusach.db",
+	"serverPath" : "/home/dvan/dev/tusach/dist/html",
+	"libraryPath" : "/home/dvan/dev/tusach/dist/library",
+	"dbFilename" : "/home/dvan/dev/tusach/dist/library/tusach.ql",
 	"logLevel" : "info",
-	"logFile" : "/home/dvan/dev/tusach/server/dist/log/tusach.log",
+	"logFile" : "/home/dvan/dev/tusach/dist/tusach.log",
 	"ServerBindPort" : 8888
 }
 	

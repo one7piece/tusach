@@ -39,7 +39,7 @@ func (p Truyencv) Validate(url string) (string, error) {
 	m := map[string]string{"validated": strconv.Itoa(validated)}
 	m["batchSize"] = "50"
 	m["batchDelaySec"] = "10"
-	m["url"] = "http://truyencv.vn"
+	m["url"] = "https://truyencv.vn"
 	json, _ := json.Marshal(m)
 	return "\nparser-output:" + string(json) + "\n", nil
 }

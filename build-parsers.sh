@@ -1,13 +1,28 @@
-#!/bin/sh
-export parser_ipath=/home/dvan/dev/tusach/server/src/dv.com.tusach/parser
-export parser_opath=/home/dvan/dev/tusach/server/dist/library/parser
+#!/bin/bash
 
-go build -o $parser_opath/truyenyy $parser_ipath/truyenyy/truyenyy.go
-go build -o $parser_opath/truyencv $parser_ipath/truyencv/truyencv.go
-go build -o $parser_opath/webtruyen $parser_ipath/webtruyen/webtruyen.go
-go build -o $parser_opath/goctruyen $parser_ipath/goctruyen/goctruyen.go
-go build -o $parser_opath/tunghoanh $parser_ipath/tunghoanh/tunghoanh.go
-go build -o $parser_opath/vnthuquan $parser_ipath/vnthuquan/vnthuquan.go
-go build -o $parser_opath/truyenfull $parser_ipath/truyenfull/truyenfull.go
-go build -o $parser_opath/truyenhixx $parser_ipath/truyenhixx/truyenhixx.go
-go build -o $parser_opath/truyencuatui $parser_ipath/truyencuatui/truyencuatui.go
+echo "GOPATH: $GOPATH"
+export parser_ipath=/home/dvan/dev/tusach/server/src/dv.com.tusach/parser
+export parser_opath=/home/dvan/dev/tusach/dist/library/parser
+if [ ! -d "$parser_opath" ]; then
+mkdir $parser_opath
+fi
+
+declare -a parsers=("truyenyy" "truyencv" "webtruyen" "goctruyen" "tunghoanh" "vnthuquan" "truyenfull" "truyenhixx" "truyencuatui")
+
+arch=linux
+if [ "$1" == "" ] || [ "$1" == "linux" ]; then
+echo "building tusach parsers for linux"
+for p in "${parsers[@]}"
+do
+  echo building parser: $p
+  go build -o $parser_opath/$p $parser_ipath/$p/$p.go
+done
+else
+echo "cross compile tusach parsers for $1"
+for p in "${parsers[@]}"
+do
+  echo building parser: $p
+  env GOOS=linux GOARCH=$1 go build -o $parser_opath/$p $parser_ipath/$p/$p.go
+done
+
+fi

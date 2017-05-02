@@ -18,7 +18,7 @@ import (
 	_ "github.com/cznic/ql/driver"
 )
 
-var systemInfo maker.SystemInfo
+//var systemInfo maker.SystemInfo
 
 type Ql struct {
 	db   *sql.DB
@@ -91,7 +91,7 @@ func (ql *Ql) createTable(tableName string, tableType reflect.Type) error {
 
 	tx, err := ql.db.Begin()
 	if err != nil {
-		logger.Infof("failed to start transaction.", err)
+		logger.Errorf("failed to start transaction.", err)
 		return err
 	}
 	defer func() {
@@ -105,7 +105,7 @@ func (ql *Ql) createTable(tableName string, tableType reflect.Type) error {
 	logger.Infof("executing creating table query: %s\n", stmt)
 	_, err = tx.Exec(stmt)
 	if err != nil {
-		logger.Infof("failed to create table: %s\n", err)
+		logger.Errorf("failed to create table: %s\n", err)
 		return err
 	}
 	return nil
@@ -121,13 +121,14 @@ func (ql *Ql) GetSystemInfo(forceReload bool) (maker.SystemInfo, error) {
 			ql.info = records[0].(maker.SystemInfo)
 			logger.Infof("Found systeminfo: %+v\n", ql.info)
 		} else {
-			logger.Infof("No systeminfo found\n")
+			logger.Errorf("No systeminfo found\n")
 		}
 	}
 	return ql.info, nil
 }
 
 func (ql *Ql) SaveSystemInfo(info maker.SystemInfo) {
+	logger.Infof("save systemInfo=%v", info)
 	records, err := ql.loadRecords(reflect.TypeOf(maker.SystemInfo{}), "systeminfo", "", nil)
 	if err != nil {
 		logger.Errorf("Failed to load systeminfo", err)
@@ -288,8 +289,8 @@ func (ql *Ql) SaveBook(book maker.Book) (retId int, retErr error) {
 		retErr = ql.updateRecord("book", reflect.ValueOf(book), []string{"ID"})
 	}
 
-	systemInfo.BookLastUpdateTime = book.LastUpdateTime
-	ql.SaveSystemInfo(systemInfo)
+	ql.info.BookLastUpdateTime = book.LastUpdateTime
+	ql.SaveSystemInfo(ql.info)
 
 	return book.ID, retErr
 }
@@ -312,8 +313,8 @@ func (ql *Ql) DeleteBook(bookId int) error {
 	// remove files
 	err = os.RemoveAll(util.GetBookPath(bookId))
 
-	systemInfo.BookLastUpdateTime = time.Now()
-	ql.SaveSystemInfo(systemInfo)
+	ql.info.BookLastUpdateTime = time.Now()
+	ql.SaveSystemInfo(ql.info)
 
 	return err
 }
@@ -388,7 +389,7 @@ func (ql *Ql) loadRecords(tableType reflect.Type, tableName string, whereStr str
 	if whereStr != "" {
 		query += " WHERE " + whereStr
 	}
-	logger.Infof("executing query: %s\n", query)
+	logger.Debugf("executing query: %s\n", query)
 	rows, err := ql.db.Query(query, args...)
 	if err != nil {
 		logger.Errorf("Error executing query. ", err)
@@ -432,7 +433,7 @@ func (ql *Ql) loadRecords(tableType reflect.Type, tableName string, whereStr str
 func (ql *Ql) insertRecord(tableName string, value reflect.Value) error {
 	tx, err := ql.db.Begin()
 	if err != nil {
-		logger.Infof("failed to start transaction.", err)
+		logger.Errorf("failed to start transaction.", err)
 		return err
 	}
 
@@ -456,7 +457,7 @@ func (ql *Ql) insertRecord(tableName string, value reflect.Value) error {
 	}
 
 	insertStr := "INSERT INTO " + tableName + "(" + nameStr + ") values(" + valueStr + ")"
-	logger.Infof("executing insert: ", insertStr)
+	logger.Debugf("executing insert: ", insertStr)
 	pstmt, err := tx.Prepare(insertStr)
 	if err != nil {
 		logger.Errorf("failed to prepare insert.", err)
@@ -514,18 +515,18 @@ func (ql *Ql) updateRecord(tableName string, value reflect.Value, filterFields [
 		updateStr += " WHERE " + whereStr
 	}
 
-	logger.Infof("executing update: ", updateStr)
+	logger.Debugf("executing update: ", updateStr)
 
 	pstmt, err := tx.Prepare(updateStr)
 	if err != nil {
-		logger.Infof("failed to prepare update.", err)
+		logger.Errorf("failed to prepare update.", err)
 		return err
 	}
 	defer pstmt.Close()
 
 	_, err = pstmt.Exec(params...)
 	if err != nil {
-		logger.Infof("failed to execute update.", err)
+		logger.Errorf("failed to execute update.", err)
 		return err
 	}
 
@@ -540,7 +541,7 @@ func (ql *Ql) deleteRecords(tableName string, whereStr string, whereArgs []inter
 
 	tx, err := ql.db.Begin()
 	if err != nil {
-		logger.Infof("failed to start transaction.", err)
+		logger.Errorf("failed to start transaction.", err)
 		return err
 	}
 
@@ -551,15 +552,15 @@ func (ql *Ql) deleteRecords(tableName string, whereStr string, whereArgs []inter
 
 	pstmt, err := tx.Prepare(deleteStr)
 	if err != nil {
-		logger.Infof("failed to prepare delete.", err)
+		logger.Errorf("failed to prepare delete.", err)
 		return err
 	}
 	defer pstmt.Close()
 
-	logger.Infof("executing delete: ", deleteStr)
+	logger.Debugf("executing delete: ", deleteStr)
 	_, err = pstmt.Exec(whereArgs...)
 	if err != nil {
-		logger.Infof("failed to execute delete.", err)
+		logger.Errorf("failed to execute delete.", err)
 		return err
 	}
 

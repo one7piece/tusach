@@ -16,6 +16,8 @@ import (
 	"strings"
 )
 
+var myURL = "http://truyencuatui.net"
+
 func main() {
 	site := Truyencuatui{}
 	str, err := parser.Execute(site)
@@ -40,7 +42,7 @@ func (p Truyencuatui) Validate(url string) (string, error) {
 	m := map[string]string{"validated": strconv.Itoa(validated)}
 	m["batchSize"] = "50"
 	m["batchDelaySec"] = "10"
-	m["url"] = "http://www.truyencuatui.net"
+	m["url"] = myURL
 	json, _ := json.Marshal(m)
 	return "\nparser-output:" + string(json) + "\n", nil
 }
@@ -102,9 +104,9 @@ func (p Truyencuatui) GetNextPageUrl(rawHtml string, html string) (string, error
 	})
 	if !strings.HasPrefix(nextPageUrl, "http://") {
 		if strings.HasPrefix(nextPageUrl, "/") {
-			nextPageUrl = "http://www.truyencuatui.net" + nextPageUrl
+			nextPageUrl = myURL + nextPageUrl
 		} else {
-			nextPageUrl = "http://www.truyencuatui.net/" + nextPageUrl
+			nextPageUrl = myURL + "/" + nextPageUrl
 		}
 	}
 	return nextPageUrl, nil

@@ -27,7 +27,7 @@ angular.module('tusachangApp')
     $window.addEventListener('resize', onResize);
     function onResize() {
       self.listStyle.height = ($window.innerHeight - height_offset) + 'px';
-      if(!$scope.$root.$$phase) $scope.$digest();
+      if(!$scope.$root.$phase) $scope.$digest();
     }
 
 		self.sort = function() {

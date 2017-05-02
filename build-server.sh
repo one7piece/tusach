@@ -2,7 +2,7 @@
 arch=linux
 echo "GOPATH: $GOPATH"
 cd server
-if [ "$1" == "" ]; then
+if [ "$1" == "" ] || [ "$1" == "linux" ]; then
 echo building tusach server, output: dist/tusach-linux
 go build -v -o ../dist/tusach-linux dv.com.tusach/app
 else

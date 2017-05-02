@@ -70,7 +70,7 @@ angular
 angular.module('tusachangApp').factory('myHttpRequestInterceptor', ['$injector', function($injector) {
   return {
     'request': function(config) {
-      console.log("inject auth header...")
+      //console.log("inject auth header...")
       config.headers['Content-Type'] = "application/json";
       var LoginService = $injector.get('LoginService');
       if (LoginService.isLogin && !config.headers['Authorization']) {
