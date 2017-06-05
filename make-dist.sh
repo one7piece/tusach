@@ -22,5 +22,5 @@ echo "Building client..."
 echo "Creating tar file..."
 chmod +x dist/library/make-epub.sh
 chmod +x dist/library/parser/*
-tar -czvf tusach.tar.gz dist --exclude=tusach-linux --exclude=tusach.ql
+tar -czvf tusach.tar.gz dist --exclude=tusach-linux --exclude=tusach.ql --exclude=config.json
 

@@ -365,13 +365,13 @@ func (bookMaker BookMaker) MakeEpub(book Book, chapters []Chapter) error {
 	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, util.GetBookPath(book.ID))
 	out, err := cmd.CombinedOutput()
 	str = string(out)
-	logger.Infof("epub command output: %s", str)
+	//logger.Infof("epub command output: %s", str)
 	if err != nil {
 		logger.Errorf("Error creating epub file. " + err.Error())
 		return errors.New("Error creating epub file. " + err.Error())
 	}
 	str = string(out)
-	logger.Infof("epub command output: %s", str)
+	//logger.Infof("epub command output: %s", str)
 
 	if _, err := os.Stat(epubFile); os.IsNotExist(err) {
 		logger.Error("Error creating epub file. " + epubFile)

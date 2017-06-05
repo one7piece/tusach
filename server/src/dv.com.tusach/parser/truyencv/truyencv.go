@@ -2,17 +2,19 @@ package main
 
 import (
 	"bytes"
+
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	//"errors"
-	"dv.com.tusach/logger"
 	"encoding/json"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
+
+	"dv.com.tusach/logger"
+	"github.com/PuerkitoBio/goquery"
 )
 
 func main() {
@@ -61,21 +63,18 @@ func (p Truyencv) GetChapterHtml(rawHtml string, chapterTitle *string) (string, 
 
 	*chapterTitle = ""
 	var buffer bytes.Buffer
-	doc.Find("body").Find("div").Each(func(i int, td *goquery.Selection) {
-		clazz, _ := td.Attr("class")
-		if clazz == "chapter" {
-			td.Contents().Each(func(i int, s *goquery.Selection) {
-				if s.Text() != "" {
-					buffer.WriteString("<br/>")
-					buffer.WriteString(s.Text())
-				}
-			})
+	elm := doc.Find("div[id='js-truyencv-content']").First()
+	if elm != nil {
+		html, err := elm.Html()
+		if err == nil {
+			logger.Debugf("page html: %s", html)
+			buffer.WriteString(html)
 		}
-	})
+	}
 
-	index := strings.Index(rawHtml, "id=\"readstory\"")
-	if index > 200 {
-		*chapterTitle = parser.GetChapterTitle(rawHtml[index:])
+	elm = doc.Find("h2[class='title']").First()
+	if elm != nil {
+		*chapterTitle = elm.Text()
 	}
 
 	chapterHtml := ""

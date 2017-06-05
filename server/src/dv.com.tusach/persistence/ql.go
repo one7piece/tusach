@@ -128,7 +128,7 @@ func (ql *Ql) GetSystemInfo(forceReload bool) (maker.SystemInfo, error) {
 }
 
 func (ql *Ql) SaveSystemInfo(info maker.SystemInfo) {
-	logger.Infof("save systemInfo=%v", info)
+	//logger.Infof("save systemInfo=%v", info)
 	records, err := ql.loadRecords(reflect.TypeOf(maker.SystemInfo{}), "systeminfo", "", nil)
 	if err != nil {
 		logger.Errorf("Failed to load systeminfo", err)
@@ -220,7 +220,7 @@ func (ql *Ql) SaveBook(book maker.Book) (retId int, retErr error) {
 	var newBookId = 0
 	defer func() {
 		if err := recover(); err != nil {
-			//logger.Infof("Recover from panic: %s\n", err)
+			logger.Infof("Recover from panic: %s\n", err)
 			if newBookId > 0 {
 				ql.DeleteBook(newBookId)
 			}
@@ -296,18 +296,17 @@ func (ql *Ql) SaveBook(book maker.Book) (retId int, retErr error) {
 }
 
 func (ql *Ql) DeleteBook(bookId int) error {
-	logger.Infof("Deleting book: ", bookId)
+	logger.Infof("Deleting book ID=" + strconv.Itoa(bookId))
 	// TODO need locking here
 
 	// delete all chapters of book
 	args := []interface{}{bookId}
-	err := ql.deleteRecords("chapter", "bookId=$1", args)
+	err := ql.deleteRecords("chapter", "BookId=$1", args)
 	if err != nil {
 		return err
 	}
 
 	// remove book
-	args = []interface{}{bookId}
 	err = ql.deleteRecords("book", "ID=$1", args)
 
 	// remove files

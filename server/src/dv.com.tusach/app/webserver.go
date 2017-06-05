@@ -222,6 +222,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 			err = errors.New("Book is currently in progress.")
 		}
 	} else {
+		logger.Infof("%s: %+v", op, updateBook)
 		switch op {
 		case "abort":
 			currentBook.Status = maker.STATUS_ABORTED

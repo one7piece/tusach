@@ -1,25 +1,27 @@
 package main
 
 import (
-	"dv.com.tusach/util"
 	"fmt"
 	"os/exec"
 	"testing"
+
+	"dv.com.tusach/logger"
+	"dv.com.tusach/util"
 )
 
 func TestPackage(t *testing.T) {
-	util.LoadConfig("/dev/dv/tusach/server/config-test-win.json")
+	util.LoadConfig("/home/dvan/dev/tusach/dist/config.json")
 
-	url := "http://truyencv.com/doc-bo/chuong-2/"
+	url := "http://truyencv.com/ho-phach-chi-kiem/chuong-1387/"
 	name := "truyencv"
-	logger.Debug("executing validate command: " + util.GetParserPath() + "/" + name)
+	logger.Info("executing validate command: " + util.GetParserPath() + "/" + name)
 	cmd := exec.Command(util.GetParserPath()+"/"+name,
 		"-configFile="+util.GetConfigFile(), "-op=v",
 		"-url="+url)
 	out, err := cmd.CombinedOutput()
-	logger.Debug("command output: " + string(out))
+	logger.Info("command output: " + string(out))
 	if err != nil {
-		logger.Debug("Error validating url. " + err.Error())
+		logger.Info("Error validating url. " + err.Error())
 	}
 
 	bookPath := util.GetBookPath(9999)
