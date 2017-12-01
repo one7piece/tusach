@@ -1,11 +1,13 @@
 package util
 
 import (
-	"dv.com.tusach/logger"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"dv.com.tusach/logger"
 )
 
 type Configuration struct {
@@ -92,6 +94,11 @@ func LoadConfig(filename string) {
 	if configuration.MaxActionBooks == 0 {
 		configuration.MaxActionBooks = 2
 	}
+
+	if configuration.LogFile == "" {
+		// default to the parent of the server path
+		configuration.LogFile = filepath.Dir(configuration.ServerPath)
+	}
 	if configuration.LogLevel == "" {
 		configuration.LogLevel = "info"
 	}
@@ -103,5 +110,11 @@ func LoadConfig(filename string) {
 	} else if configuration.LogLevel == "error" {
 		level = 3
 	}
-	logger.Init(level, configuration.LogFile)
+	if configuration.LogMaxSizeMB == 0 {
+		configuration.LogMaxSizeMB = 10
+	}
+	if configuration.LogMaxBackups == 0 {
+		configuration.LogMaxBackups = 10
+	}
+	logger.Init(level, configuration.LogFile, configuration.LogMaxSizeMB, configuration.LogMaxBackups, 30)
 }

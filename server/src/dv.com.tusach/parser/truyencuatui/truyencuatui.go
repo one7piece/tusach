@@ -6,14 +6,15 @@ import (
 	"dv.com.tusach/parser"
 	"dv.com.tusach/util"
 	//"errors"
-	"dv.com.tusach/logger"
 	"encoding/json"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
+
+	"dv.com.tusach/logger"
+	"github.com/PuerkitoBio/goquery"
 )
 
 var myURL = "http://truyencuatui.net"
@@ -51,6 +52,12 @@ func (p Truyencuatui) Parse(chapterUrl string, inputFile string, outputFile stri
 	return parser.DefaultParse(p, chapterUrl, inputFile, outputFile, 10, 2)
 }
 
+func (p Truyencuatui) GetRequestHeader(chapterUrl string) map[string]string {
+	headers := map[string]string{}
+	headers["referer"] = chapterUrl
+	return headers
+}
+
 func (p Truyencuatui) GetChapterHtml(rawHtml string, chapterTitle *string) (string, error) {
 	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
 	if err != nil {
@@ -64,16 +71,28 @@ func (p Truyencuatui) GetChapterHtml(rawHtml string, chapterTitle *string) (stri
 
 	*chapterTitle = ""
 	var buffer bytes.Buffer
-	elm := doc.Find("div[class='content chapter-content']").First()
-	if elm != nil {
-		html, err := elm.Html()
-		if err == nil {
-			logger.Debugf("page html: %s", html)
-			buffer.WriteString(html)
+	/*
+		elm := doc.Find("div[class='content chapter-content']").First()
+		if elm != nil {
+			html, err := elm.Html()
+			if err == nil {
+				logger.Debugf("page html: %s", html)
+				buffer.WriteString(html)
+			}
 		}
-	}
-
-	elm = doc.Find("h1[class='title']").First()
+	*/
+	doc.Find("div").Each(func(i int, s *goquery.Selection) {
+		var elm = s.Find("div").First()
+		if elm == nil {
+			html, err := s.Html()
+			logger.Infof("found inner div: %s", html)
+			if err == nil && len(html) > 1000 {
+				logger.Debugf("page html: %s", html)
+				buffer.WriteString(html)
+			}
+		}
+	})
+	var elm = doc.Find("h1[class='title']").First()
 	if elm != nil {
 		*chapterTitle = elm.Text()
 	}

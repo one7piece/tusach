@@ -182,7 +182,7 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 		if newChapter.Title == "" {
 			newChapter.Title = "Chapter " + strconv.Itoa(newChapter.ChapterNo)
 		}
-		logger.Infof("completed chapter: %d:%s, nextPageUrl:%s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
+		logger.Infof("completed chapter: %d (%s), nextPageUrl: %s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
 		// save the chapter
 		err = bookMaker.DB.SaveChapter(newChapter)

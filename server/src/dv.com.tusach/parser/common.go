@@ -1,21 +1,23 @@
 package parser
 
 import (
-	"dv.com.tusach/util"
 	"errors"
 	"flag"
 	"io/ioutil"
+
+	"dv.com.tusach/util"
 	//"log"
 	"bytes"
-	"dv.com.tusach/logger"
 	"encoding/json"
-	"github.com/PuerkitoBio/goquery"
-	"golang.org/x/net/proxy"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
 	"time"
+
+	"dv.com.tusach/logger"
+	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/proxy"
 )
 
 var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"}
@@ -25,6 +27,7 @@ type SiteParser interface {
 	Parse(chapterUrl string, inputFile string, outputFile string) (string, error)
 	GetChapterHtml(rawHtml string, chapterTitle *string) (string, error)
 	GetNextPageUrl(rawHtml string, html string) (string, error)
+	GetRequestHeader(chapterUrl string) map[string]string
 }
 
 func Execute(p SiteParser) (string, error) {
@@ -51,7 +54,8 @@ func Execute(p SiteParser) (string, error) {
 
 func DefaultParse(siteParser SiteParser, chapterUrl string, inputFile string, outputFile string, timeoutSec int, numTries int) (string, error) {
 	// load the request
-	headers := map[string]string{}
+	//headers := map[string]string{}
+	headers := siteParser.GetRequestHeader(chapterUrl)
 	form := map[string]string{}
 	responseBytes, err := ExecuteRequest("GET", chapterUrl, timeoutSec, numTries, headers, form)
 	if err != nil {
@@ -220,7 +224,7 @@ func ExecuteRequest(method string, targetUrl string, timeoutSec int, numTries in
 		n = 1
 	}
 	for i := 0; i < n; i++ {
-		logger.Infof("Attempt %d/%d to load from %s\n", (i + 1), n, targetUrl)
+		logger.Infof("Attempt %d of %d to load from %s\n", (i + 1), n, targetUrl)
 		resp, err := client.Do(req)
 		if err != nil {
 			logger.Errorf("Error loading from %s. %s\n", targetUrl, err.Error())

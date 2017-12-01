@@ -5,6 +5,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"strconv"
 	"strings"
@@ -222,7 +223,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 			err = errors.New("Book is currently in progress.")
 		}
 	} else {
-		logger.Infof("%s: %+v", op, updateBook)
+		logger.Infof("updateBook - op:%s: current book details: %+v", op, updateBook)
 		switch op {
 		case "abort":
 			currentBook.Status = maker.STATUS_ABORTED
