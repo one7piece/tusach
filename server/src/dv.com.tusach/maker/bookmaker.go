@@ -2,7 +2,6 @@ package maker
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -14,122 +13,58 @@ import (
 
 	"dv.com.tusach/logger"
 	"dv.com.tusach/util"
+	"github.com/robertkrimen/otto"
 )
-
-type BookSite struct {
-	Parser        string
-	Referer       string
-	Cookie        string
-	NumTries      int
-	TimeoutSec    int
-	BatchSize     int
-	BatchDelaySec int
-}
-
-type HttpService interface {
-	ExecuteRequest(url string) []byte
-}
 
 type BookMaker struct {
 	DB Persistence
 }
 
+type ScriptEngine struct {
+	jsVM       *otto.Otto
+	script     *otto.Script
+	beginFn    otto.Value
+	endFn      otto.Value
+	startTagFn otto.Value
+	endTagFn   otto.Value
+	textFn     otto.Value
+}
+
+func (bookMaker BookMaker) Compile(scriptData []byte) (*ScriptEngine, error) {
+	if scriptData == nil {
+		return nil, errors.New("Missing argument!")
+	}
+	engine := new(ScriptEngine)
+	engine.jsVM = otto.New()
+	logger.Infof("Compiling script...\n")
+	script, err := engine.jsVM.Compile("", scriptData)
+	if err != nil {
+		logger.Errorf("Error compiling script: %s", err)
+		return nil, err
+	}
+	engine.script = script
+	// check if this is needed
+	//engine.jsVM.Run(engine.script)
+
+	engine.jsVM.Set("logInfo", func(call otto.FunctionCall) otto.Value {
+		logger.Info(call.Argument(0).String())
+		return otto.Value{}
+	})
+
+	engine.jsVM.Set("logError", func(call otto.FunctionCall) otto.Value {
+		logger.Error(call.Argument(0).String())
+		return otto.Value{}
+	})
+
+	logger.Info("script compiled succesffuly!")
+	return engine, nil
+}
+
 func (bookMaker BookMaker) GetBookSites() []string {
-	sites := []string{}
-	// get list of parsers
-	names, err := util.ListDir(util.GetParserPath(), true)
-	if err != nil {
-		logger.Error("Error reading parser directory. " + err.Error())
-		return sites
-	}
-	for _, name := range names {
-		// call parser to check url support
-		logger.Debug("executing validate command: " + util.GetParserPath() + "/" + name)
-		cmd := exec.Command(util.GetParserPath()+"/"+name,
-			"-configFile="+util.GetConfigFile(), "-op=v",
-			"-url=http://dummy.com")
-		out, err := cmd.CombinedOutput()
-		str := string(out)
-		logger.Debugf("validate command output: %s", str)
-		if err != nil {
-			logger.Error("Error checking url. " + err.Error())
-			return sites
-		}
-
-		lines := strings.Split(str, "\n")
-		var m map[string]string
-		for _, line := range lines {
-			if strings.HasPrefix(line, "parser-output:") {
-				jsonstr := line[len("parser-output:"):]
-				//logger.Debugf("Found json: %s\n", jsonstr)
-				json.Unmarshal([]byte(jsonstr), &m)
-				//logger.Debugf("%v, validated: %s\n", m, m["validated"])
-				break
-			}
-		}
-		if m["url"] != "" {
-			sites = append(sites, m["url"])
-		}
-	}
-
-	logger.Debugf("Found book sites: [%v]\n", sites)
-	return sites
+	return []string{"www.truyencuatui.net"}
 }
 
-func (bookMaker BookMaker) GetBookSite(url string) BookSite {
-	site := BookSite{Parser: ""}
-	if url == "" {
-		logger.Warn("Parameter url is empty")
-		return site
-	}
-	// get list of parsers
-	names, err := util.ListDir(util.GetParserPath(), true)
-	if err != nil {
-		logger.Error("Error reading parser directory. " + err.Error())
-		return site
-	}
-	for _, name := range names {
-		// call parser to check url support
-		cmd := exec.Command(util.GetParserPath()+"/"+name,
-			"-configFile="+util.GetConfigFile(), "-op=v",
-			"-url="+url)
-		out, err := cmd.CombinedOutput()
-		str := string(out)
-		//logger.Infof("validate command output: ", str)
-		if err != nil {
-			logger.Error("Error validating url. " + err.Error())
-			return site
-		}
-
-		lines := strings.Split(str, "\n")
-		var m map[string]string
-		for _, line := range lines {
-			if strings.HasPrefix(line, "parser-output:") {
-				jsonstr := line[len("parser-output:"):]
-				//logger.Infof("Found json: %s\n", jsonstr)
-				json.Unmarshal([]byte(jsonstr), &m)
-				//logger.Infof("%v, validated: %s\n", m, m["validated"])
-				break
-			}
-		}
-		//logger.Infof("validated: %s\n", m["validated"])
-		if m["validated"] == "1" {
-			site.Parser = name
-			site.BatchSize, _ = strconv.Atoi(m["batchSsize"])
-			site.BatchDelaySec, _ = strconv.Atoi(m["batchDelaySec"])
-			site.NumTries = 2
-			break
-		}
-	}
-	if site.Parser == "" {
-		logger.Errorf("No book site found for url: %s\n", url)
-	} else {
-		logger.Infof("Found book site:[%v] for url:%s\n", site, url)
-	}
-	return site
-}
-
-func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book, site BookSite) {
+func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, eventChannel util.EventChannel, book Book) {
 	var numPagesLoaded = 0
 	var aborted = false
 	var errorMsg = ""
@@ -172,10 +107,11 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 			newChapterNo = book.CurrentPageNo
 		}
 		newChapter := Chapter{BookId: book.ID, ChapterNo: newChapterNo}
-		nextPageUrl, err := bookMaker.CreateChapter(site.Parser, url, &newChapter)
+		nextPageUrl, err := bookMaker.CreateChapter(engine, url, &newChapter)
 
 		if err != nil {
 			errorMsg = err.Error()
+			logger.Error(errorMsg)
 			break
 		}
 
@@ -244,6 +180,20 @@ func (bookMaker BookMaker) CreateBook(eventChannel util.EventChannel, book Book,
 	}
 
 	bookMaker.saveBook(em, book, true)
+}
+
+func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string, chapter *Chapter) (string, error) {
+	rawFilename := util.GetRawChapterFilename(chapter.BookId, chapter.ChapterNo)
+	filename := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
+
+	chapterTitle, nextChapterURL, err := bookMaker.parse(engine, chapterUrl, rawFilename, filename, 10, 2)
+	if err != nil {
+		return "", err
+	}
+	chapter.Title = chapterTitle
+	os.Remove(rawFilename)
+
+	return nextChapterURL, nil
 }
 
 func (bookMaker BookMaker) saveBook(manager *util.EventManager, book Book, done bool) (int, error) {
@@ -365,12 +315,12 @@ func (bookMaker BookMaker) MakeEpub(book Book, chapters []Chapter) error {
 	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, util.GetBookPath(book.ID))
 	out, err := cmd.CombinedOutput()
 	str = string(out)
-	//logger.Infof("epub command output: %s", str)
+	logger.Infof("epub command output: %s", str)
 	if err != nil {
 		logger.Errorf("Error creating epub file. " + err.Error())
 		return errors.New("Error creating epub file. " + err.Error())
 	}
-	str = string(out)
+	//str = string(out)
 	//logger.Infof("epub command output: %s", str)
 
 	if _, err := os.Stat(epubFile); os.IsNotExist(err) {
@@ -381,45 +331,6 @@ func (bookMaker BookMaker) MakeEpub(book Book, chapters []Chapter) error {
 	}
 
 	return nil
-}
-
-func (bookMaker BookMaker) CreateChapter(parser string, chapterUrl string, chapter *Chapter) (string, error) {
-	var nextPageUrl = ""
-
-	rawFilename := util.GetRawChapterFilename(chapter.BookId, chapter.ChapterNo)
-	filename := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
-
-	// call parser to create chapter html
-	logger.Infof("Calling parser: %s to create chapter: %s\n", parser, chapterUrl)
-
-	cmd := exec.Command(util.GetParserPath()+"/"+parser,
-		"-configFile="+util.GetConfigFile(), "-op=p", "-url="+chapterUrl,
-		"-inputFile="+rawFilename, "-outputFile="+filename)
-	out, err := cmd.CombinedOutput()
-	outStr := ""
-	if out != nil {
-		outStr = string(out)
-	}
-	if err != nil {
-		logger.Error("Error executing parser command: " + err.Error() + ". command out: " + outStr)
-		return "", errors.New("Error executing parser command: " + err.Error())
-	}
-
-	// extract the nextPageUrl & chapterTitle
-	var m map[string]string
-	index := strings.LastIndex(outStr, "parser-output:")
-	if index != -1 {
-		json.Unmarshal([]byte(outStr[index+len("parser-output:"):]), &m)
-	}
-	nextPageUrl, found := m["nextPageUrl"]
-	if !found {
-		return "", errors.New("Invalid parser output: " + outStr)
-	}
-	chapter.Title, _ = m["chapterTitle"]
-
-	os.Remove(rawFilename)
-
-	return nextPageUrl, nil
 }
 
 type EventSink struct {

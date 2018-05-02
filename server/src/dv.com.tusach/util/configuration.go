@@ -17,7 +17,6 @@ type Configuration struct {
 	ServerBindAddress string `json:serverBindAddress`
 	ServerBindPort    int    `json:serverBindPort`
 	MaxActionBooks    int    `json:maxActiveBooks`
-	SupportedSites    string `json:supportedSites`
 	ProxyURL          string `json:proxyURL`
 	ProxyUsername     string `json:proxyUsername`
 	ProxyPassword     string `json:proxyPassword`

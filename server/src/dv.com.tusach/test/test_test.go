@@ -54,7 +54,7 @@ func xTestGoQuery(t *testing.T) {
 	})
 }
 
-func TestRegexp(t *testing.T) {
+func xTestRegexp(t *testing.T) {
 	data, err := ioutil.ReadFile("/home/dvan/vshared/dv/thanh-guom-ho-phach.htm")
 	if err != nil {
 		t.Error(err)
@@ -109,7 +109,7 @@ func xTestFuncReturn(t *testing.T) {
 	logger.Infof("dung1=%+v\n", user)
 
 	user.Role = "operator"
-	changed_user := getUser("dung")
+	changedUser := getUser("dung")
 	logger.Infof("dung2=%+v\n", changed_user)
 
 	user = mymap["dung"]
@@ -163,9 +163,9 @@ func xTestChannel1(t *testing.T) {
 }
 
 func xTestReflect(t *testing.T) {
-	var x int = 3
-	var y MyInt = 4
-	var z interface{}
+	x int
+	y myInt
+	z interface{}
 	z = y
 
 	var vox = reflect.ValueOf(x)

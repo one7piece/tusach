@@ -105,7 +105,7 @@ angular.module('tusachangApp')
         })
         .catch(function error(response) {
           console.log("BookService.loadBooks() - error response, status:" + response.status);
-          callback(false, "Failed to load books, status=" + response.status);
+          callback(false, "Failed to " + operation + " book, error=" + response.data + "(" + response.status + ")");
         });
     };
 
@@ -130,7 +130,7 @@ angular.module('tusachangApp')
             }
             callback(true, response.data);
           } else {
-            callback(false, "Failed to " + operation + " book, status=" + response.status);
+            callback(false, "Failed to " + operation + " book, error=" + response.data + "(" + response.status + ")");
           }
         })
         .catch(function error(response) {

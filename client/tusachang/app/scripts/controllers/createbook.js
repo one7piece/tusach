@@ -34,7 +34,13 @@ angular.module('tusachangApp')
 
 			self.statusMessage = "Creating book...";
 			self.statusType = "info";
-			var newBook = {startPageUrl: self.firstChapterURL, title: self.title, author: self.author, maxNumPages: self.numPages};
+			var newBook = {startPageUrl: self.firstChapterURL, title: self.title, author: self.author, maxNumPages: 0};
+			if (typeof(self.numPages) == "string") {
+				newBook.maxNumPages = parseInt(self.numPages);
+			} else {
+				newBook.maxNumPages = self.numPages;
+			}
+
 			self.firstChapterURL = "";
 			self.title = "";
 			self.author = "";

@@ -257,18 +257,8 @@ func UpdateBook(ctx *httprest.HttpContext) {
 					}
 				}
 
-				// find parser
-				url := currentBook.CurrentPageUrl
-				if currentBook.CurrentPageNo <= 0 {
-					url = currentBook.StartPageUrl
-				}
-				site := bookMaker.GetBookSite(url)
-				if site.Parser == "" {
-					err = errors.New("No parser found for url: " + currentBook.CurrentPageUrl)
-				} else {
-					// schedule goroutine to create book
-					scheduleCreateBook(currentBook, site)
-				}
+				// schedule goroutine to create book
+				scheduleCreateBook(currentBook)
 			}
 
 		case "delete":
@@ -297,7 +287,7 @@ func CreateBook(ctx *httprest.HttpContext) {
 	newBook := maker.Book{}
 	err := ctx.GetPayload(&newBook)
 	if err != nil {
-		logger.Errorf("Invalid request book payload [%s] %v\n", ctx.R.Body, err)
+		logger.Errorf("Invalid request book payload: %v\n", err)
 		ctx.RespERRString(http.StatusInternalServerError, "Invalid request book payload: "+err.Error())
 		return
 	}
@@ -327,13 +317,6 @@ func CreateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	site := bookMaker.GetBookSite(newBook.StartPageUrl)
-	if site.Parser == "" {
-		logger.Error("No parser found for url: " + newBook.StartPageUrl)
-		ctx.RespERRString(http.StatusBadRequest, "No parser found for url: "+newBook.StartPageUrl)
-		return
-	}
-
 	newBook.Status = maker.STATUS_WORKING
 	newBook.CreatedTime = time.Now()
 	bookId, err := bookMaker.DB.SaveBook(newBook)
@@ -347,7 +330,7 @@ func CreateBook(ctx *httprest.HttpContext) {
 	books = append(books, newBook)
 
 	// schedule goroutine to create book
-	scheduleCreateBook(newBook, site)
+	scheduleCreateBook(newBook)
 
 	ctx.RespOK(newBook)
 }
@@ -399,13 +382,23 @@ func reloadBook(bookId int) {
 	}
 }
 
-func scheduleCreateBook(book maker.Book, site maker.BookSite) {
+func scheduleCreateBook(book maker.Book) {
+	data, err := ioutil.ReadFile(util.GetParserPath() + "/parser.js")
+	if err != nil {
+		logger.Errorf("Failed to load js: %s\n", err)
+	}
+
+	engine, err := bookMaker.Compile(data)
+	if err != nil {
+		logger.Errorf("Error compiling parser.js: %s\n", err.Error())
+		return
+	}
 	// create channel for communication
 	c := make(util.EventChannel)
 	em := util.CreateEventManager(c, 1)
 	em.StartListening(EventSink{manager: em})
 	eventManagers[book.ID] = *em
-	go bookMaker.CreateBook(c, book, site)
+	go bookMaker.CreateBook(engine, c, book)
 }
 
 func loadData() {

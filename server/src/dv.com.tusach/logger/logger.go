@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/natefinch/lumberjack"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 const (
@@ -33,48 +33,48 @@ func Init(level int, filename string, maxSizeMB int, maxBackups int, maxAgeDays 
 
 func Debug(v ...interface{}) {
 	if logLevel <= LevelDebug {
-		log.Printf("DBUG - %v", v)
+		log.Printf("DBUG - %v", v...)
 	}
 }
 
 func Debugf(f string, v ...interface{}) {
 	if logLevel <= LevelDebug {
-		log.Printf("DBUG - "+f, v)
+		log.Printf("DBUG - "+f, v...)
 	}
 }
 
 func Info(v ...interface{}) {
 	if logLevel <= LevelInfo {
-		log.Printf("INFO - %v", v)
+		log.Printf("INFO - %v", v...)
 	}
 }
 
 func Infof(f string, v ...interface{}) {
 	if logLevel <= LevelInfo {
-		log.Printf("INFO - "+f, v)
+		log.Printf("INFO - "+f, v...)
 	}
 }
 
 func Warn(v ...interface{}) {
 	if logLevel <= LevelWarn {
-		log.Printf("WARN - %v", v)
+		log.Printf("WARN - %v", v...)
 	}
 }
 
 func Warnf(f string, v ...interface{}) {
 	if logLevel <= LevelWarn {
-		log.Printf("WARN - "+f, v)
+		log.Printf("WARN - "+f, v...)
 	}
 }
 
 func Error(v ...interface{}) {
 	if logLevel <= LevelError {
-		log.Printf("ERRO - %v", v)
+		log.Printf("ERRO - %v", v...)
 	}
 }
 
 func Errorf(f string, v ...interface{}) {
 	if logLevel <= LevelError {
-		log.Printf("ERRO - "+f, v)
+		log.Printf("ERRO - "+f, v...)
 	}
 }
