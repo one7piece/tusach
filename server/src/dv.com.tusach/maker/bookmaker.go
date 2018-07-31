@@ -32,7 +32,7 @@ type ScriptEngine struct {
 
 func (bookMaker BookMaker) Compile(scriptData []byte) (*ScriptEngine, error) {
 	if scriptData == nil {
-		return nil, errors.New("Missing argument!")
+		return nil, errors.New("missing argument")
 	}
 	engine := new(ScriptEngine)
 	engine.jsVM = otto.New()
@@ -64,31 +64,26 @@ func (bookMaker BookMaker) GetBookSites() []string {
 	return []string{"www.truyencuatui.net"}
 }
 
-func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, eventChannel util.EventChannel, book Book) {
+type BookMonitor struct {
+	book *Book
+}
+
+func (monitor *BookMonitor) ProcessEvent(event util.EventData) {
+	logger.Debugf("Received event: %s : %d, data:%v\n", event.Channel, event.Type, event.Data)
+	if event.Type == "abort" && event.Data.(int) == monitor.book.ID {
+		logger.Infof("Received ABORT for book: %v\n", event.Data)
+		monitor.book.Status = STATUS_ABORTED
+	}
+}
+
+func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *Book) error {
 	var numPagesLoaded = 0
 	var aborted = false
 	var errorMsg = ""
 
-	em := util.CreateEventManager(eventChannel, 1)
-	c := make(chan string)
-	sink := EventSink{internalChannel: c, bookId: book.ID}
-	em.StartListening(sink)
-
-	go func() {
-		logger.Infof("start monitoring book: %d-%s\n", book.ID, book.Title)
-		for {
-			msg, more := <-c
-			logger.Debugf("Received message: %s for book: %d, more:%v\n", msg, book.ID, more)
-			if msg == "abort" {
-				aborted = true
-				break
-			}
-			if !more {
-				break
-			}
-		}
-		logger.Infof("stop monitoring book: %d-%s\n", book.ID, book.Title)
-	}()
+	monitor := BookMonitor{book}
+	util.GetEventManager().StartListening("BOOK-CHANNEL", &monitor)
+	defer util.GetEventManager().StopListening(&monitor)
 
 	url := book.CurrentPageUrl
 	if url == "" {
@@ -136,7 +131,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, eventChannel util.Ev
 			logger.Info("No more next page url found.")
 			break
 		} else {
-			_, err := bookMaker.saveBook(em, book, false)
+			_, err := bookMaker.saveBook(book)
 			if err != nil {
 				errorMsg = err.Error()
 				break
@@ -167,7 +162,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, eventChannel util.Ev
 		book.ErrorMsg = errorMsg
 		book.Status = STATUS_ERROR
 	} else {
-		err = bookMaker.MakeEpub(book, chapters)
+		err = bookMaker.MakeEpub(*book, chapters)
 		if err != nil {
 			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
 			logger.Error(errorMsg)
@@ -179,7 +174,8 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, eventChannel util.Ev
 		}
 	}
 
-	bookMaker.saveBook(em, book, true)
+	bookMaker.saveBook(book)
+	return err
 }
 
 func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string, chapter *Chapter) (string, error) {
@@ -196,14 +192,10 @@ func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string
 	return nextChapterURL, nil
 }
 
-func (bookMaker BookMaker) saveBook(manager *util.EventManager, book Book, done bool) (int, error) {
-	id, err := bookMaker.DB.SaveBook(book)
-	// notify channel
-	if done {
-		manager.Push(util.EventData{Name: "book.done", Data: strconv.Itoa(book.ID)})
-	} else {
-		manager.Push(util.EventData{Name: "book.update", Data: strconv.Itoa(book.ID)})
-	}
+func (bookMaker BookMaker) saveBook(book *Book) (int, error) {
+	id, err := bookMaker.DB.SaveBook(*book)
+	logger.Infof("saveBook - %v", book)
+	util.GetEventManager().Push(util.EventData{Channel: "BOOK-CHANNEL", Type: "update", Data: *book})
 	return id, err
 }
 
@@ -326,24 +318,8 @@ func (bookMaker BookMaker) MakeEpub(book Book, chapters []Chapter) error {
 	if _, err := os.Stat(epubFile); os.IsNotExist(err) {
 		logger.Error("Error creating epub file. " + epubFile)
 		return errors.New("Error creating epub file: " + epubFile)
-	} else {
-		logger.Info("Created epub file: " + epubFile)
 	}
 
+	logger.Info("Created epub file: " + epubFile)
 	return nil
-}
-
-type EventSink struct {
-	internalChannel chan string
-	bookId          int
-}
-
-func (sink EventSink) HandleEvent(event util.EventData) {
-	if event.Name == "book.abort" {
-		bookId := event.Data.(int)
-		if bookId == sink.bookId {
-			sink.internalChannel <- "abort"
-			close(sink.internalChannel)
-		}
-	}
 }

@@ -61,6 +61,11 @@ angular
 				url: '/createBook',
         templateUrl: 'views/createbook.html',
         controller: 'CreateBookCtrl as creator'
+      })
+      .state('administration', {
+				url: '/administration',
+        templateUrl: 'views/administration.html',
+        controller: 'AdministrationCtrl as administration'
       });
       
       $httpProvider.interceptors.push('myHttpRequestInterceptor');

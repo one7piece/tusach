@@ -1,117 +1,95 @@
 package util
 
 import (
+	"sync"
+
 	"dv.com.tusach/logger"
 )
 
+const ()
+
 type EventData struct {
-	Name string
-	Data interface{}
+	Channel string // BookChannel
+	Type    string // add, update, delete, abort
+	Data    interface{}
 }
 
-type EventChannel chan EventData
-
 type EventHandler interface {
-	HandleEvent(event EventData)
+	ProcessEvent(event EventData)
 }
 
 type EventManager struct {
-	Channel    EventChannel
-	outChannel EventChannel
-	listeners  []EventHandler
-	Closed     bool
+	listeners  map[string][]EventHandler
+	eventQueue chan EventData
 }
 
-func CreateEventManager(c EventChannel, bufferSize int) *EventManager {
-	em := EventManager{Channel: c, Closed: false}
-	em.outChannel = make(EventChannel, bufferSize)
-	em.listeners = []EventHandler{}
+var eventManager *EventManager
+var once sync.Once
 
-	// create routine to listen for event
-	go func(mgr *EventManager) {
-		for ev := range mgr.Channel {
-			// write to the output channel
-			mgr.outChannel <- ev
-			// push back to the original channel, so other event manager may receive
-			if !mgr.doPush(ev) {
-				break
-			}
-		}
-		logger.Debug("EventManager - inbound channel is closed")
-		// close the outbound channel
-		close(mgr.outChannel)
-	}(&em)
-
-	// create routine to dispatch events
-	go func(mgr *EventManager) {
-		for ev := range mgr.outChannel {
-			mgr.dispatch(ev)
-		}
-		logger.Debug("EventManager - outbound channel is closed")
-	}(&em)
-
-	return &em
-}
-
-func (em *EventManager) StartListening(listener EventHandler) {
-	logger.Debug("address of listener: %d\n", &listener)
-	/*
-		for _, l := range em.listeners {
-			if l == listener {
-				logger.Debug("ignore duplicate listener")
-				return
-			}
-		}
-	*/
-	em.listeners = append(em.listeners, listener)
-	//logger.Debug("added listener, count=%d\n", len(em.listeners))
-}
-
-func (em *EventManager) StopListening(listener EventHandler) {
-	index := -1
-	for i, l := range em.listeners {
-		if &l == &listener {
-			index = i
-			break
-		}
-	}
-	if index != -1 {
-		em.listeners = append(em.listeners[:index], em.listeners[index+1:]...)
-	} else {
-		logger.Debug("StopListening() - Not found")
-	}
+func GetEventManager() *EventManager {
+	once.Do(func() {
+		eventManager = &EventManager{listeners: make(map[string][]EventHandler), eventQueue: make(chan EventData, 100)}
+		// create dispatch goroutines
+		go eventManager.dispatcher()
+	})
+	return eventManager
 }
 
 // push the event to the channel
 func (em *EventManager) Push(event EventData) {
-	if em.Closed {
-		return
-	}
+	logger.Infof("pushing: %s[%v]\n", event.Channel, event.Data)
+	em.eventQueue <- event
+}
 
-	logger.Debug("pushing: %s[%v]\n", event.Name, event.Data)
-	if em.doPush(event) {
-		<-em.Channel
+func (em *EventManager) StartListening(channel string, listener EventHandler) {
+	arr, ok := em.listeners[channel]
+	if !ok {
+		em.listeners[channel] = []EventHandler{listener}
+	} else {
+		// append to array
+		em.listeners[channel] = append(arr, listener)
 	}
 }
 
-// dispatch the event to the listeners
-func (em *EventManager) dispatch(event EventData) {
-	logger.Debug("dispatching: %s[%v] to %d listeners\n", event.Name, event.Data, len(em.listeners))
-	for _, l := range em.listeners {
-		l.HandleEvent(event)
+func (em EventManager) GetListeners(channel string) []EventHandler {
+	arr, ok := em.listeners[channel]
+	if !ok {
+		return []EventHandler{}
 	}
+	return arr
 }
 
-// do push the event to the channel, return true if channel is still open
-// this function recover from panic when pushing to a closed channel
-func (em *EventManager) doPush(event EventData) (ok bool) {
-	defer func() {
-		if err := recover(); err != nil {
-			logger.Debug("recover from panic: ", err)
-			ok = false
-			em.Closed = true
+func findArrayItemIndex(arr []EventHandler, item EventHandler) int {
+	index := -1
+	for i, l := range arr {
+		if l == item {
+			index = i
+			break
 		}
-	}()
-	em.Channel <- event
-	return true
+	}
+	return index
+}
+
+func (em *EventManager) StopListening(listener EventHandler) {
+	for key, arr := range em.listeners {
+		index := findArrayItemIndex(arr, listener)
+		if index != -1 {
+			em.listeners[key] = append(arr[:index], arr[index+1:]...)
+		} else {
+			logger.Infof("StopListening - No listener found for channel %s\n", key)
+		}
+	}
+}
+
+func (em *EventManager) dispatcher() {
+	for event := range em.eventQueue {
+		logger.Infof("dispatcher - dispatching event: %+v\n", event)
+		arr, ok := em.listeners[event.Channel]
+		if ok {
+			for _, handler := range arr {
+				handler.ProcessEvent(event)
+			}
+		}
+	}
+	logger.Info("dispatcher - terminated")
 }

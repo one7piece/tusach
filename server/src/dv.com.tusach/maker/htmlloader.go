@@ -32,7 +32,7 @@ func (bookMaker BookMaker) setupHTTPClient(timeout time.Duration) (*http.Client,
 	return client, nil
 }
 
-func (maker BookMaker) executeRequest(method string, targetURL string, timeoutSec int, numTries int,
+func (bookMaker BookMaker) executeRequest(method string, targetURL string, timeoutSec int, numTries int,
 	headerMap map[string]string, formMap map[string]string) ([]byte, error) {
 
 	var result []byte
@@ -44,7 +44,7 @@ func (maker BookMaker) executeRequest(method string, targetURL string, timeoutSe
 		timeout = time.Duration(10 * time.Second)
 	}
 
-	client, err := maker.setupHTTPClient(timeout)
+	client, err := bookMaker.setupHTTPClient(timeout)
 	if err != nil {
 		return nil, err
 	}

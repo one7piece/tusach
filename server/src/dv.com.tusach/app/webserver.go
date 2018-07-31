@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"io/ioutil"
 	"net/http"
@@ -22,11 +21,13 @@ type MapData struct {
 	data map[string]string `json:data`
 }
 
+type EventSink struct {
+}
+
 var bookMaker maker.BookMaker
 var users []maker.User
 var books []maker.Book
 var scripts []maker.ParserScript
-var eventManagers map[int]util.EventManager
 
 const sessionExpiredTimeSec = 24 * 60 * 60
 
@@ -58,8 +59,8 @@ func main() {
 	loadData()
 	logger.Infof("Starting GO web server, configuration: %+v", util.GetConfiguration())
 
-	// create channels map
-	eventManagers = make(map[int]util.EventManager)
+	eventSink := EventSink{}
+	util.GetEventManager().StartListening("BOOK-CHANNEL", &eventSink)
 
 	rest := httprest.New()
 	rest.Auth = httprest.JWTAuth{TimeoutSec: sessionExpiredTimeSec, SecretKey: []byte("pi.tusach"), Handler: LoginHandler{}}
@@ -73,6 +74,7 @@ func main() {
 	*/
 	rest.LOGON("/login", Login)
 	//rest.LOGOUT("/logout")
+	rest.GET(false, "/filterlog/:numLines/:filterRegex", GetFilterLog)
 	rest.GET(false, "/systeminfo", GetSystemInfo)
 	rest.GET(false, "/sites", GetSites)
 	rest.GET(false, "/books/:id", GetBooks)
@@ -185,6 +187,58 @@ func GetBooks(ctx *httprest.HttpContext) {
 	ctx.RespOK(result)
 }
 
+func GetFilterLog(ctx *httprest.HttpContext) {
+	numLinesStr := ctx.GetParam("numLines")
+	filterRegex := ctx.GetParam("filterRegex")
+	logger.Debugf("GetFilterLog - numLines:%s filterRegex:%s", numLinesStr, filterRegex)
+	numLines := strconv.Atoi(numLinesStr)
+	if numLines <= 0 {
+		numLines = 1000
+	}
+
+	data, err := ioutil.ReadFile(configuration.LogFile)
+	if err != nil {
+		logger.Errorf("File %s not found\n", configuration.LogFile)
+		ctx.RespERRString(http.StatusInternalServerError, "Could not load log file: "+configuration.LogFile)
+		return
+	}
+
+	lines := strings.Split(string(data), "\n")
+	for i := 0; i < len(lines); i++ {
+		line := strings.TrimSpace(lines[i])
+		str := matchedServer.FindString(strings.ToLower(line))
+		if len(str) > 0 {
+			if len(servers) > 0 {
+				servers = servers + ","
+			}
+			servers = servers + line
+		}
+	}
+	ntp.Data["servers"] = servers
+	result := []maker.Book{}
+
+	if idstr == "0" {
+		result = books
+	} else {
+		arr := strings.Split(idstr, ",")
+		for _, s := range arr {
+			id, err := strconv.Atoi(s)
+			if err != nil {
+				ctx.RespERRString(http.StatusBadRequest, "Invalid book ID, value must be an integer.")
+				return
+			}
+			// find the book
+			for _, book := range books {
+				if book.ID == id {
+					result = append(result, book)
+				}
+			}
+		}
+	}
+
+	ctx.RespOK(result)
+}
+
 func UpdateBook(ctx *httprest.HttpContext) {
 	op := ctx.GetParam("cmd")
 	logger.Infof("UpdateBook - op:%s", op)
@@ -214,64 +268,53 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	em, present := eventManagers[updateBook.ID]
-	if present {
-		// can only abort
+	logger.Infof("updateBook - op:%s: current book details: %+v", op, updateBook)
+	if currentBook.Status == maker.STATUS_WORKING {
+		// only allow abort operation
 		if op == "abort" {
-			em.Push(util.EventData{Name: "book.abort", Data: updateBook.ID})
+			util.GetEventManager().Push(util.EventData{Channel: "BOOK-CHANNEL", Type: "abort", Data: currentBook.ID})
 		} else {
-			err = errors.New("Book is currently in progress.")
+			ctx.RespERRString(http.StatusInternalServerError, "Cannot "+op+" an in-progress book")
 		}
-	} else {
-		logger.Infof("updateBook - op:%s: current book details: %+v", op, updateBook)
-		switch op {
-		case "abort":
-			currentBook.Status = maker.STATUS_ABORTED
-			bookMaker.DB.SaveBook(currentBook)
+		return
+	}
+
+	switch op {
+	case "update":
+		_, err = bookMaker.DB.SaveBook(updateBook)
+		if err == nil {
+			for i := 0; i < len(books); i++ {
+				if books[i].ID == updateBook.ID {
+					books[i] = updateBook
+					break
+				}
+			}
+		}
+
+	case "resume":
+		currentBook.Status = maker.STATUS_WORKING
+		_, err := bookMaker.DB.SaveBook(currentBook)
+		if err == nil {
 			for i := 0; i < len(books); i++ {
 				if books[i].ID == currentBook.ID {
 					books[i] = currentBook
 					break
 				}
 			}
-
-		case "update":
-			_, err = bookMaker.DB.SaveBook(updateBook)
-			if err == nil {
-				for i := 0; i < len(books); i++ {
-					if books[i].ID == updateBook.ID {
-						books[i] = updateBook
-						break
-					}
-				}
-			}
-
-		case "resume":
-			currentBook.Status = maker.STATUS_WORKING
-			_, err := bookMaker.DB.SaveBook(currentBook)
-			if err == nil {
-				for i := 0; i < len(books); i++ {
-					if books[i].ID == currentBook.ID {
-						books[i] = currentBook
-						break
-					}
-				}
-
-				// schedule goroutine to create book
-				scheduleCreateBook(currentBook)
-			}
-
-		case "delete":
-			var newBooks []maker.Book
-			bookMaker.DB.DeleteBook(updateBook.ID)
-			for i := 0; i < len(books); i++ {
-				if books[i].ID == updateBook.ID {
-					newBooks = append(books[0:i], books[i+1:]...)
-					break
-				}
-			}
-			books = newBooks
+			// schedule goroutine to create book
+			doCreateBook(&currentBook)
 		}
+
+	case "delete":
+		var newBooks []maker.Book
+		bookMaker.DB.DeleteBook(updateBook.ID)
+		for i := 0; i < len(books); i++ {
+			if books[i].ID == updateBook.ID {
+				newBooks = append(books[0:i], books[i+1:]...)
+				break
+			}
+		}
+		books = newBooks
 	}
 
 	message := "OK"
@@ -330,41 +373,16 @@ func CreateBook(ctx *httprest.HttpContext) {
 	books = append(books, newBook)
 
 	// schedule goroutine to create book
-	scheduleCreateBook(newBook)
+	doCreateBook(&newBook)
 
 	ctx.RespOK(newBook)
 }
 
-type EventSink struct {
-	manager *util.EventManager
-}
-
-func (sink EventSink) HandleEvent(event util.EventData) {
-	if event.Name == "book.done" {
-		str := event.Data.(string)
-		bookId, err := strconv.Atoi(str)
-		if err != nil {
-			logger.Errorf("Invalid book id, expecting a number")
-			panic("Invalid book id, expecting a number")
-			return
-		}
-		reloadBook(bookId)
-		em, ok := eventManagers[bookId]
-		if ok {
-			logger.Infof("Book %d completed, closing channel\n", bookId)
-			close(em.Channel)
-			delete(eventManagers, bookId)
-		}
-	} else if event.Name == "book.update" {
-		str := event.Data.(string)
-		bookId, err := strconv.Atoi(str)
-		if err != nil {
-			logger.Errorf("Invalid book id, expecting a number")
-			panic("Invalid book id, expecting a number")
-			return
-		}
-		logger.Infof("Received book updated event for %d, reloading book\n", bookId)
-		reloadBook(bookId)
+func (sink *EventSink) ProcessEvent(event util.EventData) {
+	logger.Infof("Received book event: %s (%v)", event.Type, event.Data)
+	book, ok := event.Data.(*maker.Book)
+	if ok {
+		reloadBook(book.ID)
 	}
 }
 
@@ -382,7 +400,7 @@ func reloadBook(bookId int) {
 	}
 }
 
-func scheduleCreateBook(book maker.Book) {
+func doCreateBook(book *maker.Book) {
 	data, err := ioutil.ReadFile(util.GetParserPath() + "/parser.js")
 	if err != nil {
 		logger.Errorf("Failed to load js: %s\n", err)
@@ -393,12 +411,7 @@ func scheduleCreateBook(book maker.Book) {
 		logger.Errorf("Error compiling parser.js: %s\n", err.Error())
 		return
 	}
-	// create channel for communication
-	c := make(util.EventChannel)
-	em := util.CreateEventManager(c, 1)
-	em.StartListening(EventSink{manager: em})
-	eventManagers[book.ID] = *em
-	go bookMaker.CreateBook(engine, c, book)
+	go bookMaker.CreateBook(engine, book)
 }
 
 func loadData() {

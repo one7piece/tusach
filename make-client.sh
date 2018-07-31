@@ -1,5 +1,6 @@
 #!/bin/bash
 
+output_path=/home/dvan/runtime/tusach
 if [ "$1" == "update" ]; then
 echo "Updating bower dependencies..."
 bower update
@@ -12,12 +13,14 @@ find ./client/tusachang/bower_components -type f \( -iname "*.min.js" ! -path "*
 cp ./client/tusachang/bower_components/matchmedia-ng/matchmedia-ng.js ./client/tusachang/app/lib
 cp ./client/tusachang/bower_components/angular-material/angular-material.min.css ./client/tusachang/app/styles
 
-destdir=./dist/html
+destdir=$output_path/html
 appdir=./client/tusachang/app
 echo "Generating client directory $destdir"
 if [ -d "$destdir" ]; then
-rm -r $destdir
+rm -rf $destdir
 fi
+
+#read -p "press any key to continue"
 
 suffix=`date +"%Y%m%d_%H%M%S"`
 mkdir $destdir
@@ -27,6 +30,7 @@ cp -r $appdir/views $destdir/
 cp -r $appdir/images $destdir/
 
 for name in $appdir/styles/*; do
+  echo "appending style file: $name -: style_$suffix.css"
   cat $name >> $destdir/style_$suffix.css
 done
 
@@ -35,10 +39,12 @@ sed -n 's|<script src="\(lib/.*.js\)"></script>|\1|p' $destdir/index.html >> $de
 while read name; do
   if [ "$name" != "scripts/test.js" ] 
   then
+    echo "append script file: [$name]"
     cat $appdir/$name >> $destdir/scripts_$suffix.js
   fi  
 done < $destdir/scripts.list
 while read name; do
+  echo "append vendor file: [$appdir/$name]"
   cat $appdir/$name >> $destdir/vendor_$suffix.js
 done < $destdir/vendor.list
 sed '/<script src=.*<\/script>/ d' $destdir/index.html > $destdir/tmp1.html
@@ -49,7 +55,7 @@ sed "/<!-- build:css -->/a \<link rel=\"stylesheet\" href=\"style_$suffix.css\">
 
 cp $destdir/tmp5.html $destdir/index.html
 rm $destdir/tmp?.html
-rm $destdir/*.list
+rem rm $destdir/*.list
 
 #rm -f dist.tar.gz
 #cd dist

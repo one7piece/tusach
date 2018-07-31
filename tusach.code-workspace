@@ -2,6 +2,18 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "C:\\dev\\PCP100\\dev\\pcpweb.openwrt"
+		},
+		{
+			"path": "C:\\dev\\m4mms\\com.tycoint.m4mms.server\\source\\resources\\load-balancer"
+		},
+		{
+			"path": "C:\\dev\\Prototypes\\grpc-java\\examples"
+		},
+		{
+			"path": "C:\\dev\\dvan\\github\\combination\\src"
 		}
 	],
 	"settings": {}
