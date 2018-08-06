@@ -5,9 +5,9 @@
 *.exe
 *.go~
 **/.idea
+BAK/*
 server/pkg/*
-client/GTusach/gwt-unitCache/*
-client/GTusach/war/WEB-INF/*
+server/test/*
 tusachdart/build
 tusachdart/packages
 tusachdart/web
