@@ -83,7 +83,7 @@ func (em *EventManager) StopListening(listener EventHandler) {
 
 func (em *EventManager) dispatcher() {
 	for event := range em.eventQueue {
-		logger.Infof("dispatcher - dispatching event: %+v\n", event)
+		logger.Debugf("dispatcher - dispatching event: %+v\n", event)
 		arr, ok := em.listeners[event.Channel]
 		if ok {
 			for _, handler := range arr {

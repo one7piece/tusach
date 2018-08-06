@@ -1,0 +1,12 @@
+{
+	"serverPath" : "../../../test",
+	"libraryPath" : "../../../test/library",
+	"dbFilename" : "../../../test/library/test.ql",
+	"logLevel" : "info",
+	"logFile" : "../../../test/test.log",
+	"ServerBindPort" : 8888,
+	"ProxyURL": "",
+	"ProxyUsername" : "jvand",
+	"ProxyPassword" : "Tyco04003"
+}
+	

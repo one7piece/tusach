@@ -1,11 +1,12 @@
 package util
 
 import (
-	"dv.com.tusach/logger"
 	"errors"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"dv.com.tusach/logger"
 )
 
 func ExtractError(err interface{}) error {
@@ -21,10 +22,10 @@ func ExtractError(err interface{}) error {
 }
 
 func SaveFile(filename string, data []byte) error {
-	logger.Info("saving file: ", filename)
+	logger.Info("saving file: %s", filename)
 	fo, err := os.Create(filename)
 	if err != nil {
-		return err
+		return errors.New("Error creating file " + filename + ": " + err.Error())
 	}
 	defer fo.Close()
 

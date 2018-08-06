@@ -10,14 +10,16 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"dv.com.tusach/logger"
+	"dv.com.tusach/persistence"
 	"dv.com.tusach/util"
 	"github.com/robertkrimen/otto"
 )
 
 type BookMaker struct {
-	DB Persistence
+	DB persistence.Persistence
 }
 
 type ScriptEngine struct {
@@ -30,7 +32,7 @@ type ScriptEngine struct {
 	textFn     otto.Value
 }
 
-func (bookMaker BookMaker) Compile(scriptData []byte) (*ScriptEngine, error) {
+func Compile(scriptData []byte) (*ScriptEngine, error) {
 	if scriptData == nil {
 		return nil, errors.New("missing argument")
 	}
@@ -45,6 +47,11 @@ func (bookMaker BookMaker) Compile(scriptData []byte) (*ScriptEngine, error) {
 	engine.script = script
 	// check if this is needed
 	//engine.jsVM.Run(engine.script)
+
+	engine.jsVM.Set("logDebug", func(call otto.FunctionCall) otto.Value {
+		logger.Debug(call.Argument(0).String())
+		return otto.Value{}
+	})
 
 	engine.jsVM.Set("logInfo", func(call otto.FunctionCall) otto.Value {
 		logger.Info(call.Argument(0).String())
@@ -64,26 +71,9 @@ func (bookMaker BookMaker) GetBookSites() []string {
 	return []string{"www.truyencuatui.net"}
 }
 
-type BookMonitor struct {
-	book *Book
-}
-
-func (monitor *BookMonitor) ProcessEvent(event util.EventData) {
-	logger.Debugf("Received event: %s : %d, data:%v\n", event.Channel, event.Type, event.Data)
-	if event.Type == "abort" && event.Data.(int) == monitor.book.ID {
-		logger.Infof("Received ABORT for book: %v\n", event.Data)
-		monitor.book.Status = STATUS_ABORTED
-	}
-}
-
-func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *Book) error {
+func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *persistence.Book) error {
 	var numPagesLoaded = 0
-	var aborted = false
 	var errorMsg = ""
-
-	monitor := BookMonitor{book}
-	util.GetEventManager().StartListening("BOOK-CHANNEL", &monitor)
-	defer util.GetEventManager().StopListening(&monitor)
 
 	url := book.CurrentPageUrl
 	if url == "" {
@@ -93,7 +83,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *Book) error {
 	// TODO set loader configuration
 
 	for {
-		if aborted || book.MaxNumPages > 0 && book.MaxNumPages <= book.CurrentPageNo {
+		if book.Status == persistence.STATUS_ABORTED || book.MaxNumPages > 0 && book.MaxNumPages <= book.CurrentPageNo {
 			break
 		}
 
@@ -101,7 +91,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *Book) error {
 		if book.CurrentPageUrl == url {
 			newChapterNo = book.CurrentPageNo
 		}
-		newChapter := Chapter{BookId: book.ID, ChapterNo: newChapterNo}
+		newChapter := persistence.Chapter{BookId: book.ID, ChapterNo: newChapterNo}
 		nextPageUrl, err := bookMaker.CreateChapter(engine, url, &newChapter)
 
 		if err != nil {
@@ -111,7 +101,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *Book) error {
 		}
 
 		if newChapter.Title == "" {
-			newChapter.Title = "Chapter " + strconv.Itoa(newChapter.ChapterNo)
+			newChapter.Title = "persistence.Chapter " + strconv.Itoa(newChapter.ChapterNo)
 		}
 		logger.Infof("completed chapter: %d (%s), nextPageUrl: %s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
@@ -131,7 +121,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *Book) error {
 			logger.Info("No more next page url found.")
 			break
 		} else {
-			_, err := bookMaker.saveBook(book)
+			_, err := bookMaker.SaveBook(book)
 			if err != nil {
 				errorMsg = err.Error()
 				break
@@ -147,12 +137,10 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *Book) error {
 
 	book.ErrorMsg = errorMsg
 	if book.ErrorMsg != "" {
-		book.Status = STATUS_ERROR
+		book.Status = persistence.STATUS_ERROR
 		logger.Error(book.ErrorMsg)
-	} else if aborted {
-		book.Status = STATUS_ABORTED
-	} else {
-		book.Status = STATUS_COMPLETED
+	} else if book.Status != persistence.STATUS_ABORTED {
+		book.Status = persistence.STATUS_COMPLETED
 	}
 
 	chapters, err := bookMaker.DB.LoadChapters(book.ID)
@@ -160,29 +148,29 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *Book) error {
 		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.ID, err.Error())
 		logger.Error(errorMsg)
 		book.ErrorMsg = errorMsg
-		book.Status = STATUS_ERROR
+		book.Status = persistence.STATUS_ERROR
 	} else {
 		err = bookMaker.MakeEpub(*book, chapters)
 		if err != nil {
 			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
 			logger.Error(errorMsg)
 			book.ErrorMsg = errorMsg
-			book.Status = STATUS_ERROR
+			book.Status = persistence.STATUS_ERROR
 			book.EpubCreated = false
 		} else {
 			book.EpubCreated = true
 		}
 	}
 
-	bookMaker.saveBook(book)
+	bookMaker.SaveBook(book)
 	return err
 }
 
-func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string, chapter *Chapter) (string, error) {
+func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string, chapter *persistence.Chapter) (string, error) {
 	rawFilename := util.GetRawChapterFilename(chapter.BookId, chapter.ChapterNo)
 	filename := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
 
-	chapterTitle, nextChapterURL, err := bookMaker.parse(engine, chapterUrl, rawFilename, filename, 10, 2)
+	chapterTitle, nextChapterURL, err := bookMaker.Parse(engine, chapterUrl, rawFilename, filename, 10, 2)
 	if err != nil {
 		return "", err
 	}
@@ -192,14 +180,22 @@ func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string
 	return nextChapterURL, nil
 }
 
-func (bookMaker BookMaker) saveBook(book *Book) (int, error) {
+func (bookMaker BookMaker) SaveBook(book *persistence.Book) (int, error) {
+	book.LastUpdateTime = time.Now()
 	id, err := bookMaker.DB.SaveBook(*book)
-	logger.Infof("saveBook - %v", book)
-	util.GetEventManager().Push(util.EventData{Channel: "BOOK-CHANNEL", Type: "update", Data: *book})
+	if err == nil {
+		if book.ID <= 0 {
+			book.ID = id
+			logger.Infof("created book - %v", book)
+		} else {
+			logger.Infof("updated book - %v", book)
+		}
+		util.GetEventManager().Push(util.EventData{Channel: "BOOK-CHANNEL", Type: "update", Data: book})
+	}
 	return id, err
 }
 
-func (bookMaker BookMaker) MakeEpub(book Book, chapters []Chapter) error {
+func (bookMaker BookMaker) MakeEpub(book persistence.Book, chapters []persistence.Chapter) error {
 	if book.CurrentPageNo == 0 {
 		return errors.New("Book has no chapters")
 	}

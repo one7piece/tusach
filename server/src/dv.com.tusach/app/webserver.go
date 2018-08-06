@@ -25,9 +25,10 @@ type EventSink struct {
 }
 
 var bookMaker maker.BookMaker
-var users []maker.User
-var books []maker.Book
-var scripts []maker.ParserScript
+var users []persistence.User
+var books []persistence.Book
+
+//var scripts []maker.ParserScript
 
 const sessionExpiredTimeSec = 24 * 60 * 60
 
@@ -106,7 +107,7 @@ func downloadBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	book := maker.Book{}
+	book := persistence.Book{}
 	// find the book
 	for _, b := range books {
 		if b.ID == bookId {
@@ -164,7 +165,7 @@ func GetUser(ctx *httprest.HttpContext) {
 func GetBooks(ctx *httprest.HttpContext) {
 	idstr := ctx.GetParam("id")
 	logger.Debugf("GetBooks - id:%s", idstr)
-	result := []maker.Book{}
+	result := []persistence.Book{}
 	if idstr == "0" {
 		result = books
 	} else {
@@ -191,52 +192,24 @@ func GetFilterLog(ctx *httprest.HttpContext) {
 	numLinesStr := ctx.GetParam("numLines")
 	filterRegex := ctx.GetParam("filterRegex")
 	logger.Debugf("GetFilterLog - numLines:%s filterRegex:%s", numLinesStr, filterRegex)
-	numLines := strconv.Atoi(numLinesStr)
+	numLines, _ := strconv.Atoi(numLinesStr)
 	if numLines <= 0 {
 		numLines = 1000
 	}
 
-	data, err := ioutil.ReadFile(configuration.LogFile)
+	data, err := ioutil.ReadFile(util.GetConfiguration().LogFile)
 	if err != nil {
-		logger.Errorf("File %s not found\n", configuration.LogFile)
-		ctx.RespERRString(http.StatusInternalServerError, "Could not load log file: "+configuration.LogFile)
+		logger.Errorf("File %s not found\n", util.GetConfiguration().LogFile)
+		ctx.RespERRString(http.StatusInternalServerError, "Could not load log file: "+util.GetConfiguration().LogFile)
 		return
 	}
 
 	lines := strings.Split(string(data), "\n")
-	for i := 0; i < len(lines); i++ {
-		line := strings.TrimSpace(lines[i])
-		str := matchedServer.FindString(strings.ToLower(line))
-		if len(str) > 0 {
-			if len(servers) > 0 {
-				servers = servers + ","
-			}
-			servers = servers + line
-		}
-	}
-	ntp.Data["servers"] = servers
-	result := []maker.Book{}
+	//	for i := 0; i < len(lines); i++ {
+	//		line := strings.TrimSpace(lines[i])
+	//	}
 
-	if idstr == "0" {
-		result = books
-	} else {
-		arr := strings.Split(idstr, ",")
-		for _, s := range arr {
-			id, err := strconv.Atoi(s)
-			if err != nil {
-				ctx.RespERRString(http.StatusBadRequest, "Invalid book ID, value must be an integer.")
-				return
-			}
-			// find the book
-			for _, book := range books {
-				if book.ID == id {
-					result = append(result, book)
-				}
-			}
-		}
-	}
-
-	ctx.RespOK(result)
+	ctx.RespOK(lines)
 }
 
 func UpdateBook(ctx *httprest.HttpContext) {
@@ -253,7 +226,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	updateBook := maker.Book{}
+	updateBook := persistence.Book{}
 	err := ctx.GetPayload(&updateBook)
 	if err != nil {
 		logger.Errorf("Invalid request book payload [%s] %v\n", ctx.R.Body, err)
@@ -269,10 +242,11 @@ func UpdateBook(ctx *httprest.HttpContext) {
 	}
 
 	logger.Infof("updateBook - op:%s: current book details: %+v", op, updateBook)
-	if currentBook.Status == maker.STATUS_WORKING {
+	if currentBook.Status == persistence.STATUS_WORKING {
 		// only allow abort operation
 		if op == "abort" {
-			util.GetEventManager().Push(util.EventData{Channel: "BOOK-CHANNEL", Type: "abort", Data: currentBook.ID})
+			currentBook.Status = persistence.STATUS_ABORTED
+			bookMaker.SaveBook(&currentBook)
 		} else {
 			ctx.RespERRString(http.StatusInternalServerError, "Cannot "+op+" an in-progress book")
 		}
@@ -281,32 +255,16 @@ func UpdateBook(ctx *httprest.HttpContext) {
 
 	switch op {
 	case "update":
-		_, err = bookMaker.DB.SaveBook(updateBook)
-		if err == nil {
-			for i := 0; i < len(books); i++ {
-				if books[i].ID == updateBook.ID {
-					books[i] = updateBook
-					break
-				}
-			}
-		}
+		_, _ = bookMaker.SaveBook(&updateBook)
 
 	case "resume":
-		currentBook.Status = maker.STATUS_WORKING
-		_, err := bookMaker.DB.SaveBook(currentBook)
-		if err == nil {
-			for i := 0; i < len(books); i++ {
-				if books[i].ID == currentBook.ID {
-					books[i] = currentBook
-					break
-				}
-			}
-			// schedule goroutine to create book
-			doCreateBook(&currentBook)
-		}
+		currentBook.Status = persistence.STATUS_WORKING
+		bookMaker.SaveBook(&currentBook)
+		// schedule goroutine to create book
+		doCreateBook(&currentBook)
 
 	case "delete":
-		var newBooks []maker.Book
+		var newBooks []persistence.Book
 		bookMaker.DB.DeleteBook(updateBook.ID)
 		for i := 0; i < len(books); i++ {
 			if books[i].ID == updateBook.ID {
@@ -327,7 +285,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 }
 
 func CreateBook(ctx *httprest.HttpContext) {
-	newBook := maker.Book{}
+	newBook := persistence.Book{}
 	err := ctx.GetPayload(&newBook)
 	if err != nil {
 		logger.Errorf("Invalid request book payload: %v\n", err)
@@ -350,7 +308,7 @@ func CreateBook(ctx *httprest.HttpContext) {
 	// prevent too many concurrent books creation
 	numActive := 0
 	for _, book := range books {
-		if book.Status == maker.STATUS_WORKING {
+		if book.Status == persistence.STATUS_WORKING {
 			numActive++
 		}
 	}
@@ -360,17 +318,15 @@ func CreateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	newBook.Status = maker.STATUS_WORKING
+	newBook.Status = persistence.STATUS_WORKING
 	newBook.CreatedTime = time.Now()
-	bookId, err := bookMaker.DB.SaveBook(newBook)
+	bookId, err := bookMaker.SaveBook(&newBook)
 	if err != nil {
 		logger.Error("Failed to save book: " + err.Error())
 		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
 	newBook.ID = bookId
-
-	books = append(books, newBook)
 
 	// schedule goroutine to create book
 	doCreateBook(&newBook)
@@ -380,9 +336,22 @@ func CreateBook(ctx *httprest.HttpContext) {
 
 func (sink *EventSink) ProcessEvent(event util.EventData) {
 	logger.Infof("Received book event: %s (%v)", event.Type, event.Data)
-	book, ok := event.Data.(*maker.Book)
+	book, ok := event.Data.(*persistence.Book)
 	if ok {
-		reloadBook(book.ID)
+		info, _ := bookMaker.DB.GetSystemInfo(false)
+		logger.Infof("System info: %v", info)
+
+		found := false
+		for i := 0; i < len(books); i++ {
+			if books[i].ID == book.ID {
+				books[i] = *book
+				found = true
+				break
+			}
+		}
+		if !found {
+			books = append(books, *book)
+		}
 	}
 }
 
@@ -400,13 +369,13 @@ func reloadBook(bookId int) {
 	}
 }
 
-func doCreateBook(book *maker.Book) {
+func doCreateBook(book *persistence.Book) {
 	data, err := ioutil.ReadFile(util.GetParserPath() + "/parser.js")
 	if err != nil {
 		logger.Errorf("Failed to load js: %s\n", err)
 	}
 
-	engine, err := bookMaker.Compile(data)
+	engine, err := maker.Compile(data)
 	if err != nil {
 		logger.Errorf("Error compiling parser.js: %s\n", err.Error())
 		return
@@ -446,22 +415,22 @@ func loadData() {
 		panic("Error loading users! " + err.Error())
 	}
 	if len(users) != 3 {
-		adminUser := maker.User{Name: "admin", Password: "spidey", Role: "administrator"}
+		adminUser := persistence.User{Name: "admin", Password: "spidey", Role: "administrator"}
 		err = bookMaker.DB.SaveUser(adminUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		dadUser := maker.User{Name: "vinhvan", Password: "colong", Role: "user"}
+		dadUser := persistence.User{Name: "vinhvan", Password: "colong", Role: "user"}
 		err = bookMaker.DB.SaveUser(dadUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		guestUser := maker.User{Name: "guest", Password: "password", Role: "user"}
+		guestUser := persistence.User{Name: "guest", Password: "password", Role: "user"}
 		err = bookMaker.DB.SaveUser(guestUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		users = []maker.User{adminUser, dadUser, guestUser}
+		users = []persistence.User{adminUser, dadUser, guestUser}
 	}
 	logger.Infof("users=%d", len(users))
 
@@ -469,6 +438,12 @@ func loadData() {
 	books, err = bookMaker.DB.LoadBooks()
 	if err != nil {
 		panic("Error loading books! " + err.Error())
+	}
+	for _, book := range books {
+		if book.Status == persistence.STATUS_WORKING {
+			book.Status = persistence.STATUS_ABORTED
+			bookMaker.SaveBook(&book)
+		}
 	}
 
 	// init parser scripts

@@ -9,12 +9,12 @@ import (
 	"dv.com.tusach/util"
 )
 
-type EventSink struct {
+type myEventSink struct {
 	id             int
 	expectedEvents []string
 }
 
-func (sink *EventSink) ProcessEvent(event util.EventData) {
+func (sink *myEventSink) ProcessEvent(event util.EventData) {
 	count := len(sink.expectedEvents)
 	index := -1
 	for i := 0; i < count; i++ {
@@ -41,11 +41,11 @@ func TestEvent(t *testing.T) {
 	logger.Infof("event list address: %p\n", &events)
 
 	const numSinks = 2
-	sinks := [numSinks]EventSink{}
+	sinks := [numSinks]myEventSink{}
 	for i := 0; i < numSinks; i++ {
 		arr := make([]string, len(events))
 		copy(arr, events[:])
-		sinks[i] = EventSink{id: i + 1, expectedEvents: arr}
+		sinks[i] = myEventSink{id: i + 1, expectedEvents: arr}
 		logger.Infof("sink %d event list address: %p\n", sinks[i].id, &sinks[i].expectedEvents)
 		em.StartListening("testChannel", &sinks[i])
 	}
@@ -56,7 +56,7 @@ func TestEvent(t *testing.T) {
 	}
 
 	for i := 0; i < len(listeners); i++ {
-		ptr, ok := listeners[i].(*EventSink)
+		ptr, ok := listeners[i].(*myEventSink)
 		if !ok || ptr != &sinks[i] {
 			t.Errorf("Register listener[%d] failed! ", i)
 			t.FailNow()

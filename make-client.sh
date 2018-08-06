@@ -1,6 +1,6 @@
 #!/bin/bash
 
-output_path=/home/dvan/runtime/tusach
+output_path=~/runtime/tusach
 if [ "$1" == "update" ]; then
 echo "Updating bower dependencies..."
 bower update
@@ -55,8 +55,7 @@ sed "/<!-- build:css -->/a \<link rel=\"stylesheet\" href=\"style_$suffix.css\">
 
 cp $destdir/tmp5.html $destdir/index.html
 rm $destdir/tmp?.html
-rem rm $destdir/*.list
-
+# rm $destdir/*.list
 #rm -f dist.tar.gz
 #cd dist
 #tar -zcvf ../dist.tar.gz .

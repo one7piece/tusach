@@ -54,7 +54,7 @@ func Test1(t *testing.T) {
 				}
 			}
 			if tagName == "a" {
-				href := getTagAttribute(z, "href")
+				href := getTagAttr(z, "href")
 				fmt.Printf("inside: %+v, found link: %s\n", inside, href)
 			}
 
@@ -98,7 +98,7 @@ func Test1(t *testing.T) {
 	}
 }
 
-func getTagAttribute(z *html.Tokenizer, name string) string {
+func getTagAttr(z *html.Tokenizer, name string) string {
 	for {
 		key, val, more := z.TagAttr()
 		if string(key) == name {

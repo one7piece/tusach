@@ -13,16 +13,13 @@ import (
 	"time"
 
 	"dv.com.tusach/logger"
-	"dv.com.tusach/maker"
 	"dv.com.tusach/util"
 	_ "github.com/cznic/ql/driver"
 )
 
-//var systemInfo maker.SystemInfo
-
 type Ql struct {
 	db   *sql.DB
-	info maker.SystemInfo
+	info SystemInfo
 }
 
 func (ql *Ql) InitDB() {
@@ -36,25 +33,25 @@ func (ql *Ql) InitDB() {
 	ql.db = _db
 
 	// create table systeminfo, datetime store as TEXT (ISO8601 string)
-	err = ql.createTable("systeminfo", reflect.TypeOf(maker.SystemInfo{}))
+	err = ql.createTable("systeminfo", reflect.TypeOf(SystemInfo{}))
 	if err != nil {
 		panic(err)
 	}
-	err = ql.createTable("user", reflect.TypeOf(maker.User{}))
+	err = ql.createTable("user", reflect.TypeOf(User{}))
 	if err != nil {
 		panic(err)
 	}
-	err = ql.createTable("book", reflect.TypeOf(maker.Book{}))
+	err = ql.createTable("book", reflect.TypeOf(Book{}))
 	if err != nil {
 		panic(err)
 	}
-	err = ql.createTable("chapter", reflect.TypeOf(maker.Chapter{}))
+	err = ql.createTable("chapter", reflect.TypeOf(Chapter{}))
 	if err != nil {
 		panic(err)
 	}
 
 	// init system info
-	ql.info = maker.SystemInfo{SystemUpTime: time.Now(), BookLastUpdateTime: time.Now(), ParserEditing: false}
+	ql.info = SystemInfo{SystemUpTime: time.Now(), BookLastUpdateTime: time.Now(), ParserEditing: false}
 	ql.SaveSystemInfo(ql.info)
 }
 
@@ -111,14 +108,14 @@ func (ql *Ql) createTable(tableName string, tableType reflect.Type) error {
 	return nil
 }
 
-func (ql *Ql) GetSystemInfo(forceReload bool) (maker.SystemInfo, error) {
+func (ql *Ql) GetSystemInfo(forceReload bool) (SystemInfo, error) {
 	if forceReload {
-		records, err := ql.loadRecords(reflect.TypeOf(maker.SystemInfo{}), "systeminfo", "", nil)
+		records, err := ql.loadRecords(reflect.TypeOf(SystemInfo{}), "systeminfo", "", nil)
 		if err != nil {
-			return maker.SystemInfo{}, err
+			return SystemInfo{}, err
 		}
 		if len(records) > 0 {
-			ql.info = records[0].(maker.SystemInfo)
+			ql.info = records[0].(SystemInfo)
 			logger.Infof("Found systeminfo: %+v\n", ql.info)
 		} else {
 			logger.Errorf("No systeminfo found\n")
@@ -127,9 +124,9 @@ func (ql *Ql) GetSystemInfo(forceReload bool) (maker.SystemInfo, error) {
 	return ql.info, nil
 }
 
-func (ql *Ql) SaveSystemInfo(info maker.SystemInfo) {
+func (ql *Ql) SaveSystemInfo(info SystemInfo) {
 	//logger.Infof("save systemInfo=%v", info)
-	records, err := ql.loadRecords(reflect.TypeOf(maker.SystemInfo{}), "systeminfo", "", nil)
+	records, err := ql.loadRecords(reflect.TypeOf(SystemInfo{}), "systeminfo", "", nil)
 	if err != nil {
 		logger.Errorf("Failed to load systeminfo", err)
 		panic(err)
@@ -147,14 +144,14 @@ func (ql *Ql) SaveSystemInfo(info maker.SystemInfo) {
 	}
 }
 
-func (ql *Ql) LoadUsers() ([]maker.User, error) {
-	records, err := ql.loadRecords(reflect.TypeOf(maker.User{}), "user", "", nil)
+func (ql *Ql) LoadUsers() ([]User, error) {
+	records, err := ql.loadRecords(reflect.TypeOf(User{}), "user", "", nil)
 	if err != nil {
-		return []maker.User{}, err
+		return []User{}, err
 	}
-	users := []maker.User{}
+	users := []User{}
 	for i := 0; i < len(records); i++ {
-		user := records[i].(maker.User)
+		user := records[i].(User)
 		users = append(users, user)
 		logger.Infof("Found user: %+v\n", user)
 	}
@@ -164,9 +161,9 @@ func (ql *Ql) LoadUsers() ([]maker.User, error) {
 	return users, nil
 }
 
-func (ql *Ql) SaveUser(user maker.User) error {
+func (ql *Ql) SaveUser(user User) error {
 	args := []interface{}{user.Name}
-	records, err := ql.loadRecords(reflect.TypeOf(maker.User{}), "user", "Name=$1", args)
+	records, err := ql.loadRecords(reflect.TypeOf(User{}), "user", "Name=$1", args)
 	if err != nil {
 		return err
 	}
@@ -186,26 +183,26 @@ func (ql *Ql) DeleteUser(userName string) error {
 	return err
 }
 
-func (ql *Ql) LoadBook(id int) (maker.Book, error) {
+func (ql *Ql) LoadBook(id int) (Book, error) {
 	args := []interface{}{id}
-	records, err := ql.loadRecords(reflect.TypeOf(maker.Book{}), "book", "ID=$1", args)
+	records, err := ql.loadRecords(reflect.TypeOf(Book{}), "book", "ID=$1", args)
 	if err != nil {
-		return maker.Book{}, err
+		return Book{}, err
 	}
 	if len(records) > 0 {
-		return records[0].(maker.Book), nil
+		return records[0].(Book), nil
 	}
-	return maker.Book{}, nil
+	return Book{}, nil
 }
 
-func (ql *Ql) LoadBooks() ([]maker.Book, error) {
-	records, err := ql.loadRecords(reflect.TypeOf(maker.Book{}), "book", "", nil)
+func (ql *Ql) LoadBooks() ([]Book, error) {
+	records, err := ql.loadRecords(reflect.TypeOf(Book{}), "book", "", nil)
 	if err != nil {
-		return []maker.Book{}, err
+		return []Book{}, err
 	}
-	books := []maker.Book{}
+	books := []Book{}
 	for i := 0; i < len(records); i++ {
-		book := records[i].(maker.Book)
+		book := records[i].(Book)
 		books = append(books, book)
 		logger.Infof("Found book: %+v\n", book)
 	}
@@ -215,7 +212,7 @@ func (ql *Ql) LoadBooks() ([]maker.Book, error) {
 	return books, nil
 }
 
-func (ql *Ql) SaveBook(book maker.Book) (retId int, retErr error) {
+func (ql *Ql) SaveBook(book Book) (retId int, retErr error) {
 
 	var newBookId = 0
 	defer func() {
@@ -242,7 +239,6 @@ func (ql *Ql) SaveBook(book maker.Book) (retId int, retErr error) {
 
 	// TODO need locking here
 
-	book.LastUpdateTime = time.Now()
 	if book.ID == 0 {
 		rows, retErr := ql.db.Query("SELECT max(ID) FROM book")
 		if retErr != nil {
@@ -318,22 +314,22 @@ func (ql *Ql) DeleteBook(bookId int) error {
 	return err
 }
 
-func (ql *Ql) LoadChapters(bookId int) ([]maker.Chapter, error) {
+func (ql *Ql) LoadChapters(bookId int) ([]Chapter, error) {
 	var records []interface{}
 	var err error
 	if bookId > 0 {
 		args := []interface{}{bookId}
-		records, err = ql.loadRecords(reflect.TypeOf(maker.Chapter{}), "chapter", "BookId=$1", args)
+		records, err = ql.loadRecords(reflect.TypeOf(Chapter{}), "chapter", "BookId=$1", args)
 	} else {
-		records, err = ql.loadRecords(reflect.TypeOf(maker.Chapter{}), "chapter", "", nil)
+		records, err = ql.loadRecords(reflect.TypeOf(Chapter{}), "chapter", "", nil)
 	}
 	if err != nil {
-		return []maker.Chapter{}, err
+		return []Chapter{}, err
 	}
 
-	chapters := []maker.Chapter{}
+	chapters := []Chapter{}
 	for i := 0; i < len(records); i++ {
-		chapter := records[i].(maker.Chapter)
+		chapter := records[i].(Chapter)
 		chapters = append(chapters, chapter)
 		//logger.Infof("Found chapter: %+v\n", chapter)
 	}
@@ -341,7 +337,7 @@ func (ql *Ql) LoadChapters(bookId int) ([]maker.Chapter, error) {
 		logger.Infof("No chapter found\n")
 	} else {
 		// sort chapters by ChapterNo
-		sort.Sort(maker.ByChapterNo(chapters))
+		sort.Sort(ByChapterNo(chapters))
 	}
 
 	// TODO verify chapter html/images from file system
@@ -349,7 +345,7 @@ func (ql *Ql) LoadChapters(bookId int) ([]maker.Chapter, error) {
 	return chapters, nil
 }
 
-func (ql *Ql) SaveChapter(chapter maker.Chapter) error {
+func (ql *Ql) SaveChapter(chapter Chapter) error {
 	/*
 		filepath := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
 		err := ioutil.WriteFile(filepath, chapter.Html, 0777)
@@ -359,7 +355,7 @@ func (ql *Ql) SaveChapter(chapter maker.Chapter) error {
 		}
 	*/
 	args := []interface{}{chapter.BookId, chapter.ChapterNo}
-	records, err := ql.loadRecords(reflect.TypeOf(maker.Chapter{}), "chapter", "BookId=$1 and ChapterNo=$2", args)
+	records, err := ql.loadRecords(reflect.TypeOf(Chapter{}), "chapter", "BookId=$1 and ChapterNo=$2", args)
 	if err != nil {
 		return err
 	}
