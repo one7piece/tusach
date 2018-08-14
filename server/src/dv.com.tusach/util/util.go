@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"dv.com.tusach/logger"
 )
@@ -60,4 +61,12 @@ func ListDir(root string, filesOnly bool) ([]string, error) {
 		return nil
 	})
 	return filenames, nil
+}
+
+func UnixTimeNow() int64 {
+	return UnixTimeMS(time.Now())
+}
+
+func UnixTimeMS(t time.Time) int64 {
+	return t.UnixNano() / (int64(time.Millisecond) / int64(time.Nanosecond))
 }

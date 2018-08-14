@@ -8,10 +8,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"dv.com.tusach/logger"
 	"dv.com.tusach/maker"
+	"dv.com.tusach/model"
 	"dv.com.tusach/persistence"
 	"dv.com.tusach/util"
 	"github.com/one7piece/httprest"
@@ -25,8 +25,8 @@ type EventSink struct {
 }
 
 var bookMaker maker.BookMaker
-var users []persistence.User
-var books []persistence.Book
+var users []model.User
+var books []model.Book
 
 //var scripts []maker.ParserScript
 
@@ -37,7 +37,7 @@ type LoginHandler struct {
 
 func (h LoginHandler) Validate(username string, password string) bool {
 	for _, u := range users {
-		if u.Name == username && u.Password == password {
+		if u.Name == username {
 			return true
 		}
 	}
@@ -48,7 +48,7 @@ func (h LoginHandler) GetRoles(username string) []string {
 	roles := []string{}
 	for _, u := range users {
 		if u.Name == username {
-			roles = append(roles, u.Role)
+			roles = u.Roles
 			break
 		}
 	}
@@ -103,26 +103,26 @@ func main() {
 func downloadBook(w http.ResponseWriter, r *http.Request) {
 	bookId, err := strconv.Atoi(r.URL.Query().Get("bookId"))
 	if err != nil {
-		http.Error(w, "Invalid book ID", http.StatusBadRequest)
+		http.Error(w, "Invalid book.Id", http.StatusBadRequest)
 		return
 	}
 
-	book := persistence.Book{}
+	book := model.Book{}
 	// find the book
 	for _, b := range books {
-		if b.ID == bookId {
+		if int(b.Id) == bookId {
 			book = b
 		}
 	}
-	if book.ID == 0 {
-		http.Error(w, "Invalid book ID", http.StatusBadRequest)
+	if book.Id == 0 {
+		http.Error(w, "Invalid book.Id", http.StatusBadRequest)
 		return
 	}
 
-	epubFile := util.GetBookEpubFilename(book.ID, book.Title)
+	epubFile := persistence.GetBookEpubFilename(book)
 	data, err := ioutil.ReadFile(epubFile)
 	if err != nil {
-		logger.Error("Failed to read epub file (bookId=" + strconv.Itoa(book.ID) + "): " + err.Error())
+		logger.Error("Failed to read epub file (bookId=" + strconv.Itoa(int(book.Id)) + "): " + err.Error())
 		http.Error(w, "Failed to read epub file: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -165,7 +165,7 @@ func GetUser(ctx *httprest.HttpContext) {
 func GetBooks(ctx *httprest.HttpContext) {
 	idstr := ctx.GetParam("id")
 	logger.Debugf("GetBooks - id:%s", idstr)
-	result := []persistence.Book{}
+	result := []model.Book{}
 	if idstr == "0" {
 		result = books
 	} else {
@@ -173,12 +173,12 @@ func GetBooks(ctx *httprest.HttpContext) {
 		for _, s := range arr {
 			id, err := strconv.Atoi(s)
 			if err != nil {
-				ctx.RespERRString(http.StatusBadRequest, "Invalid book ID, value must be an integer.")
+				ctx.RespERRString(http.StatusBadRequest, "Invalid book.Id, value must be an integer.")
 				return
 			}
 			// find the book
 			for _, book := range books {
-				if book.ID == id {
+				if int(book.Id) == id {
 					result = append(result, book)
 				}
 			}
@@ -226,7 +226,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	updateBook := persistence.Book{}
+	updateBook := model.Book{}
 	err := ctx.GetPayload(&updateBook)
 	if err != nil {
 		logger.Errorf("Invalid request book payload [%s] %v\n", ctx.R.Body, err)
@@ -234,18 +234,18 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	currentBook, err := bookMaker.DB.LoadBook(updateBook.ID)
+	currentBook, err := bookMaker.DB.LoadBook(int(updateBook.Id))
 	if err != nil {
-		logger.Error("Error loading book: " + strconv.Itoa(updateBook.ID) + ": " + err.Error())
+		logger.Error("Error loading book: " + strconv.Itoa(int(updateBook.Id)) + ": " + err.Error())
 		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	logger.Infof("updateBook - op:%s: current book details: %+v", op, updateBook)
-	if currentBook.Status == persistence.STATUS_WORKING {
+	if currentBook.Status == model.BookStatusType_IN_PROGRESS {
 		// only allow abort operation
 		if op == "abort" {
-			currentBook.Status = persistence.STATUS_ABORTED
+			currentBook.Status = model.BookStatusType_ABORTED
 			bookMaker.SaveBook(&currentBook)
 		} else {
 			ctx.RespERRString(http.StatusInternalServerError, "Cannot "+op+" an in-progress book")
@@ -258,16 +258,16 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		_, _ = bookMaker.SaveBook(&updateBook)
 
 	case "resume":
-		currentBook.Status = persistence.STATUS_WORKING
+		currentBook.Status = model.BookStatusType_IN_PROGRESS
 		bookMaker.SaveBook(&currentBook)
 		// schedule goroutine to create book
 		doCreateBook(&currentBook)
 
 	case "delete":
-		var newBooks []persistence.Book
-		bookMaker.DB.DeleteBook(updateBook.ID)
+		var newBooks []model.Book
+		bookMaker.DB.DeleteBook(int(updateBook.Id))
 		for i := 0; i < len(books); i++ {
-			if books[i].ID == updateBook.ID {
+			if books[i].Id == updateBook.Id {
 				newBooks = append(books[0:i], books[i+1:]...)
 				break
 			}
@@ -285,7 +285,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 }
 
 func CreateBook(ctx *httprest.HttpContext) {
-	newBook := persistence.Book{}
+	newBook := model.Book{}
 	err := ctx.GetPayload(&newBook)
 	if err != nil {
 		logger.Errorf("Invalid request book payload: %v\n", err)
@@ -308,7 +308,7 @@ func CreateBook(ctx *httprest.HttpContext) {
 	// prevent too many concurrent books creation
 	numActive := 0
 	for _, book := range books {
-		if book.Status == persistence.STATUS_WORKING {
+		if book.Status == model.BookStatusType_IN_PROGRESS {
 			numActive++
 		}
 	}
@@ -318,15 +318,15 @@ func CreateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	newBook.Status = persistence.STATUS_WORKING
-	newBook.CreatedTime = time.Now()
+	newBook.Status = model.BookStatusType_IN_PROGRESS
+	newBook.CreatedTime = util.UnixTimeNow()
 	bookId, err := bookMaker.SaveBook(&newBook)
 	if err != nil {
 		logger.Error("Failed to save book: " + err.Error())
 		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
-	newBook.ID = bookId
+	newBook.Id = int32(bookId)
 
 	// schedule goroutine to create book
 	doCreateBook(&newBook)
@@ -336,14 +336,14 @@ func CreateBook(ctx *httprest.HttpContext) {
 
 func (sink *EventSink) ProcessEvent(event util.EventData) {
 	logger.Infof("Received book event: %s (%v)", event.Type, event.Data)
-	book, ok := event.Data.(*persistence.Book)
+	book, ok := event.Data.(*model.Book)
 	if ok {
 		info, _ := bookMaker.DB.GetSystemInfo(false)
 		logger.Infof("System info: %v", info)
 
 		found := false
 		for i := 0; i < len(books); i++ {
-			if books[i].ID == book.ID {
+			if books[i].Id == book.Id {
 				books[i] = *book
 				found = true
 				break
@@ -361,7 +361,7 @@ func reloadBook(bookId int) {
 		logger.Errorf("Error loading book: %d - %s\n", bookId, err.Error())
 	} else {
 		for i := 0; i < len(books); i++ {
-			if books[i].ID == updatedBook.ID {
+			if books[i].Id == updatedBook.Id {
 				books[i] = updatedBook
 				break
 			}
@@ -369,7 +369,7 @@ func reloadBook(bookId int) {
 	}
 }
 
-func doCreateBook(book *persistence.Book) {
+func doCreateBook(book *model.Book) {
 	data, err := ioutil.ReadFile(util.GetParserPath() + "/parser.js")
 	if err != nil {
 		logger.Errorf("Failed to load js: %s\n", err)
@@ -415,22 +415,22 @@ func loadData() {
 		panic("Error loading users! " + err.Error())
 	}
 	if len(users) != 3 {
-		adminUser := persistence.User{Name: "admin", Password: "spidey", Role: "administrator"}
+		adminUser := model.User{Name: "admin", Roles: []string{"administrator"}}
 		err = bookMaker.DB.SaveUser(adminUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		dadUser := persistence.User{Name: "vinhvan", Password: "colong", Role: "user"}
+		dadUser := model.User{Name: "vinhvan", Roles: []string{"user"}}
 		err = bookMaker.DB.SaveUser(dadUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		guestUser := persistence.User{Name: "guest", Password: "password", Role: "user"}
+		guestUser := model.User{Name: "guest", Roles: []string{"user"}}
 		err = bookMaker.DB.SaveUser(guestUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		users = []persistence.User{adminUser, dadUser, guestUser}
+		users = []model.User{adminUser, dadUser, guestUser}
 	}
 	logger.Infof("users=%d", len(users))
 
@@ -440,8 +440,8 @@ func loadData() {
 		panic("Error loading books! " + err.Error())
 	}
 	for _, book := range books {
-		if book.Status == persistence.STATUS_WORKING {
-			book.Status = persistence.STATUS_ABORTED
+		if book.Status == model.BookStatusType_IN_PROGRESS {
+			book.Status = model.BookStatusType_ABORTED
 			bookMaker.SaveBook(&book)
 		}
 	}

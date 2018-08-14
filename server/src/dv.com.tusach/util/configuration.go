@@ -2,10 +2,8 @@ package util
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"dv.com.tusach/logger"
 )
@@ -39,22 +37,6 @@ func GetConfiguration() Configuration {
 
 func GetEpubPath() string {
 	return configuration.LibraryPath + "/epub"
-}
-
-func GetBookPath(bookId int) string {
-	return configuration.LibraryPath + "/books/" + fmt.Sprintf("%08d", bookId)
-}
-
-func GetBookEpubFilename(bookId int, title string) string {
-	return configuration.LibraryPath + "/books/" + fmt.Sprintf("%08d", bookId) + "-" + strings.Replace(title, " ", "-", -1) + ".epub"
-}
-
-func GetChapterFilename(bookId int, chapterNo int) string {
-	return configuration.LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d.html", bookId, chapterNo)
-}
-
-func GetRawChapterFilename(bookId int, chapterNo int) string {
-	return configuration.LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d-raw.html", bookId, chapterNo)
 }
 
 func GetParserPath() string {

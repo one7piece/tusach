@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package model;
+
+message User {
+  string name = 1;
+  repeated string roles = 2;
+}
+
+message SystemInfo {
+  int64 systemUpTime = 1;
+  int64 bookLastUpdatedTime = 2;  
+}
+
+enum BookStatusType {
+  NONE = 0;
+  IN_PROGRESS = 1;
+  COMPLETED = 2;
+  ERROR = 3;
+  ABORTED = 4;
+}
+
+message Book {
+  int32 id = 1;
+  BookStatusType status = 2;
+  string title = 3;
+  string author = 4;
+  int64 createdTime = 5; // Epoch time in MS
+  string createdBy = 6;
+  int32 buildTimeSec = 7;
+  string startPageUrl = 8;
+  string currentPageUrl = 9;
+  int32 currentPageNo = 10;
+  int32 maxNumPages = 11;
+  int64 lastUpdatedTime = 12;
+  string errorMsg = 13;
+  bool epubCreated = 14;
+}
+
+message BookList {
+  repeated Book books = 1;
+}
+
+message NewBookRequest {
+  string title = 1;
+  string startPageUrl = 2;
+  string author = 3;
+  int32 maxNumPages = 4;
+}
+
+message BookID {
+  int32 id = 1;
+}
+
+message Chapter {
+  int32 chapterNo = 1;
+  int32 bookId = 2;
+  string title = 3;
+  bytes html = 4;
+}

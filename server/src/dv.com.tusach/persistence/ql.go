@@ -10,16 +10,16 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"dv.com.tusach/logger"
+	"dv.com.tusach/model"
 	"dv.com.tusach/util"
 	_ "github.com/cznic/ql/driver"
 )
 
 type Ql struct {
 	db   *sql.DB
-	info SystemInfo
+	info model.SystemInfo
 }
 
 func (ql *Ql) InitDB() {
@@ -33,25 +33,26 @@ func (ql *Ql) InitDB() {
 	ql.db = _db
 
 	// create table systeminfo, datetime store as TEXT (ISO8601 string)
-	err = ql.createTable("systeminfo", reflect.TypeOf(SystemInfo{}))
+	err = ql.createTable("systeminfo", reflect.TypeOf(model.SystemInfo{}))
 	if err != nil {
 		panic(err)
 	}
-	err = ql.createTable("user", reflect.TypeOf(User{}))
+	err = ql.createTable("user", reflect.TypeOf(model.User{}))
 	if err != nil {
 		panic(err)
 	}
-	err = ql.createTable("book", reflect.TypeOf(Book{}))
+	err = ql.createTable("book", reflect.TypeOf(model.Book{}))
 	if err != nil {
 		panic(err)
 	}
-	err = ql.createTable("chapter", reflect.TypeOf(Chapter{}))
+	err = ql.createTable("chapter", reflect.TypeOf(model.Chapter{}))
 	if err != nil {
 		panic(err)
 	}
 
 	// init system info
-	ql.info = SystemInfo{SystemUpTime: time.Now(), BookLastUpdateTime: time.Now(), ParserEditing: false}
+	now := util.UnixTimeNow()
+	ql.info = model.SystemInfo{SystemUpTime: now, BookLastUpdatedTime: now}
 	ql.SaveSystemInfo(ql.info)
 }
 
@@ -88,7 +89,7 @@ func (ql *Ql) createTable(tableName string, tableType reflect.Type) error {
 
 	tx, err := ql.db.Begin()
 	if err != nil {
-		logger.Errorf("failed to start transaction.", err)
+		logger.Errorf("failed to start transaction: %v", err)
 		return err
 	}
 	defer func() {
@@ -108,14 +109,14 @@ func (ql *Ql) createTable(tableName string, tableType reflect.Type) error {
 	return nil
 }
 
-func (ql *Ql) GetSystemInfo(forceReload bool) (SystemInfo, error) {
+func (ql *Ql) GetSystemInfo(forceReload bool) (model.SystemInfo, error) {
 	if forceReload {
-		records, err := ql.loadRecords(reflect.TypeOf(SystemInfo{}), "systeminfo", "", nil)
+		records, err := ql.loadRecords(reflect.TypeOf(model.SystemInfo{}), "systeminfo", "", nil)
 		if err != nil {
-			return SystemInfo{}, err
+			return model.SystemInfo{}, err
 		}
 		if len(records) > 0 {
-			ql.info = records[0].(SystemInfo)
+			ql.info = records[0].(model.SystemInfo)
 			logger.Infof("Found systeminfo: %+v\n", ql.info)
 		} else {
 			logger.Errorf("No systeminfo found\n")
@@ -124,9 +125,9 @@ func (ql *Ql) GetSystemInfo(forceReload bool) (SystemInfo, error) {
 	return ql.info, nil
 }
 
-func (ql *Ql) SaveSystemInfo(info SystemInfo) {
+func (ql *Ql) SaveSystemInfo(info model.SystemInfo) {
 	//logger.Infof("save systemInfo=%v", info)
-	records, err := ql.loadRecords(reflect.TypeOf(SystemInfo{}), "systeminfo", "", nil)
+	records, err := ql.loadRecords(reflect.TypeOf(model.SystemInfo{}), "systeminfo", "", nil)
 	if err != nil {
 		logger.Errorf("Failed to load systeminfo", err)
 		panic(err)
@@ -144,14 +145,14 @@ func (ql *Ql) SaveSystemInfo(info SystemInfo) {
 	}
 }
 
-func (ql *Ql) LoadUsers() ([]User, error) {
-	records, err := ql.loadRecords(reflect.TypeOf(User{}), "user", "", nil)
+func (ql *Ql) LoadUsers() ([]model.User, error) {
+	records, err := ql.loadRecords(reflect.TypeOf(model.User{}), "user", "", nil)
 	if err != nil {
-		return []User{}, err
+		return []model.User{}, err
 	}
-	users := []User{}
+	users := []model.User{}
 	for i := 0; i < len(records); i++ {
-		user := records[i].(User)
+		user := records[i].(model.User)
 		users = append(users, user)
 		logger.Infof("Found user: %+v\n", user)
 	}
@@ -161,9 +162,9 @@ func (ql *Ql) LoadUsers() ([]User, error) {
 	return users, nil
 }
 
-func (ql *Ql) SaveUser(user User) error {
+func (ql *Ql) SaveUser(user model.User) error {
 	args := []interface{}{user.Name}
-	records, err := ql.loadRecords(reflect.TypeOf(User{}), "user", "Name=$1", args)
+	records, err := ql.loadRecords(reflect.TypeOf(model.User{}), "user", "Name=$1", args)
 	if err != nil {
 		return err
 	}
@@ -183,26 +184,26 @@ func (ql *Ql) DeleteUser(userName string) error {
 	return err
 }
 
-func (ql *Ql) LoadBook(id int) (Book, error) {
+func (ql *Ql) LoadBook(id int) (model.Book, error) {
 	args := []interface{}{id}
-	records, err := ql.loadRecords(reflect.TypeOf(Book{}), "book", "ID=$1", args)
+	records, err := ql.loadRecords(reflect.TypeOf(model.Book{}), "book", "ID=$1", args)
 	if err != nil {
-		return Book{}, err
+		return model.Book{}, err
 	}
 	if len(records) > 0 {
-		return records[0].(Book), nil
+		return records[0].(model.Book), nil
 	}
-	return Book{}, nil
+	return model.Book{}, nil
 }
 
-func (ql *Ql) LoadBooks() ([]Book, error) {
-	records, err := ql.loadRecords(reflect.TypeOf(Book{}), "book", "", nil)
+func (ql *Ql) LoadBooks() ([]model.Book, error) {
+	records, err := ql.loadRecords(reflect.TypeOf(model.Book{}), "book", "", nil)
 	if err != nil {
-		return []Book{}, err
+		return []model.Book{}, err
 	}
-	books := []Book{}
+	books := []model.Book{}
 	for i := 0; i < len(records); i++ {
-		book := records[i].(Book)
+		book := records[i].(model.Book)
 		books = append(books, book)
 		logger.Infof("Found book: %+v\n", book)
 	}
@@ -212,7 +213,7 @@ func (ql *Ql) LoadBooks() ([]Book, error) {
 	return books, nil
 }
 
-func (ql *Ql) SaveBook(book Book) (retId int, retErr error) {
+func (ql *Ql) SaveBook(book model.Book) (retId int, retErr error) {
 
 	var newBookId = 0
 	defer func() {
@@ -239,7 +240,7 @@ func (ql *Ql) SaveBook(book Book) (retId int, retErr error) {
 
 	// TODO need locking here
 
-	if book.ID == 0 {
+	if book.Id == 0 {
 		rows, retErr := ql.db.Query("SELECT max(ID) FROM book")
 		if retErr != nil {
 			return 0, retErr
@@ -257,11 +258,11 @@ func (ql *Ql) SaveBook(book Book) (retId int, retErr error) {
 			newBookId = 1
 		}
 		// insert
-		book.ID = newBookId
+		book.Id = int32(newBookId)
 		retErr = ql.insertRecord("book", reflect.ValueOf(book))
 		if retErr == nil {
 			// create book dir
-			dirPath := util.GetBookPath(book.ID)
+			dirPath := GetBookPath(int(book.Id))
 			logger.Infof("Creating book dir: ", dirPath)
 			os.MkdirAll(dirPath, 0777)
 			if _, err := os.Stat(dirPath); os.IsNotExist(err) {
@@ -285,10 +286,10 @@ func (ql *Ql) SaveBook(book Book) (retId int, retErr error) {
 		retErr = ql.updateRecord("book", reflect.ValueOf(book), []string{"ID"})
 	}
 
-	ql.info.BookLastUpdateTime = book.LastUpdateTime
+	ql.info.BookLastUpdatedTime = book.LastUpdatedTime
 	ql.SaveSystemInfo(ql.info)
 
-	return book.ID, retErr
+	return int(book.Id), retErr
 }
 
 func (ql *Ql) DeleteBook(bookId int) error {
@@ -306,30 +307,30 @@ func (ql *Ql) DeleteBook(bookId int) error {
 	err = ql.deleteRecords("book", "ID=$1", args)
 
 	// remove files
-	err = os.RemoveAll(util.GetBookPath(bookId))
+	err = os.RemoveAll(GetBookPath(bookId))
 
-	ql.info.BookLastUpdateTime = time.Now()
+	ql.info.BookLastUpdatedTime = util.UnixTimeNow()
 	ql.SaveSystemInfo(ql.info)
 
 	return err
 }
 
-func (ql *Ql) LoadChapters(bookId int) ([]Chapter, error) {
+func (ql *Ql) LoadChapters(bookId int) ([]model.Chapter, error) {
 	var records []interface{}
 	var err error
 	if bookId > 0 {
 		args := []interface{}{bookId}
-		records, err = ql.loadRecords(reflect.TypeOf(Chapter{}), "chapter", "BookId=$1", args)
+		records, err = ql.loadRecords(reflect.TypeOf(model.Chapter{}), "chapter", "BookId=$1", args)
 	} else {
-		records, err = ql.loadRecords(reflect.TypeOf(Chapter{}), "chapter", "", nil)
+		records, err = ql.loadRecords(reflect.TypeOf(model.Chapter{}), "chapter", "", nil)
 	}
 	if err != nil {
-		return []Chapter{}, err
+		return []model.Chapter{}, err
 	}
 
-	chapters := []Chapter{}
+	chapters := []model.Chapter{}
 	for i := 0; i < len(records); i++ {
-		chapter := records[i].(Chapter)
+		chapter := records[i].(model.Chapter)
 		chapters = append(chapters, chapter)
 		//logger.Infof("Found chapter: %+v\n", chapter)
 	}
@@ -337,7 +338,7 @@ func (ql *Ql) LoadChapters(bookId int) ([]Chapter, error) {
 		logger.Infof("No chapter found\n")
 	} else {
 		// sort chapters by ChapterNo
-		sort.Sort(ByChapterNo(chapters))
+		sort.Sort(model.ByChapterNo(chapters))
 	}
 
 	// TODO verify chapter html/images from file system
@@ -345,7 +346,7 @@ func (ql *Ql) LoadChapters(bookId int) ([]Chapter, error) {
 	return chapters, nil
 }
 
-func (ql *Ql) SaveChapter(chapter Chapter) error {
+func (ql *Ql) SaveChapter(chapter model.Chapter) error {
 	/*
 		filepath := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
 		err := ioutil.WriteFile(filepath, chapter.Html, 0777)
@@ -355,7 +356,7 @@ func (ql *Ql) SaveChapter(chapter Chapter) error {
 		}
 	*/
 	args := []interface{}{chapter.BookId, chapter.ChapterNo}
-	records, err := ql.loadRecords(reflect.TypeOf(Chapter{}), "chapter", "BookId=$1 and ChapterNo=$2", args)
+	records, err := ql.loadRecords(reflect.TypeOf(model.Chapter{}), "chapter", "BookId=$1 and ChapterNo=$2", args)
 	if err != nil {
 		return err
 	}

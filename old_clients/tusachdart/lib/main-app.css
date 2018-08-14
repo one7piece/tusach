@@ -1,0 +1,78 @@
+:host-context(body) {
+  height: 100%;
+  width: 100%;
+  font-family: "RobotoDraft";
+  font-weight: 300;
+  font-size: 12px;
+}
+
+:host /deep/ .title {
+  font-size: 16px;
+  font-style: bold;
+}
+
+:host /deep/ core-list-dart {
+  height: 100%;
+}
+
+:host {
+}
+
+:host /deep/ core-header-panel {
+  height: 100%;
+  width: 100%;
+}
+
+:host /deep/ core-toolbar {
+  background-color: #03a9f4;
+  color: #fff;
+}
+
+:host /deep/ #username,#password {
+  width: 75px;
+  font-size: 75%;
+}
+
+:host /deep/ core-animated-pages {
+  width: 90%;
+  height: 90%;
+  -webkit-user-select: none;
+  overflow: auto;
+}
+
+:host /deep/ core-animated-pages > * {
+  border-radius: 5px;
+  font-size: 50px;
+  overflow: auto;
+}
+
+:host /deep/ core-menu {
+  color: #01579b;
+  margin: 10px 0 0 0;
+}
+
+:host /deep/ core-menu > paper-item {
+  transition: all 300ms ease-in-out;
+}
+
+:host /deep/ paper-item a {
+  text-decoration: none;
+  color: currentcolor;
+  margin-left: 5px;
+}
+
+:host /deep/ core-menu > paper-item.core-selected {
+  background: #e1f5fe;
+}
+
+:host /deep/ @media all and (max-width: 480px) {
+  core-animated-pages {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+:host /deep/ core-animated-pages section {
+  background-image: url("/images/background.jpg");
+}
+

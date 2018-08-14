@@ -10,9 +10,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"dv.com.tusach/logger"
+	"dv.com.tusach/model"
 	"dv.com.tusach/persistence"
 	"dv.com.tusach/util"
 	"github.com/robertkrimen/otto"
@@ -71,7 +71,7 @@ func (bookMaker BookMaker) GetBookSites() []string {
 	return []string{"www.truyencuatui.net"}
 }
 
-func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *persistence.Book) error {
+func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) error {
 	var numPagesLoaded = 0
 	var errorMsg = ""
 
@@ -83,7 +83,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *persistence.Bo
 	// TODO set loader configuration
 
 	for {
-		if book.Status == persistence.STATUS_ABORTED || book.MaxNumPages > 0 && book.MaxNumPages <= book.CurrentPageNo {
+		if book.Status == model.BookStatusType_ABORTED || book.MaxNumPages > 0 && book.MaxNumPages <= book.CurrentPageNo {
 			break
 		}
 
@@ -91,7 +91,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *persistence.Bo
 		if book.CurrentPageUrl == url {
 			newChapterNo = book.CurrentPageNo
 		}
-		newChapter := persistence.Chapter{BookId: book.ID, ChapterNo: newChapterNo}
+		newChapter := model.Chapter{BookId: book.Id, ChapterNo: newChapterNo}
 		nextPageUrl, err := bookMaker.CreateChapter(engine, url, &newChapter)
 
 		if err != nil {
@@ -101,7 +101,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *persistence.Bo
 		}
 
 		if newChapter.Title == "" {
-			newChapter.Title = "persistence.Chapter " + strconv.Itoa(newChapter.ChapterNo)
+			newChapter.Title = "model.Chapter " + strconv.Itoa(int(newChapter.ChapterNo))
 		}
 		logger.Infof("completed chapter: %d (%s), nextPageUrl: %s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
@@ -137,25 +137,25 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *persistence.Bo
 
 	book.ErrorMsg = errorMsg
 	if book.ErrorMsg != "" {
-		book.Status = persistence.STATUS_ERROR
+		book.Status = model.BookStatusType_ERROR
 		logger.Error(book.ErrorMsg)
-	} else if book.Status != persistence.STATUS_ABORTED {
-		book.Status = persistence.STATUS_COMPLETED
+	} else if book.Status != model.BookStatusType_ABORTED {
+		book.Status = model.BookStatusType_COMPLETED
 	}
 
-	chapters, err := bookMaker.DB.LoadChapters(book.ID)
+	chapters, err := bookMaker.DB.LoadChapters(int(book.Id))
 	if err != nil {
-		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.ID, err.Error())
+		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.Id, err.Error())
 		logger.Error(errorMsg)
 		book.ErrorMsg = errorMsg
-		book.Status = persistence.STATUS_ERROR
+		book.Status = model.BookStatusType_ERROR
 	} else {
 		err = bookMaker.MakeEpub(*book, chapters)
 		if err != nil {
-			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
+			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.Id, err.Error())
 			logger.Error(errorMsg)
 			book.ErrorMsg = errorMsg
-			book.Status = persistence.STATUS_ERROR
+			book.Status = model.BookStatusType_ERROR
 			book.EpubCreated = false
 		} else {
 			book.EpubCreated = true
@@ -166,9 +166,9 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *persistence.Bo
 	return err
 }
 
-func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string, chapter *persistence.Chapter) (string, error) {
-	rawFilename := util.GetRawChapterFilename(chapter.BookId, chapter.ChapterNo)
-	filename := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
+func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string, chapter *model.Chapter) (string, error) {
+	rawFilename := persistence.GetRawChapterFilename(*chapter)
+	filename := persistence.GetChapterFilename(*chapter)
 
 	chapterTitle, nextChapterURL, err := bookMaker.Parse(engine, chapterUrl, rawFilename, filename, 10, 2)
 	if err != nil {
@@ -180,12 +180,12 @@ func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string
 	return nextChapterURL, nil
 }
 
-func (bookMaker BookMaker) SaveBook(book *persistence.Book) (int, error) {
-	book.LastUpdateTime = time.Now()
+func (bookMaker BookMaker) SaveBook(book *model.Book) (int, error) {
+	book.LastUpdatedTime = util.UnixTimeNow()
 	id, err := bookMaker.DB.SaveBook(*book)
 	if err == nil {
-		if book.ID <= 0 {
-			book.ID = id
+		if book.Id <= 0 {
+			book.Id = int32(id)
 			logger.Infof("created book - %v", book)
 		} else {
 			logger.Infof("updated book - %v", book)
@@ -195,21 +195,21 @@ func (bookMaker BookMaker) SaveBook(book *persistence.Book) (int, error) {
 	return id, err
 }
 
-func (bookMaker BookMaker) MakeEpub(book persistence.Book, chapters []persistence.Chapter) error {
+func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) error {
 	if book.CurrentPageNo == 0 {
 		return errors.New("Book has no chapters")
 	}
 	// validate chapter html files
 	for i := 0; i < len(chapters); i++ {
 		chapter := chapters[i]
-		filename := util.GetChapterFilename(book.ID, chapter.ChapterNo)
+		filename := persistence.GetChapterFilename(chapter)
 		if _, err := os.Stat(filename); os.IsNotExist(err) {
 			return errors.New("Missing chapter file: " + filename)
 		}
 	}
 
 	// update toc.ncx file
-	tocFile := util.GetBookPath(book.ID) + "/OEBPS/toc.ncx"
+	tocFile := persistence.GetBookPath(int(book.Id)) + "/OEBPS/toc.ncx"
 	data, err := ioutil.ReadFile(tocFile)
 	if err != nil {
 		return errors.New("Failed to open file: " + tocFile + ". " + err.Error())
@@ -230,7 +230,7 @@ func (bookMaker BookMaker) MakeEpub(book persistence.Book, chapters []persistenc
 	// add all <navPoint>
 	for i := 0; i < len(chapters); i++ {
 		chapter := chapters[i]
-		filepath := util.GetChapterFilename(book.ID, chapter.ChapterNo)
+		filepath := persistence.GetChapterFilename(chapter)
 		index := strings.LastIndex(filepath, "/")
 		filename := filepath[index+1:]
 		buffer.WriteString(fmt.Sprintf("<navPoint id=\"navPoint-%d\" playOrder=\"%d\" class=\"chapter\">\n", chapter.ChapterNo, chapter.ChapterNo))
@@ -247,7 +247,7 @@ func (bookMaker BookMaker) MakeEpub(book persistence.Book, chapters []persistenc
 	}
 
 	// update content.opf
-	contentFile := util.GetBookPath(book.ID) + "/OEBPS/content.opf"
+	contentFile := persistence.GetBookPath(int(book.Id)) + "/OEBPS/content.opf"
 	data, err = ioutil.ReadFile(contentFile)
 	if err != nil {
 		return errors.New("Failed to open file: " + contentFile + ". " + err.Error())
@@ -274,7 +274,7 @@ func (bookMaker BookMaker) MakeEpub(book persistence.Book, chapters []persistenc
 	// write opf:items
 	for i := 0; i < len(chapters); i++ {
 		chapter := chapters[i]
-		filepath := util.GetChapterFilename(book.ID, chapter.ChapterNo)
+		filepath := persistence.GetChapterFilename(chapter)
 		index := strings.LastIndex(filepath, "/")
 		filename := filepath[index+1:]
 		buffer.WriteString(fmt.Sprintf("<opf:item id=\"%s\" href=\"%s\" media-type=\"application/xhtml+xml\" />\n", filename, filename))
@@ -283,7 +283,7 @@ func (bookMaker BookMaker) MakeEpub(book persistence.Book, chapters []persistenc
 	buffer.WriteString("<opf:spine toc=\"ncx\">\n")
 	for i := 0; i < len(chapters); i++ {
 		chapter := chapters[i]
-		filepath := util.GetChapterFilename(book.ID, chapter.ChapterNo)
+		filepath := persistence.GetChapterFilename(chapter)
 		index := strings.LastIndex(filepath, "/")
 		filename := filepath[index+1:]
 		buffer.WriteString(fmt.Sprintf("<opf:itemref idref=\"%s\" />\n", filename))
@@ -295,12 +295,12 @@ func (bookMaker BookMaker) MakeEpub(book persistence.Book, chapters []persistenc
 		return err
 	}
 
-	epubFile := util.GetBookEpubFilename(book.ID, book.Title)
+	epubFile := persistence.GetBookEpubFilename(book)
 	// delete existing epub
 	os.Remove(epubFile)
 
 	// zip the epub file
-	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, util.GetBookPath(book.ID))
+	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, persistence.GetBookPath(int(book.Id)))
 	out, err := cmd.CombinedOutput()
 	str = string(out)
 	logger.Infof("epub command output: %s", str)

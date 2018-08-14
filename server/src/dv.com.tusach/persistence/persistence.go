@@ -1,12 +1,49 @@
 package persistence
 
 import (
-	"dv.com.tusach/logger"
+	"fmt"
 	"reflect"
+	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"dv.com.tusach/logger"
+	"dv.com.tusach/model"
+	"dv.com.tusach/util"
 )
+
+type Persistence interface {
+	InitDB()
+	CloseDB()
+	GetSystemInfo(forceReload bool) (model.SystemInfo, error)
+	SaveSystemInfo(info model.SystemInfo)
+	LoadUsers() ([]model.User, error)
+	SaveUser(user model.User) error
+	DeleteUser(userName string) error
+	LoadBooks() ([]model.Book, error)
+	LoadBook(id int) (model.Book, error)
+	SaveBook(book model.Book) (retId int, retErr error)
+	DeleteBook(bookId int) error
+	LoadChapters(bookId int) ([]model.Chapter, error)
+	SaveChapter(chapter model.Chapter) error
+}
+
+func GetBookPath(bookId int) string {
+	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", bookId)
+}
+
+func GetBookEpubFilename(book model.Book) string {
+	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.Id) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
+}
+
+func GetChapterFilename(chapter model.Chapter) string {
+	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d.html", chapter.BookId, chapter.ChapterNo)
+}
+
+func GetRawChapterFilename(chapter model.Chapter) string {
+	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d-raw.html", chapter.BookId, chapter.ChapterNo)
+}
 
 func isPersistentField(tableType reflect.Type, fieldName string) bool {
 	field, found := tableType.FieldByName(fieldName)
