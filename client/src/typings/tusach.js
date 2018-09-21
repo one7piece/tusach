@@ -1,22 +1,20 @@
 /*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars*/
-"use strict";
-
-var $protobuf = require("protobufjs/minimal");
+import * as $protobuf from "protobufjs/minimal";
 
 // Common aliases
-var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
+const $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 
 // Exported root namespace
-var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+const $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
-$root.model = (function() {
+export const model = $root.model = (() => {
 
     /**
      * Namespace model.
      * @exports model
      * @namespace
      */
-    var model = {};
+    const model = {};
 
     model.User = (function() {
 
@@ -39,7 +37,7 @@ $root.model = (function() {
         function User(properties) {
             this.roles = [];
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -87,7 +85,7 @@ $root.model = (function() {
             if (message.name != null && message.hasOwnProperty("name"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
             if (message.roles != null && message.roles.length)
-                for (var i = 0; i < message.roles.length; ++i)
+                for (let i = 0; i < message.roles.length; ++i)
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.roles[i]);
             return writer;
         };
@@ -119,9 +117,9 @@ $root.model = (function() {
         User.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.User();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.User();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.name = reader.string();
@@ -172,7 +170,7 @@ $root.model = (function() {
             if (message.roles != null && message.hasOwnProperty("roles")) {
                 if (!Array.isArray(message.roles))
                     return "roles: array expected";
-                for (var i = 0; i < message.roles.length; ++i)
+                for (let i = 0; i < message.roles.length; ++i)
                     if (!$util.isString(message.roles[i]))
                         return "roles: string[] expected";
             }
@@ -190,14 +188,14 @@ $root.model = (function() {
         User.fromObject = function fromObject(object) {
             if (object instanceof $root.model.User)
                 return object;
-            var message = new $root.model.User();
+            let message = new $root.model.User();
             if (object.name != null)
                 message.name = String(object.name);
             if (object.roles) {
                 if (!Array.isArray(object.roles))
                     throw TypeError(".model.User.roles: array expected");
                 message.roles = [];
-                for (var i = 0; i < object.roles.length; ++i)
+                for (let i = 0; i < object.roles.length; ++i)
                     message.roles[i] = String(object.roles[i]);
             }
             return message;
@@ -215,7 +213,7 @@ $root.model = (function() {
         User.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.arrays || options.defaults)
                 object.roles = [];
             if (options.defaults)
@@ -224,7 +222,7 @@ $root.model = (function() {
                 object.name = message.name;
             if (message.roles && message.roles.length) {
                 object.roles = [];
-                for (var j = 0; j < message.roles.length; ++j)
+                for (let j = 0; j < message.roles.length; ++j)
                     object.roles[j] = message.roles[j];
             }
             return object;
@@ -264,7 +262,7 @@ $root.model = (function() {
          */
         function SystemInfo(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -343,9 +341,9 @@ $root.model = (function() {
         SystemInfo.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.SystemInfo();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.SystemInfo();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.systemUpTime = reader.int64();
@@ -408,7 +406,7 @@ $root.model = (function() {
         SystemInfo.fromObject = function fromObject(object) {
             if (object instanceof $root.model.SystemInfo)
                 return object;
-            var message = new $root.model.SystemInfo();
+            let message = new $root.model.SystemInfo();
             if (object.systemUpTime != null)
                 if ($util.Long)
                     (message.systemUpTime = $util.Long.fromValue(object.systemUpTime)).unsigned = false;
@@ -442,15 +440,15 @@ $root.model = (function() {
         SystemInfo.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 if ($util.Long) {
-                    var long = new $util.Long(0, 0, false);
+                    let long = new $util.Long(0, 0, false);
                     object.systemUpTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.systemUpTime = options.longs === String ? "0" : 0;
                 if ($util.Long) {
-                    var long = new $util.Long(0, 0, false);
+                    let long = new $util.Long(0, 0, false);
                     object.bookLastUpdatedTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.bookLastUpdatedTime = options.longs === String ? "0" : 0;
@@ -493,7 +491,7 @@ $root.model = (function() {
      * @property {number} ABORTED=4 ABORTED value
      */
     model.BookStatusType = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
+        const valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "NONE"] = 0;
         values[valuesById[1] = "IN_PROGRESS"] = 1;
         values[valuesById[2] = "COMPLETED"] = 2;
@@ -534,7 +532,7 @@ $root.model = (function() {
          */
         function Book(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -733,9 +731,9 @@ $root.model = (function() {
         Book.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.Book();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.Book();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.id = reader.int32();
@@ -878,7 +876,7 @@ $root.model = (function() {
         Book.fromObject = function fromObject(object) {
             if (object instanceof $root.model.Book)
                 return object;
-            var message = new $root.model.Book();
+            let message = new $root.model.Book();
             if (object.id != null)
                 message.id = object.id | 0;
             switch (object.status) {
@@ -956,14 +954,14 @@ $root.model = (function() {
         Book.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.id = 0;
                 object.status = options.enums === String ? "NONE" : 0;
                 object.title = "";
                 object.author = "";
                 if ($util.Long) {
-                    var long = new $util.Long(0, 0, false);
+                    let long = new $util.Long(0, 0, false);
                     object.createdTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.createdTime = options.longs === String ? "0" : 0;
@@ -974,7 +972,7 @@ $root.model = (function() {
                 object.currentPageNo = 0;
                 object.maxNumPages = 0;
                 if ($util.Long) {
-                    var long = new $util.Long(0, 0, false);
+                    let long = new $util.Long(0, 0, false);
                     object.lastUpdatedTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.lastUpdatedTime = options.longs === String ? "0" : 0;
@@ -1052,7 +1050,7 @@ $root.model = (function() {
         function BookList(properties) {
             this.books = [];
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1090,7 +1088,7 @@ $root.model = (function() {
             if (!writer)
                 writer = $Writer.create();
             if (message.books != null && message.books.length)
-                for (var i = 0; i < message.books.length; ++i)
+                for (let i = 0; i < message.books.length; ++i)
                     $root.model.Book.encode(message.books[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
             return writer;
         };
@@ -1122,9 +1120,9 @@ $root.model = (function() {
         BookList.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.BookList();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.BookList();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     if (!(message.books && message.books.length))
@@ -1169,8 +1167,8 @@ $root.model = (function() {
             if (message.books != null && message.hasOwnProperty("books")) {
                 if (!Array.isArray(message.books))
                     return "books: array expected";
-                for (var i = 0; i < message.books.length; ++i) {
-                    var error = $root.model.Book.verify(message.books[i]);
+                for (let i = 0; i < message.books.length; ++i) {
+                    let error = $root.model.Book.verify(message.books[i]);
                     if (error)
                         return "books." + error;
                 }
@@ -1189,12 +1187,12 @@ $root.model = (function() {
         BookList.fromObject = function fromObject(object) {
             if (object instanceof $root.model.BookList)
                 return object;
-            var message = new $root.model.BookList();
+            let message = new $root.model.BookList();
             if (object.books) {
                 if (!Array.isArray(object.books))
                     throw TypeError(".model.BookList.books: array expected");
                 message.books = [];
-                for (var i = 0; i < object.books.length; ++i) {
+                for (let i = 0; i < object.books.length; ++i) {
                     if (typeof object.books[i] !== "object")
                         throw TypeError(".model.BookList.books: object expected");
                     message.books[i] = $root.model.Book.fromObject(object.books[i]);
@@ -1215,12 +1213,12 @@ $root.model = (function() {
         BookList.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.arrays || options.defaults)
                 object.books = [];
             if (message.books && message.books.length) {
                 object.books = [];
-                for (var j = 0; j < message.books.length; ++j)
+                for (let j = 0; j < message.books.length; ++j)
                     object.books[j] = $root.model.Book.toObject(message.books[j], options);
             }
             return object;
@@ -1262,7 +1260,7 @@ $root.model = (function() {
          */
         function NewBookRequest(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1361,9 +1359,9 @@ $root.model = (function() {
         NewBookRequest.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.NewBookRequest();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.NewBookRequest();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.title = reader.string();
@@ -1438,7 +1436,7 @@ $root.model = (function() {
         NewBookRequest.fromObject = function fromObject(object) {
             if (object instanceof $root.model.NewBookRequest)
                 return object;
-            var message = new $root.model.NewBookRequest();
+            let message = new $root.model.NewBookRequest();
             if (object.title != null)
                 message.title = String(object.title);
             if (object.startPageUrl != null)
@@ -1462,7 +1460,7 @@ $root.model = (function() {
         NewBookRequest.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.title = "";
                 object.startPageUrl = "";
@@ -1513,7 +1511,7 @@ $root.model = (function() {
          */
         function BookID(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1582,9 +1580,9 @@ $root.model = (function() {
         BookID.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.BookID();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.BookID();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.id = reader.int32();
@@ -1641,7 +1639,7 @@ $root.model = (function() {
         BookID.fromObject = function fromObject(object) {
             if (object instanceof $root.model.BookID)
                 return object;
-            var message = new $root.model.BookID();
+            let message = new $root.model.BookID();
             if (object.id != null)
                 message.id = object.id | 0;
             return message;
@@ -1659,7 +1657,7 @@ $root.model = (function() {
         BookID.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults)
                 object.id = 0;
             if (message.id != null && message.hasOwnProperty("id"))
@@ -1703,7 +1701,7 @@ $root.model = (function() {
          */
         function Chapter(properties) {
             if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1802,9 +1800,9 @@ $root.model = (function() {
         Chapter.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.Chapter();
+            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.model.Chapter();
             while (reader.pos < end) {
-                var tag = reader.uint32();
+                let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
                     message.chapterNo = reader.int32();
@@ -1879,7 +1877,7 @@ $root.model = (function() {
         Chapter.fromObject = function fromObject(object) {
             if (object instanceof $root.model.Chapter)
                 return object;
-            var message = new $root.model.Chapter();
+            let message = new $root.model.Chapter();
             if (object.chapterNo != null)
                 message.chapterNo = object.chapterNo | 0;
             if (object.bookId != null)
@@ -1906,7 +1904,7 @@ $root.model = (function() {
         Chapter.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            var object = {};
+            let object = {};
             if (options.defaults) {
                 object.chapterNo = 0;
                 object.bookId = 0;
@@ -1947,4 +1945,4 @@ $root.model = (function() {
     return model;
 })();
 
-module.exports = $root;
+export { $root as default };

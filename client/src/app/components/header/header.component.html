@@ -1,0 +1,23 @@
+<mat-toolbar color="primary">
+  <span class="fill-remaining-space">
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item routerLink="">
+        <mat-icon>home</mat-icon>
+        <span>Home</span>
+      </button>
+      <button mat-menu-item routerLink="/book-detail/0">
+        <mat-icon>library_add</mat-icon>
+        <span>Create Book</span>
+      </button>
+      <button mat-menu-item routerLink="messages">
+          <mat-icon>message</mat-icon>
+          <span>View Log</span>
+        </button>
+      </mat-menu>
+  </span>
+
+  <span class="fill-remaining-space">One-7-Piece</span>
+</mat-toolbar>

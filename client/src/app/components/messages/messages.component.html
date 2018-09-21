@@ -1,0 +1,10 @@
+<mat-expansion-panel>
+  <mat-expansion-panel-header>
+    <mat-panel-title>Log Messages</mat-panel-title>
+  </mat-expansion-panel-header>
+  <div *ngIf="messageService.messages.length">
+    <mat-list>
+        <mat-list-item *ngFor='let message of messageService.messages'>{{message}}</mat-list-item>
+    </mat-list>
+  </div>
+</mat-expansion-panel>

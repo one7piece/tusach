@@ -1,4 +1,7 @@
-import * as $protobuf from "protobufjs";
+// Long is imported whenever int64 support is required
+import { Long } from "protobufjs/minimal";
+import * as $protobuf from "protobufjs/minimal";
+
 /** Namespace model. */
 export namespace model {
 

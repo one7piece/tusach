@@ -7,7 +7,7 @@ import "tusach_model.proto";
 
 service Tusach {
   rpc GetBooks(google.protobuf.Empty) returns ( BookList );
-  rpc QueryBooks(BookID) returns ( BookList );
+  rpc QueryBooks(int64) returns ( BookList );
   rpc GetSystemInfo(google.protobuf.Empty) returns ( SystemInfo );
   rpc CreateBook(NewBookRequest) returns ( Book );
   rpc UpdateBook(Book) returns ( Book );
