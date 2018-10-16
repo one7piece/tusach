@@ -11,6 +11,7 @@ import (
 	"dv.com.tusach/logger"
 	"dv.com.tusach/model"
 	"dv.com.tusach/util"
+	tspb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 type Persistence interface {
@@ -34,7 +35,7 @@ func GetBookPath(bookId int) string {
 }
 
 func GetBookEpubFilename(book model.Book) string {
-	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.Id) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
+	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.ID) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
 }
 
 func GetChapterFilename(chapter model.Chapter) string {
@@ -51,16 +52,25 @@ func isPersistentField(tableType reflect.Type, fieldName string) bool {
 		return false
 	}
 
-	if field.Tag.Get("persist") == "false" {
-		return false
-	}
-	return true
+	return field.Tag.Get("protobuf") != ""
 }
 
-func field2db(fieldType reflect.Type, fieldValue interface{}) interface{} {
+func field2db(fieldName string, fieldType reflect.Type, fieldValue interface{}) (interface{}, error) {
+	logger.Debugf("field2db() - name:%s, type:%v, value:%v(%s)", fieldName, fieldType, fieldValue, reflect.TypeOf(fieldValue).Name())
 	var result interface{}
+	var err error
 	if fieldType == reflect.TypeOf(time.Time{}) {
-		result, _ = fromDateTime(fieldValue.(time.Time))
+		result, _ = util.FromDateTime(fieldValue.(time.Time))
+	} else if fieldType == reflect.TypeOf(&tspb.Timestamp{}) {
+		result = util.FromTimestamp(fieldValue.(*tspb.Timestamp))
+	} else if fieldType == reflect.TypeOf(model.BookStatusType_NONE) {
+		result = fieldValue.(model.BookStatusType)
+	} else if fieldType.Kind() == reflect.Int64 {
+		result = fieldValue.(int64)
+	} else if fieldType.Kind() == reflect.Int32 {
+		result = fieldValue.(int32)
+	} else if fieldType.Kind() == reflect.Int16 {
+		result = fieldValue.(int16)
 	} else if fieldType.Kind() == reflect.Int {
 		result = fieldValue.(int)
 	} else if fieldType.Kind() == reflect.Bool {
@@ -69,53 +79,51 @@ func field2db(fieldType reflect.Type, fieldValue interface{}) interface{} {
 		} else {
 			result = 0
 		}
-	} else {
+	} else if fieldType.Kind() == reflect.String {
 		result = fieldValue.(string)
+	} else {
+		err = fmt.Errorf("field2db - Unknown field type: %v, field value: %v", fieldType.Kind(), fieldValue)
 	}
-	return result
+	return result, err
 }
 
-func db2field(fieldType reflect.Type, dbValue interface{}) interface{} {
+func db2field(fieldName string, fieldType reflect.Type, dbValue interface{}) (interface{}, error) {
+	logger.Debugf("db2field() - name:%s, type:%v, value:%v", fieldName, fieldType, dbValue)
 	var result interface{}
-	//strValue := dbValue.(string)
+	var err error
+	var num int64
 	if fieldType == reflect.TypeOf(time.Time{}) {
-		result, _ = toDateTime(dbValue.(string))
+		result, _ = util.ToDateTime(dbValue.(string))
+	} else if fieldType == reflect.TypeOf(&tspb.Timestamp{}) {
+		result, _ = util.ToTimestamp(dbValue.(string))
+	} else if fieldType == reflect.TypeOf(model.BookStatusType_NONE) {
+		num = dbValue.(int64)
+		result = model.BookStatusType(num)
+	} else if fieldType.Kind() == reflect.Int64 {
+		num = dbValue.(int64)
+		result = num
+	} else if fieldType.Kind() == reflect.Int32 {
+		num = dbValue.(int64)
+		result = int32(num)
+	} else if fieldType.Kind() == reflect.Int16 {
+		num = dbValue.(int64)
+		result = int16(num)
 	} else if fieldType.Kind() == reflect.Int {
-		//result, _ = strconv.Atoi(strValue)
-		result = toInt(dbValue)
+		num = dbValue.(int64)
+		result = int(num)
 	} else if fieldType.Kind() == reflect.Bool {
-		//n, _ := strconv.Atoi(strValue)
-		n := toInt(dbValue)
+		n := dbValue.(int64)
 		if n == 0 {
 			result = false
 		} else {
 			result = true
 		}
-	} else {
-		//result = strValue
+	} else if fieldType.Kind() == reflect.String {
 		result = dbValue.(string)
+	} else {
+		err = fmt.Errorf("db2field - Unknown field type: %v, field value: %v", fieldType.Kind(), dbValue)
 	}
-	return result
-}
-
-func toInt(val interface{}) int {
-	switch val.(type) {
-	case int32:
-		return val.(int)
-	case int64:
-		return int(val.(int64))
-	default:
-		return val.(int)
-	}
-}
-
-func toDateTime(str string) (time.Time, error) {
-	return time.Parse(time.RFC3339, str)
-}
-
-func fromDateTime(t time.Time) (string, error) {
-	buffer, err := t.MarshalText()
-	return string(buffer), err
+	return result, err
 }
 
 func lowerInitial(s string) string {

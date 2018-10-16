@@ -1,14 +1,23 @@
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpResponse, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpRequest, HttpResponse, HttpErrorResponse, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap, materialize, dematerialize } from 'rxjs/operators';
-import { model } from '../../typings';
+import { Long } from 'protobufjs';
+import { CommonUtils, model } from '../common.utils';
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
   books: model.Book[];
+  listRex: RegExp;
+  getRex: RegExp;
+  updateRex: RegExp;
+  systemInfo : model.SystemInfo;
 
   constructor() { 
+    this.systemInfo = new model.SystemInfo();
+    this.listRex = new RegExp("/books/[0-9]+$");
+    this.getRex = new RegExp("/book/[0-9]+$");
+    this.updateRex = new RegExp("/book/[a-z]+$");
     let storedBooks = localStorage.getItem('books');
     if (storedBooks == null) {
       this.books = [
@@ -27,30 +36,67 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       console.log("intialised books: " + storedBooks);
     } else {
       this.books = JSON.parse(storedBooks);
-      console.log("loaded books from local storage: " + storedBooks);
+      console.log("loaded " + this.books.length + " books from local storage");
     }
+    this.systemInfo.bookLastUpdatedTime = Date.now();
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-     console.log("intercept: " + request.url);
 
     // wrap in delayed observable to simulate server api call
     return of(null).pipe(mergeMap(() => {
-      if (request.url.match("/\/books\/\d*$/")) {
-        var id = 0;
-        if (request.url.match("/\/books\/\d+$/")) {
-          let urlParts = request.url.split('/');
-          id = parseInt(urlParts[urlParts.length - 1]);
+      //console.log("intercept: " + request.method + " " + request.url);
+      if (request.url.startsWith("/systemInfo")) {
+        var now = Date.now();
+        let bookLastUpdatedTime = <number>this.systemInfo.bookLastUpdatedTime;
+        if (now - bookLastUpdatedTime >= 10*1000) {
+          this.systemInfo.bookLastUpdatedTime = now;
+          let bookIndex = Math.floor(Math.random() * this.books.length);
+          this.books[bookIndex].lastUpdatedTime = now;
+          this.books[bookIndex].currentPageNo = this.books[bookIndex].currentPageNo + 1;
+          this.books[bookIndex].status = Math.floor(Math.random() * 4) + 1;      
+          this.books[bookIndex].epubCreated = true;
+          let storedBooks = JSON.stringify(this.books);
+          localStorage.setItem('books', storedBooks);    
+          console.log("update book: " + this.books[bookIndex].title + "/" + this.books[bookIndex].status);
         }
-        let list: model.Book[] = [];
+        return of(new HttpResponse({ status: 200, body: this.systemInfo }));        
+      } else if (this.getRex.test(request.url)) {
+        let urlParts = request.url.split('/');
+        let id = parseInt(urlParts[urlParts.length - 1]);
+        var foundBook = null;
         for (let book of this.books) {
-          if (id == 0 || book.id == id) {
-            list.push(book);
+          if (book.id == id) {
+            foundBook = book;
+            break;
           }
         }
-        return of(new HttpResponse({ status: 200, body: JSON.stringify(list) }));
-      } else if (request.url.match("/\/book\/\s+$/") && request.method == 'POST') {
+        if (foundBook != null) {
+          return of(new HttpResponse({ status: 200, body: foundBook }));
+        } else {
+          return throwError({ error: { message: "Book " + id + " not found!" } });
+        }
+      } else if (this.listRex.test(request.url)) {
+        let urlParts = request.url.split('/');
+        let epochMS = Number(urlParts[urlParts.length - 1]);
+        let list = new model.BookList();
+        list.books = [];
+        for (let book of this.books) {
+          //console.log("parse book: " + book.title + ", lastUpdatedTime:" + <number>book.lastUpdatedTime); 
+          if (epochMS == 0 || <number>book.lastUpdatedTime >= epochMS) {
+            console.log("found updated book: " + book.title + " " 
+              + CommonUtils.convertEpoche2Date(book.lastUpdatedTime).toLocaleString());
+            list.books.push(book);
+          }
+        }
+        list.isFullList = (this.books.length == list.books.length);
+        return of(new HttpResponse({ status: 200, body: list }));
+      } else if (this.updateRex.test(request.url) && request.method == 'POST') {
+        let urlParts = request.url.split('/');
+        let cmd = urlParts[urlParts.length - 1];
+        console.log("'" + cmd + "' book");
       } else {
+        console.log("Cannot find page: " + request.url);
         // else return 400 bad request
          return throwError({ error: { message: 'Page not found!' } });
       }
@@ -73,6 +119,9 @@ export class FakeBackendInterceptor implements HttpInterceptor {
     book.currentPageUrl = startPageURL;
     book.currentPageNo = Math.floor(Math.random() * 100);
     book.status = Math.floor(Math.random() * 4) + 1;
+    book.lastUpdatedTime = Date.now();
+    book.deleted = false;
+    book.epubCreated = true;
     return book;
   }
 }

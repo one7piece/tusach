@@ -27,6 +27,7 @@ type EventSink struct {
 var bookMaker maker.BookMaker
 var users []model.User
 var books []model.Book
+var deletedBooks []model.Book
 
 //var scripts []maker.ParserScript
 
@@ -78,7 +79,8 @@ func main() {
 	rest.GET(false, "/filterlog/:numLines/:filterRegex", GetFilterLog)
 	rest.GET(false, "/systeminfo", GetSystemInfo)
 	rest.GET(false, "/sites", GetSites)
-	rest.GET(false, "/books/:id", GetBooks)
+	rest.GET(false, "/books/:timestamp", GetBooks)
+	rest.GET(false, "/book/:id", GetBook)
 	rest.GET(true, "/user", GetUser)
 	rest.POST("/book/:cmd", UpdateBook)
 
@@ -162,25 +164,48 @@ func GetUser(ctx *httprest.HttpContext) {
 	ctx.RespOK(ctx.User)
 }
 
-func GetBooks(ctx *httprest.HttpContext) {
+func GetBook(ctx *httprest.HttpContext) {
 	idstr := ctx.GetParam("id")
-	logger.Debugf("GetBooks - id:%s", idstr)
+	logger.Debugf("GetBook - id:%s", idstr)
+	id, err := strconv.ParseInt(idstr, 10, 32)
+	if err != nil {
+		ctx.RespERRString(http.StatusBadRequest, "Invalid book id: '"+idstr+"'")
+		return
+	}
+	result := model.Book{}
+	// find the book
+	for _, book := range books {
+		if book.Id == int32(id) {
+			result = book
+			break
+		}
+	}
+
+	ctx.RespOK(result)
+}
+
+func GetBooks(ctx *httprest.HttpContext) {
+	timestr := ctx.GetParam("timestamp")
+	timestamp, err := strconv.ParseInt(timestr, 10, 64)
+	if err != nil {
+		ctx.RespERRString(http.StatusBadRequest, "Invalid timestamp: '"+timestr+"'")
+		return
+	}
+	logger.Debugf("GetBooks - timestamp:%s", timestr)
+	systemInfo, err := bookMaker.DB.GetSystemInfo(false)
+	if err != nil {
+		ctx.RespERRString(http.StatusBadRequest, "Failed to get system info: "+err.Error())
+		return
+	}
+
 	result := []model.Book{}
-	if idstr == "0" {
+	if timestr == "0" || timestamp < systemInfo.SystemUpTime {
 		result = books
 	} else {
-		arr := strings.Split(idstr, ",")
-		for _, s := range arr {
-			id, err := strconv.Atoi(s)
-			if err != nil {
-				ctx.RespERRString(http.StatusBadRequest, "Invalid book.Id, value must be an integer.")
-				return
-			}
-			// find the book
-			for _, book := range books {
-				if int(book.Id) == id {
-					result = append(result, book)
-				}
+		// find the book
+		for _, book := range books {
+			if book.LastUpdatedTime > timestamp {
+				result = append(result, book)
 			}
 		}
 	}
@@ -268,6 +293,9 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		bookMaker.DB.DeleteBook(int(updateBook.Id))
 		for i := 0; i < len(books); i++ {
 			if books[i].Id == updateBook.Id {
+				books[i].LastUpdatedTime = util.UnixTimeNow()
+				books[i].Deleted = true
+				deletedBooks = append(deletedBooks, books[i])
 				newBooks = append(books[0:i], books[i+1:]...)
 				break
 			}
@@ -397,8 +425,6 @@ func loadData() {
 		os.Exit(1)
 	}
 
-	//now := time.Now()
-
 	// load configuration
 	util.LoadConfig(configFile)
 
@@ -406,6 +432,10 @@ func loadData() {
 
 	db := persistence.Ql{}
 	db.InitDB()
+	// init system info
+	now := util.UnixTimeNow()
+	db.SaveSystemInfo(model.SystemInfo{SystemUpTime: now, BookLastUpdatedTime: now})
+
 	bookMaker.DB = &db
 
 	// init users
@@ -434,6 +464,7 @@ func loadData() {
 	}
 	logger.Infof("users=%d", len(users))
 
+	deletedBooks = []model.Book{}
 	// load books
 	books, err = bookMaker.DB.LoadBooks()
 	if err != nil {

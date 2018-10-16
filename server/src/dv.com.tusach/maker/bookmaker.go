@@ -184,6 +184,36 @@ func (bookMaker BookMaker) SaveBook(book *model.Book) (int, error) {
 	book.LastUpdatedTime = util.UnixTimeNow()
 	id, err := bookMaker.DB.SaveBook(*book)
 	if err == nil {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Infof("Recover from panic: %s\n", err)
+				if id > 0 {
+					bookMaker.DB.DeleteBook(id)
+				}
+				retErr = util.ExtractError(err)
+				retId = 0
+			}
+		}()
+
+		// create book dir
+		dirPath := persistence.GetBookPath(id)
+		logger.Infof("Creating book dir: ", dirPath)
+		os.MkdirAll(dirPath, 0777)
+		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+			panic("Error creating directory: " + dirPath)
+		}
+		files, err := ioutil.ReadDir(util.GetEpubPath())
+		if err != nil {
+			panic("Error reading directory: " + util.GetEpubPath() + ". " + err.Error())
+		}
+		for _, file := range files {
+			cmd := exec.Command("cp", "-rf", util.GetEpubPath()+"/"+file.Name(), dirPath)
+			out, retErr := cmd.CombinedOutput()
+			if retErr != nil {
+				panic("Error copying epub template file: " + util.GetEpubPath() + "/" + file.Name() + ". " + string(out))
+			}
+		}
+
 		if book.Id <= 0 {
 			book.Id = int32(id)
 			logger.Infof("created book - %v", book)

@@ -23,7 +23,7 @@ export const model = $root.model = (() => {
          * @memberof model
          * @interface IUser
          * @property {string|null} [name] User name
-         * @property {Array.<string>|null} [roles] User roles
+         * @property {string|null} [roles] User roles
          */
 
         /**
@@ -35,7 +35,6 @@ export const model = $root.model = (() => {
          * @param {model.IUser=} [properties] Properties to set
          */
         function User(properties) {
-            this.roles = [];
             if (properties)
                 for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -52,11 +51,11 @@ export const model = $root.model = (() => {
 
         /**
          * User roles.
-         * @member {Array.<string>} roles
+         * @member {string} roles
          * @memberof model.User
          * @instance
          */
-        User.prototype.roles = $util.emptyArray;
+        User.prototype.roles = "";
 
         /**
          * Creates a new User instance using the specified properties.
@@ -84,9 +83,8 @@ export const model = $root.model = (() => {
                 writer = $Writer.create();
             if (message.name != null && message.hasOwnProperty("name"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
-            if (message.roles != null && message.roles.length)
-                for (let i = 0; i < message.roles.length; ++i)
-                    writer.uint32(/* id 2, wireType 2 =*/18).string(message.roles[i]);
+            if (message.roles != null && message.hasOwnProperty("roles"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.roles);
             return writer;
         };
 
@@ -125,9 +123,7 @@ export const model = $root.model = (() => {
                     message.name = reader.string();
                     break;
                 case 2:
-                    if (!(message.roles && message.roles.length))
-                        message.roles = [];
-                    message.roles.push(reader.string());
+                    message.roles = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -167,13 +163,9 @@ export const model = $root.model = (() => {
             if (message.name != null && message.hasOwnProperty("name"))
                 if (!$util.isString(message.name))
                     return "name: string expected";
-            if (message.roles != null && message.hasOwnProperty("roles")) {
-                if (!Array.isArray(message.roles))
-                    return "roles: array expected";
-                for (let i = 0; i < message.roles.length; ++i)
-                    if (!$util.isString(message.roles[i]))
-                        return "roles: string[] expected";
-            }
+            if (message.roles != null && message.hasOwnProperty("roles"))
+                if (!$util.isString(message.roles))
+                    return "roles: string expected";
             return null;
         };
 
@@ -191,13 +183,8 @@ export const model = $root.model = (() => {
             let message = new $root.model.User();
             if (object.name != null)
                 message.name = String(object.name);
-            if (object.roles) {
-                if (!Array.isArray(object.roles))
-                    throw TypeError(".model.User.roles: array expected");
-                message.roles = [];
-                for (let i = 0; i < object.roles.length; ++i)
-                    message.roles[i] = String(object.roles[i]);
-            }
+            if (object.roles != null)
+                message.roles = String(object.roles);
             return message;
         };
 
@@ -214,17 +201,14 @@ export const model = $root.model = (() => {
             if (!options)
                 options = {};
             let object = {};
-            if (options.arrays || options.defaults)
-                object.roles = [];
-            if (options.defaults)
+            if (options.defaults) {
                 object.name = "";
+                object.roles = "";
+            }
             if (message.name != null && message.hasOwnProperty("name"))
                 object.name = message.name;
-            if (message.roles && message.roles.length) {
-                object.roles = [];
-                for (let j = 0; j < message.roles.length; ++j)
-                    object.roles[j] = message.roles[j];
-            }
+            if (message.roles != null && message.hasOwnProperty("roles"))
+                object.roles = message.roles;
             return object;
         };
 
@@ -248,8 +232,8 @@ export const model = $root.model = (() => {
          * Properties of a SystemInfo.
          * @memberof model
          * @interface ISystemInfo
-         * @property {number|Long|null} [systemUpTime] SystemInfo systemUpTime
-         * @property {number|Long|null} [bookLastUpdatedTime] SystemInfo bookLastUpdatedTime
+         * @property {google.protobuf.ITimestamp|null} [systemUpTime] SystemInfo systemUpTime
+         * @property {google.protobuf.ITimestamp|null} [bookLastUpdatedTime] SystemInfo bookLastUpdatedTime
          */
 
         /**
@@ -269,19 +253,19 @@ export const model = $root.model = (() => {
 
         /**
          * SystemInfo systemUpTime.
-         * @member {number|Long} systemUpTime
+         * @member {google.protobuf.ITimestamp|null|undefined} systemUpTime
          * @memberof model.SystemInfo
          * @instance
          */
-        SystemInfo.prototype.systemUpTime = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+        SystemInfo.prototype.systemUpTime = null;
 
         /**
          * SystemInfo bookLastUpdatedTime.
-         * @member {number|Long} bookLastUpdatedTime
+         * @member {google.protobuf.ITimestamp|null|undefined} bookLastUpdatedTime
          * @memberof model.SystemInfo
          * @instance
          */
-        SystemInfo.prototype.bookLastUpdatedTime = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+        SystemInfo.prototype.bookLastUpdatedTime = null;
 
         /**
          * Creates a new SystemInfo instance using the specified properties.
@@ -308,9 +292,9 @@ export const model = $root.model = (() => {
             if (!writer)
                 writer = $Writer.create();
             if (message.systemUpTime != null && message.hasOwnProperty("systemUpTime"))
-                writer.uint32(/* id 1, wireType 0 =*/8).int64(message.systemUpTime);
+                $root.google.protobuf.Timestamp.encode(message.systemUpTime, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
             if (message.bookLastUpdatedTime != null && message.hasOwnProperty("bookLastUpdatedTime"))
-                writer.uint32(/* id 2, wireType 0 =*/16).int64(message.bookLastUpdatedTime);
+                $root.google.protobuf.Timestamp.encode(message.bookLastUpdatedTime, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
             return writer;
         };
 
@@ -346,10 +330,10 @@ export const model = $root.model = (() => {
                 let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
-                    message.systemUpTime = reader.int64();
+                    message.systemUpTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
                     break;
                 case 2:
-                    message.bookLastUpdatedTime = reader.int64();
+                    message.bookLastUpdatedTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -386,12 +370,16 @@ export const model = $root.model = (() => {
         SystemInfo.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
-            if (message.systemUpTime != null && message.hasOwnProperty("systemUpTime"))
-                if (!$util.isInteger(message.systemUpTime) && !(message.systemUpTime && $util.isInteger(message.systemUpTime.low) && $util.isInteger(message.systemUpTime.high)))
-                    return "systemUpTime: integer|Long expected";
-            if (message.bookLastUpdatedTime != null && message.hasOwnProperty("bookLastUpdatedTime"))
-                if (!$util.isInteger(message.bookLastUpdatedTime) && !(message.bookLastUpdatedTime && $util.isInteger(message.bookLastUpdatedTime.low) && $util.isInteger(message.bookLastUpdatedTime.high)))
-                    return "bookLastUpdatedTime: integer|Long expected";
+            if (message.systemUpTime != null && message.hasOwnProperty("systemUpTime")) {
+                let error = $root.google.protobuf.Timestamp.verify(message.systemUpTime);
+                if (error)
+                    return "systemUpTime." + error;
+            }
+            if (message.bookLastUpdatedTime != null && message.hasOwnProperty("bookLastUpdatedTime")) {
+                let error = $root.google.protobuf.Timestamp.verify(message.bookLastUpdatedTime);
+                if (error)
+                    return "bookLastUpdatedTime." + error;
+            }
             return null;
         };
 
@@ -407,24 +395,16 @@ export const model = $root.model = (() => {
             if (object instanceof $root.model.SystemInfo)
                 return object;
             let message = new $root.model.SystemInfo();
-            if (object.systemUpTime != null)
-                if ($util.Long)
-                    (message.systemUpTime = $util.Long.fromValue(object.systemUpTime)).unsigned = false;
-                else if (typeof object.systemUpTime === "string")
-                    message.systemUpTime = parseInt(object.systemUpTime, 10);
-                else if (typeof object.systemUpTime === "number")
-                    message.systemUpTime = object.systemUpTime;
-                else if (typeof object.systemUpTime === "object")
-                    message.systemUpTime = new $util.LongBits(object.systemUpTime.low >>> 0, object.systemUpTime.high >>> 0).toNumber();
-            if (object.bookLastUpdatedTime != null)
-                if ($util.Long)
-                    (message.bookLastUpdatedTime = $util.Long.fromValue(object.bookLastUpdatedTime)).unsigned = false;
-                else if (typeof object.bookLastUpdatedTime === "string")
-                    message.bookLastUpdatedTime = parseInt(object.bookLastUpdatedTime, 10);
-                else if (typeof object.bookLastUpdatedTime === "number")
-                    message.bookLastUpdatedTime = object.bookLastUpdatedTime;
-                else if (typeof object.bookLastUpdatedTime === "object")
-                    message.bookLastUpdatedTime = new $util.LongBits(object.bookLastUpdatedTime.low >>> 0, object.bookLastUpdatedTime.high >>> 0).toNumber();
+            if (object.systemUpTime != null) {
+                if (typeof object.systemUpTime !== "object")
+                    throw TypeError(".model.SystemInfo.systemUpTime: object expected");
+                message.systemUpTime = $root.google.protobuf.Timestamp.fromObject(object.systemUpTime);
+            }
+            if (object.bookLastUpdatedTime != null) {
+                if (typeof object.bookLastUpdatedTime !== "object")
+                    throw TypeError(".model.SystemInfo.bookLastUpdatedTime: object expected");
+                message.bookLastUpdatedTime = $root.google.protobuf.Timestamp.fromObject(object.bookLastUpdatedTime);
+            }
             return message;
         };
 
@@ -442,27 +422,13 @@ export const model = $root.model = (() => {
                 options = {};
             let object = {};
             if (options.defaults) {
-                if ($util.Long) {
-                    let long = new $util.Long(0, 0, false);
-                    object.systemUpTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                } else
-                    object.systemUpTime = options.longs === String ? "0" : 0;
-                if ($util.Long) {
-                    let long = new $util.Long(0, 0, false);
-                    object.bookLastUpdatedTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                } else
-                    object.bookLastUpdatedTime = options.longs === String ? "0" : 0;
+                object.systemUpTime = null;
+                object.bookLastUpdatedTime = null;
             }
             if (message.systemUpTime != null && message.hasOwnProperty("systemUpTime"))
-                if (typeof message.systemUpTime === "number")
-                    object.systemUpTime = options.longs === String ? String(message.systemUpTime) : message.systemUpTime;
-                else
-                    object.systemUpTime = options.longs === String ? $util.Long.prototype.toString.call(message.systemUpTime) : options.longs === Number ? new $util.LongBits(message.systemUpTime.low >>> 0, message.systemUpTime.high >>> 0).toNumber() : message.systemUpTime;
+                object.systemUpTime = $root.google.protobuf.Timestamp.toObject(message.systemUpTime, options);
             if (message.bookLastUpdatedTime != null && message.hasOwnProperty("bookLastUpdatedTime"))
-                if (typeof message.bookLastUpdatedTime === "number")
-                    object.bookLastUpdatedTime = options.longs === String ? String(message.bookLastUpdatedTime) : message.bookLastUpdatedTime;
-                else
-                    object.bookLastUpdatedTime = options.longs === String ? $util.Long.prototype.toString.call(message.bookLastUpdatedTime) : options.longs === Number ? new $util.LongBits(message.bookLastUpdatedTime.low >>> 0, message.bookLastUpdatedTime.high >>> 0).toNumber() : message.bookLastUpdatedTime;
+                object.bookLastUpdatedTime = $root.google.protobuf.Timestamp.toObject(message.bookLastUpdatedTime, options);
             return object;
         };
 
@@ -506,20 +472,21 @@ export const model = $root.model = (() => {
          * Properties of a Book.
          * @memberof model
          * @interface IBook
-         * @property {number|null} [id] Book id
+         * @property {number|null} [ID] Book ID
          * @property {model.BookStatusType|null} [status] Book status
          * @property {string|null} [title] Book title
          * @property {string|null} [author] Book author
-         * @property {number|Long|null} [createdTime] Book createdTime
+         * @property {google.protobuf.ITimestamp|null} [createdTime] Book createdTime
          * @property {string|null} [createdBy] Book createdBy
          * @property {number|null} [buildTimeSec] Book buildTimeSec
          * @property {string|null} [startPageUrl] Book startPageUrl
          * @property {string|null} [currentPageUrl] Book currentPageUrl
          * @property {number|null} [currentPageNo] Book currentPageNo
          * @property {number|null} [maxNumPages] Book maxNumPages
-         * @property {number|Long|null} [lastUpdatedTime] Book lastUpdatedTime
+         * @property {google.protobuf.ITimestamp|null} [lastUpdatedTime] Book lastUpdatedTime
          * @property {string|null} [errorMsg] Book errorMsg
          * @property {boolean|null} [epubCreated] Book epubCreated
+         * @property {boolean|null} [deleted] Book deleted
          */
 
         /**
@@ -538,12 +505,12 @@ export const model = $root.model = (() => {
         }
 
         /**
-         * Book id.
-         * @member {number} id
+         * Book ID.
+         * @member {number} ID
          * @memberof model.Book
          * @instance
          */
-        Book.prototype.id = 0;
+        Book.prototype.ID = 0;
 
         /**
          * Book status.
@@ -571,11 +538,11 @@ export const model = $root.model = (() => {
 
         /**
          * Book createdTime.
-         * @member {number|Long} createdTime
+         * @member {google.protobuf.ITimestamp|null|undefined} createdTime
          * @memberof model.Book
          * @instance
          */
-        Book.prototype.createdTime = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+        Book.prototype.createdTime = null;
 
         /**
          * Book createdBy.
@@ -627,11 +594,11 @@ export const model = $root.model = (() => {
 
         /**
          * Book lastUpdatedTime.
-         * @member {number|Long} lastUpdatedTime
+         * @member {google.protobuf.ITimestamp|null|undefined} lastUpdatedTime
          * @memberof model.Book
          * @instance
          */
-        Book.prototype.lastUpdatedTime = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+        Book.prototype.lastUpdatedTime = null;
 
         /**
          * Book errorMsg.
@@ -648,6 +615,14 @@ export const model = $root.model = (() => {
          * @instance
          */
         Book.prototype.epubCreated = false;
+
+        /**
+         * Book deleted.
+         * @member {boolean} deleted
+         * @memberof model.Book
+         * @instance
+         */
+        Book.prototype.deleted = false;
 
         /**
          * Creates a new Book instance using the specified properties.
@@ -673,8 +648,8 @@ export const model = $root.model = (() => {
         Book.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
-            if (message.id != null && message.hasOwnProperty("id"))
-                writer.uint32(/* id 1, wireType 0 =*/8).int32(message.id);
+            if (message.ID != null && message.hasOwnProperty("ID"))
+                writer.uint32(/* id 1, wireType 0 =*/8).int32(message.ID);
             if (message.status != null && message.hasOwnProperty("status"))
                 writer.uint32(/* id 2, wireType 0 =*/16).int32(message.status);
             if (message.title != null && message.hasOwnProperty("title"))
@@ -682,7 +657,7 @@ export const model = $root.model = (() => {
             if (message.author != null && message.hasOwnProperty("author"))
                 writer.uint32(/* id 4, wireType 2 =*/34).string(message.author);
             if (message.createdTime != null && message.hasOwnProperty("createdTime"))
-                writer.uint32(/* id 5, wireType 0 =*/40).int64(message.createdTime);
+                $root.google.protobuf.Timestamp.encode(message.createdTime, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
             if (message.createdBy != null && message.hasOwnProperty("createdBy"))
                 writer.uint32(/* id 6, wireType 2 =*/50).string(message.createdBy);
             if (message.buildTimeSec != null && message.hasOwnProperty("buildTimeSec"))
@@ -696,11 +671,13 @@ export const model = $root.model = (() => {
             if (message.maxNumPages != null && message.hasOwnProperty("maxNumPages"))
                 writer.uint32(/* id 11, wireType 0 =*/88).int32(message.maxNumPages);
             if (message.lastUpdatedTime != null && message.hasOwnProperty("lastUpdatedTime"))
-                writer.uint32(/* id 12, wireType 0 =*/96).int64(message.lastUpdatedTime);
+                $root.google.protobuf.Timestamp.encode(message.lastUpdatedTime, writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
             if (message.errorMsg != null && message.hasOwnProperty("errorMsg"))
                 writer.uint32(/* id 13, wireType 2 =*/106).string(message.errorMsg);
             if (message.epubCreated != null && message.hasOwnProperty("epubCreated"))
                 writer.uint32(/* id 14, wireType 0 =*/112).bool(message.epubCreated);
+            if (message.deleted != null && message.hasOwnProperty("deleted"))
+                writer.uint32(/* id 15, wireType 0 =*/120).bool(message.deleted);
             return writer;
         };
 
@@ -736,7 +713,7 @@ export const model = $root.model = (() => {
                 let tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
-                    message.id = reader.int32();
+                    message.ID = reader.int32();
                     break;
                 case 2:
                     message.status = reader.int32();
@@ -748,7 +725,7 @@ export const model = $root.model = (() => {
                     message.author = reader.string();
                     break;
                 case 5:
-                    message.createdTime = reader.int64();
+                    message.createdTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
                     break;
                 case 6:
                     message.createdBy = reader.string();
@@ -769,13 +746,16 @@ export const model = $root.model = (() => {
                     message.maxNumPages = reader.int32();
                     break;
                 case 12:
-                    message.lastUpdatedTime = reader.int64();
+                    message.lastUpdatedTime = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
                     break;
                 case 13:
                     message.errorMsg = reader.string();
                     break;
                 case 14:
                     message.epubCreated = reader.bool();
+                    break;
+                case 15:
+                    message.deleted = reader.bool();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -812,9 +792,9 @@ export const model = $root.model = (() => {
         Book.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
-            if (message.id != null && message.hasOwnProperty("id"))
-                if (!$util.isInteger(message.id))
-                    return "id: integer expected";
+            if (message.ID != null && message.hasOwnProperty("ID"))
+                if (!$util.isInteger(message.ID))
+                    return "ID: integer expected";
             if (message.status != null && message.hasOwnProperty("status"))
                 switch (message.status) {
                 default:
@@ -832,9 +812,11 @@ export const model = $root.model = (() => {
             if (message.author != null && message.hasOwnProperty("author"))
                 if (!$util.isString(message.author))
                     return "author: string expected";
-            if (message.createdTime != null && message.hasOwnProperty("createdTime"))
-                if (!$util.isInteger(message.createdTime) && !(message.createdTime && $util.isInteger(message.createdTime.low) && $util.isInteger(message.createdTime.high)))
-                    return "createdTime: integer|Long expected";
+            if (message.createdTime != null && message.hasOwnProperty("createdTime")) {
+                let error = $root.google.protobuf.Timestamp.verify(message.createdTime);
+                if (error)
+                    return "createdTime." + error;
+            }
             if (message.createdBy != null && message.hasOwnProperty("createdBy"))
                 if (!$util.isString(message.createdBy))
                     return "createdBy: string expected";
@@ -853,15 +835,20 @@ export const model = $root.model = (() => {
             if (message.maxNumPages != null && message.hasOwnProperty("maxNumPages"))
                 if (!$util.isInteger(message.maxNumPages))
                     return "maxNumPages: integer expected";
-            if (message.lastUpdatedTime != null && message.hasOwnProperty("lastUpdatedTime"))
-                if (!$util.isInteger(message.lastUpdatedTime) && !(message.lastUpdatedTime && $util.isInteger(message.lastUpdatedTime.low) && $util.isInteger(message.lastUpdatedTime.high)))
-                    return "lastUpdatedTime: integer|Long expected";
+            if (message.lastUpdatedTime != null && message.hasOwnProperty("lastUpdatedTime")) {
+                let error = $root.google.protobuf.Timestamp.verify(message.lastUpdatedTime);
+                if (error)
+                    return "lastUpdatedTime." + error;
+            }
             if (message.errorMsg != null && message.hasOwnProperty("errorMsg"))
                 if (!$util.isString(message.errorMsg))
                     return "errorMsg: string expected";
             if (message.epubCreated != null && message.hasOwnProperty("epubCreated"))
                 if (typeof message.epubCreated !== "boolean")
                     return "epubCreated: boolean expected";
+            if (message.deleted != null && message.hasOwnProperty("deleted"))
+                if (typeof message.deleted !== "boolean")
+                    return "deleted: boolean expected";
             return null;
         };
 
@@ -877,8 +864,8 @@ export const model = $root.model = (() => {
             if (object instanceof $root.model.Book)
                 return object;
             let message = new $root.model.Book();
-            if (object.id != null)
-                message.id = object.id | 0;
+            if (object.ID != null)
+                message.ID = object.ID | 0;
             switch (object.status) {
             case "NONE":
             case 0:
@@ -905,15 +892,11 @@ export const model = $root.model = (() => {
                 message.title = String(object.title);
             if (object.author != null)
                 message.author = String(object.author);
-            if (object.createdTime != null)
-                if ($util.Long)
-                    (message.createdTime = $util.Long.fromValue(object.createdTime)).unsigned = false;
-                else if (typeof object.createdTime === "string")
-                    message.createdTime = parseInt(object.createdTime, 10);
-                else if (typeof object.createdTime === "number")
-                    message.createdTime = object.createdTime;
-                else if (typeof object.createdTime === "object")
-                    message.createdTime = new $util.LongBits(object.createdTime.low >>> 0, object.createdTime.high >>> 0).toNumber();
+            if (object.createdTime != null) {
+                if (typeof object.createdTime !== "object")
+                    throw TypeError(".model.Book.createdTime: object expected");
+                message.createdTime = $root.google.protobuf.Timestamp.fromObject(object.createdTime);
+            }
             if (object.createdBy != null)
                 message.createdBy = String(object.createdBy);
             if (object.buildTimeSec != null)
@@ -926,19 +909,17 @@ export const model = $root.model = (() => {
                 message.currentPageNo = object.currentPageNo | 0;
             if (object.maxNumPages != null)
                 message.maxNumPages = object.maxNumPages | 0;
-            if (object.lastUpdatedTime != null)
-                if ($util.Long)
-                    (message.lastUpdatedTime = $util.Long.fromValue(object.lastUpdatedTime)).unsigned = false;
-                else if (typeof object.lastUpdatedTime === "string")
-                    message.lastUpdatedTime = parseInt(object.lastUpdatedTime, 10);
-                else if (typeof object.lastUpdatedTime === "number")
-                    message.lastUpdatedTime = object.lastUpdatedTime;
-                else if (typeof object.lastUpdatedTime === "object")
-                    message.lastUpdatedTime = new $util.LongBits(object.lastUpdatedTime.low >>> 0, object.lastUpdatedTime.high >>> 0).toNumber();
+            if (object.lastUpdatedTime != null) {
+                if (typeof object.lastUpdatedTime !== "object")
+                    throw TypeError(".model.Book.lastUpdatedTime: object expected");
+                message.lastUpdatedTime = $root.google.protobuf.Timestamp.fromObject(object.lastUpdatedTime);
+            }
             if (object.errorMsg != null)
                 message.errorMsg = String(object.errorMsg);
             if (object.epubCreated != null)
                 message.epubCreated = Boolean(object.epubCreated);
+            if (object.deleted != null)
+                message.deleted = Boolean(object.deleted);
             return message;
         };
 
@@ -956,31 +937,24 @@ export const model = $root.model = (() => {
                 options = {};
             let object = {};
             if (options.defaults) {
-                object.id = 0;
+                object.ID = 0;
                 object.status = options.enums === String ? "NONE" : 0;
                 object.title = "";
                 object.author = "";
-                if ($util.Long) {
-                    let long = new $util.Long(0, 0, false);
-                    object.createdTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                } else
-                    object.createdTime = options.longs === String ? "0" : 0;
+                object.createdTime = null;
                 object.createdBy = "";
                 object.buildTimeSec = 0;
                 object.startPageUrl = "";
                 object.currentPageUrl = "";
                 object.currentPageNo = 0;
                 object.maxNumPages = 0;
-                if ($util.Long) {
-                    let long = new $util.Long(0, 0, false);
-                    object.lastUpdatedTime = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                } else
-                    object.lastUpdatedTime = options.longs === String ? "0" : 0;
+                object.lastUpdatedTime = null;
                 object.errorMsg = "";
                 object.epubCreated = false;
+                object.deleted = false;
             }
-            if (message.id != null && message.hasOwnProperty("id"))
-                object.id = message.id;
+            if (message.ID != null && message.hasOwnProperty("ID"))
+                object.ID = message.ID;
             if (message.status != null && message.hasOwnProperty("status"))
                 object.status = options.enums === String ? $root.model.BookStatusType[message.status] : message.status;
             if (message.title != null && message.hasOwnProperty("title"))
@@ -988,10 +962,7 @@ export const model = $root.model = (() => {
             if (message.author != null && message.hasOwnProperty("author"))
                 object.author = message.author;
             if (message.createdTime != null && message.hasOwnProperty("createdTime"))
-                if (typeof message.createdTime === "number")
-                    object.createdTime = options.longs === String ? String(message.createdTime) : message.createdTime;
-                else
-                    object.createdTime = options.longs === String ? $util.Long.prototype.toString.call(message.createdTime) : options.longs === Number ? new $util.LongBits(message.createdTime.low >>> 0, message.createdTime.high >>> 0).toNumber() : message.createdTime;
+                object.createdTime = $root.google.protobuf.Timestamp.toObject(message.createdTime, options);
             if (message.createdBy != null && message.hasOwnProperty("createdBy"))
                 object.createdBy = message.createdBy;
             if (message.buildTimeSec != null && message.hasOwnProperty("buildTimeSec"))
@@ -1005,14 +976,13 @@ export const model = $root.model = (() => {
             if (message.maxNumPages != null && message.hasOwnProperty("maxNumPages"))
                 object.maxNumPages = message.maxNumPages;
             if (message.lastUpdatedTime != null && message.hasOwnProperty("lastUpdatedTime"))
-                if (typeof message.lastUpdatedTime === "number")
-                    object.lastUpdatedTime = options.longs === String ? String(message.lastUpdatedTime) : message.lastUpdatedTime;
-                else
-                    object.lastUpdatedTime = options.longs === String ? $util.Long.prototype.toString.call(message.lastUpdatedTime) : options.longs === Number ? new $util.LongBits(message.lastUpdatedTime.low >>> 0, message.lastUpdatedTime.high >>> 0).toNumber() : message.lastUpdatedTime;
+                object.lastUpdatedTime = $root.google.protobuf.Timestamp.toObject(message.lastUpdatedTime, options);
             if (message.errorMsg != null && message.hasOwnProperty("errorMsg"))
                 object.errorMsg = message.errorMsg;
             if (message.epubCreated != null && message.hasOwnProperty("epubCreated"))
                 object.epubCreated = message.epubCreated;
+            if (message.deleted != null && message.hasOwnProperty("deleted"))
+                object.deleted = message.deleted;
             return object;
         };
 
@@ -1037,6 +1007,7 @@ export const model = $root.model = (() => {
          * @memberof model
          * @interface IBookList
          * @property {Array.<model.IBook>|null} [books] BookList books
+         * @property {boolean|null} [isFullList] BookList isFullList
          */
 
         /**
@@ -1062,6 +1033,14 @@ export const model = $root.model = (() => {
          * @instance
          */
         BookList.prototype.books = $util.emptyArray;
+
+        /**
+         * BookList isFullList.
+         * @member {boolean} isFullList
+         * @memberof model.BookList
+         * @instance
+         */
+        BookList.prototype.isFullList = false;
 
         /**
          * Creates a new BookList instance using the specified properties.
@@ -1090,6 +1069,8 @@ export const model = $root.model = (() => {
             if (message.books != null && message.books.length)
                 for (let i = 0; i < message.books.length; ++i)
                     $root.model.Book.encode(message.books[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+            if (message.isFullList != null && message.hasOwnProperty("isFullList"))
+                writer.uint32(/* id 2, wireType 0 =*/16).bool(message.isFullList);
             return writer;
         };
 
@@ -1128,6 +1109,9 @@ export const model = $root.model = (() => {
                     if (!(message.books && message.books.length))
                         message.books = [];
                     message.books.push($root.model.Book.decode(reader, reader.uint32()));
+                    break;
+                case 2:
+                    message.isFullList = reader.bool();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -1173,6 +1157,9 @@ export const model = $root.model = (() => {
                         return "books." + error;
                 }
             }
+            if (message.isFullList != null && message.hasOwnProperty("isFullList"))
+                if (typeof message.isFullList !== "boolean")
+                    return "isFullList: boolean expected";
             return null;
         };
 
@@ -1198,6 +1185,8 @@ export const model = $root.model = (() => {
                     message.books[i] = $root.model.Book.fromObject(object.books[i]);
                 }
             }
+            if (object.isFullList != null)
+                message.isFullList = Boolean(object.isFullList);
             return message;
         };
 
@@ -1216,11 +1205,15 @@ export const model = $root.model = (() => {
             let object = {};
             if (options.arrays || options.defaults)
                 object.books = [];
+            if (options.defaults)
+                object.isFullList = false;
             if (message.books && message.books.length) {
                 object.books = [];
                 for (let j = 0; j < message.books.length; ++j)
                     object.books[j] = $root.model.Book.toObject(message.books[j], options);
             }
+            if (message.isFullList != null && message.hasOwnProperty("isFullList"))
+                object.isFullList = message.isFullList;
             return object;
         };
 
@@ -1943,6 +1936,254 @@ export const model = $root.model = (() => {
     })();
 
     return model;
+})();
+
+export const google = $root.google = (() => {
+
+    /**
+     * Namespace google.
+     * @exports google
+     * @namespace
+     */
+    const google = {};
+
+    google.protobuf = (function() {
+
+        /**
+         * Namespace protobuf.
+         * @memberof google
+         * @namespace
+         */
+        const protobuf = {};
+
+        protobuf.Timestamp = (function() {
+
+            /**
+             * Properties of a Timestamp.
+             * @memberof google.protobuf
+             * @interface ITimestamp
+             * @property {number|Long|null} [seconds] Timestamp seconds
+             * @property {number|null} [nanos] Timestamp nanos
+             */
+
+            /**
+             * Constructs a new Timestamp.
+             * @memberof google.protobuf
+             * @classdesc Represents a Timestamp.
+             * @implements ITimestamp
+             * @constructor
+             * @param {google.protobuf.ITimestamp=} [properties] Properties to set
+             */
+            function Timestamp(properties) {
+                if (properties)
+                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+
+            /**
+             * Timestamp seconds.
+             * @member {number|Long} seconds
+             * @memberof google.protobuf.Timestamp
+             * @instance
+             */
+            Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+            /**
+             * Timestamp nanos.
+             * @member {number} nanos
+             * @memberof google.protobuf.Timestamp
+             * @instance
+             */
+            Timestamp.prototype.nanos = 0;
+
+            /**
+             * Creates a new Timestamp instance using the specified properties.
+             * @function create
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {google.protobuf.ITimestamp=} [properties] Properties to set
+             * @returns {google.protobuf.Timestamp} Timestamp instance
+             */
+            Timestamp.create = function create(properties) {
+                return new Timestamp(properties);
+            };
+
+            /**
+             * Encodes the specified Timestamp message. Does not implicitly {@link google.protobuf.Timestamp.verify|verify} messages.
+             * @function encode
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {google.protobuf.ITimestamp} message Timestamp message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            Timestamp.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.seconds != null && message.hasOwnProperty("seconds"))
+                    writer.uint32(/* id 1, wireType 0 =*/8).int64(message.seconds);
+                if (message.nanos != null && message.hasOwnProperty("nanos"))
+                    writer.uint32(/* id 2, wireType 0 =*/16).int32(message.nanos);
+                return writer;
+            };
+
+            /**
+             * Encodes the specified Timestamp message, length delimited. Does not implicitly {@link google.protobuf.Timestamp.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {google.protobuf.ITimestamp} message Timestamp message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            Timestamp.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+
+            /**
+             * Decodes a Timestamp message from the specified reader or buffer.
+             * @function decode
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {google.protobuf.Timestamp} Timestamp
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            Timestamp.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.protobuf.Timestamp();
+                while (reader.pos < end) {
+                    let tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.seconds = reader.int64();
+                        break;
+                    case 2:
+                        message.nanos = reader.int32();
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+
+            /**
+             * Decodes a Timestamp message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {google.protobuf.Timestamp} Timestamp
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            Timestamp.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+
+            /**
+             * Verifies a Timestamp message.
+             * @function verify
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            Timestamp.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.seconds != null && message.hasOwnProperty("seconds"))
+                    if (!$util.isInteger(message.seconds) && !(message.seconds && $util.isInteger(message.seconds.low) && $util.isInteger(message.seconds.high)))
+                        return "seconds: integer|Long expected";
+                if (message.nanos != null && message.hasOwnProperty("nanos"))
+                    if (!$util.isInteger(message.nanos))
+                        return "nanos: integer expected";
+                return null;
+            };
+
+            /**
+             * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {google.protobuf.Timestamp} Timestamp
+             */
+            Timestamp.fromObject = function fromObject(object) {
+                if (object instanceof $root.google.protobuf.Timestamp)
+                    return object;
+                let message = new $root.google.protobuf.Timestamp();
+                if (object.seconds != null)
+                    if ($util.Long)
+                        (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                    else if (typeof object.seconds === "string")
+                        message.seconds = parseInt(object.seconds, 10);
+                    else if (typeof object.seconds === "number")
+                        message.seconds = object.seconds;
+                    else if (typeof object.seconds === "object")
+                        message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                if (object.nanos != null)
+                    message.nanos = object.nanos | 0;
+                return message;
+            };
+
+            /**
+             * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {google.protobuf.Timestamp} message Timestamp
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            Timestamp.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                let object = {};
+                if (options.defaults) {
+                    if ($util.Long) {
+                        let long = new $util.Long(0, 0, false);
+                        object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                    } else
+                        object.seconds = options.longs === String ? "0" : 0;
+                    object.nanos = 0;
+                }
+                if (message.seconds != null && message.hasOwnProperty("seconds"))
+                    if (typeof message.seconds === "number")
+                        object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                    else
+                        object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
+                if (message.nanos != null && message.hasOwnProperty("nanos"))
+                    object.nanos = message.nanos;
+                return object;
+            };
+
+            /**
+             * Converts this Timestamp to JSON.
+             * @function toJSON
+             * @memberof google.protobuf.Timestamp
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            Timestamp.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+
+            return Timestamp;
+        })();
+
+        return protobuf;
+    })();
+
+    return google;
 })();
 
 export { $root as default };

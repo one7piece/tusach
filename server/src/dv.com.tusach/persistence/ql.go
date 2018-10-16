@@ -3,13 +3,13 @@ package persistence
 import (
 	"database/sql"
 	"errors"
-	"io/ioutil"
 	"os"
-	"os/exec"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/golang/protobuf/ptypes"
 
 	"dv.com.tusach/logger"
 	"dv.com.tusach/model"
@@ -49,11 +49,6 @@ func (ql *Ql) InitDB() {
 	if err != nil {
 		panic(err)
 	}
-
-	// init system info
-	now := util.UnixTimeNow()
-	ql.info = model.SystemInfo{SystemUpTime: now, BookLastUpdatedTime: now}
-	ql.SaveSystemInfo(ql.info)
 }
 
 func (ql *Ql) CloseDB() {
@@ -72,6 +67,12 @@ func (ql *Ql) createTable(tableName string, tableType reflect.Type) error {
 			//logger.Infof("parsing field: %s:%s\n", field.Name, field.Type.Name())
 			var colType string
 			switch field.Type.Kind() {
+			case reflect.Int64:
+				colType = "int64"
+			case reflect.Int32:
+				colType = "int32"
+			case reflect.Int16:
+				colType = "int16"
 			case reflect.Int:
 				colType = "int"
 			case reflect.Bool:
@@ -126,7 +127,7 @@ func (ql *Ql) GetSystemInfo(forceReload bool) (model.SystemInfo, error) {
 }
 
 func (ql *Ql) SaveSystemInfo(info model.SystemInfo) {
-	//logger.Infof("save systemInfo=%v", info)
+	logger.Debugf("save systemInfo=%v", info)
 	records, err := ql.loadRecords(reflect.TypeOf(model.SystemInfo{}), "systeminfo", "", nil)
 	if err != nil {
 		logger.Errorf("Failed to load systeminfo", err)
@@ -143,6 +144,8 @@ func (ql *Ql) SaveSystemInfo(info model.SystemInfo) {
 		logger.Errorf("Failed to save systeminfo", err)
 		panic(err)
 	}
+	ql.info.SystemUpTime = info.SystemUpTime
+	ql.info.BookLastUpdatedTime = info.BookLastUpdatedTime
 }
 
 func (ql *Ql) LoadUsers() ([]model.User, error) {
@@ -214,33 +217,10 @@ func (ql *Ql) LoadBooks() ([]model.Book, error) {
 }
 
 func (ql *Ql) SaveBook(book model.Book) (retId int, retErr error) {
-
+	logger.Infof("Saving book: %v", book)
 	var newBookId = 0
-	defer func() {
-		if err := recover(); err != nil {
-			logger.Infof("Recover from panic: %s\n", err)
-			if newBookId > 0 {
-				ql.DeleteBook(newBookId)
-			}
-			retErr = util.ExtractError(err)
-			/*
-				// find out what exactly is err
-				switch x := err.(type) {
-				case string:
-					retErr = errors.New(x)
-				case error:
-					retErr = x
-				default:
-					retErr = errors.New("Unknow panic")
-				}
-			*/
-			retId = 0
-		}
-	}()
-
 	// TODO need locking here
-
-	if book.Id == 0 {
+	if book.ID == 0 {
 		rows, retErr := ql.db.Query("SELECT max(ID) FROM book")
 		if retErr != nil {
 			return 0, retErr
@@ -258,28 +238,8 @@ func (ql *Ql) SaveBook(book model.Book) (retId int, retErr error) {
 			newBookId = 1
 		}
 		// insert
-		book.Id = int32(newBookId)
+		book.ID = int32(newBookId)
 		retErr = ql.insertRecord("book", reflect.ValueOf(book))
-		if retErr == nil {
-			// create book dir
-			dirPath := GetBookPath(int(book.Id))
-			logger.Infof("Creating book dir: ", dirPath)
-			os.MkdirAll(dirPath, 0777)
-			if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-				panic("Error creating directory: " + dirPath)
-			}
-			files, err := ioutil.ReadDir(util.GetEpubPath())
-			if err != nil {
-				panic("Error reading directory: " + util.GetEpubPath() + ". " + err.Error())
-			}
-			for _, file := range files {
-				cmd := exec.Command("cp", "-rf", util.GetEpubPath()+"/"+file.Name(), dirPath)
-				out, retErr := cmd.CombinedOutput()
-				if retErr != nil {
-					panic("Error copying epub template file: " + util.GetEpubPath() + "/" + file.Name() + ". " + string(out))
-				}
-			}
-		}
 	} else {
 		// update
 		//args := []interface{}{book.ID}
@@ -289,7 +249,7 @@ func (ql *Ql) SaveBook(book model.Book) (retId int, retErr error) {
 	ql.info.BookLastUpdatedTime = book.LastUpdatedTime
 	ql.SaveSystemInfo(ql.info)
 
-	return int(book.Id), retErr
+	return int(book.ID), retErr
 }
 
 func (ql *Ql) DeleteBook(bookId int) error {
@@ -298,18 +258,18 @@ func (ql *Ql) DeleteBook(bookId int) error {
 
 	// delete all chapters of book
 	args := []interface{}{bookId}
-	err := ql.deleteRecords("chapter", "BookId=$1", args)
+	err := ql.deleteRecords("chapter", "BookId=int32($1)", args)
 	if err != nil {
 		return err
 	}
 
 	// remove book
-	err = ql.deleteRecords("book", "ID=$1", args)
+	err = ql.deleteRecords("book", "ID=int32($1)", args)
 
 	// remove files
 	err = os.RemoveAll(GetBookPath(bookId))
 
-	ql.info.BookLastUpdatedTime = util.UnixTimeNow()
+	ql.info.BookLastUpdatedTime = ptypes.TimestampNow()
 	ql.SaveSystemInfo(ql.info)
 
 	return err
@@ -417,7 +377,10 @@ func (ql *Ql) loadRecords(tableType reflect.Type, tableName string, whereStr str
 					colval = colValues[i]
 				}
 				//logger.Infof("scan col field: %s=%v\n", field.Name, colval)
-				v := db2field(field.Type, colval)
+				v, err := db2field(field.Name, field.Type, colval)
+				if err != nil {
+					return records, err
+				}
 				recordValue.FieldByName(field.Name).Set(reflect.ValueOf(v))
 			}
 		}
@@ -427,11 +390,7 @@ func (ql *Ql) loadRecords(tableType reflect.Type, tableName string, whereStr str
 }
 
 func (ql *Ql) insertRecord(tableName string, value reflect.Value) error {
-	tx, err := ql.db.Begin()
-	if err != nil {
-		logger.Errorf("failed to start transaction.", err)
-		return err
-	}
+	logger.Debugf("insertRecord: table:%s, value:%v", tableName, value)
 
 	nameStr := ""
 	valueStr := ""
@@ -446,11 +405,31 @@ func (ql *Ql) insertRecord(tableName string, value reflect.Value) error {
 			if len(valueStr) > 0 {
 				valueStr += ","
 			}
-			valueStr += "$" + strconv.Itoa(i+1)
-			v := field2db(value.Type().Field(i).Type, value.Field(i).Interface())
+			v, err := field2db(value.Type().Field(i).Name, value.Type().Field(i).Type, value.Field(i).Interface())
+			if err != nil {
+				logger.Errorf("failed to convert field value to db record.", err)
+				return err
+			}
+			valueStr += createParamVariableStr(v, i+1)
+			logger.Debugf("field %s -> value: %v (%s)", value.Type().Field(i).Name, v, reflect.TypeOf(v))
 			params = append(params, v)
 		}
 	}
+
+	tx, err := ql.db.Begin()
+	if err != nil {
+		logger.Errorf("failed to start transaction.", err)
+		return err
+	}
+	defer func() {
+		if err == nil {
+			logger.Info("insertRecord() - commiting transaction")
+			tx.Commit()
+		} else {
+			logger.Info("insertRecord() - rolling back transaction")
+			tx.Rollback()
+		}
+	}()
 
 	insertStr := "INSERT INTO " + tableName + "(" + nameStr + ") values(" + valueStr + ")"
 	logger.Debugf("executing insert: ", insertStr)
@@ -466,17 +445,26 @@ func (ql *Ql) insertRecord(tableName string, value reflect.Value) error {
 		logger.Errorf("failed to execute insert.", err)
 		return err
 	}
+	return err
+}
 
-	tx.Commit()
-	return nil
+func createParamVariableStr(pValue interface{}, pIndex int) string {
+	// driver only receive value of the following types: int64, float64, bool, string, []byte, time.Time
+	// need to explicit conversion for other types such as int, int32, int64 etc.
+	valueStr := "$" + strconv.Itoa(pIndex)
+	if reflect.TypeOf(pValue).Kind() == reflect.Int {
+		valueStr = "int($" + strconv.Itoa(pIndex) + ")"
+	} else if reflect.TypeOf(pValue).Kind() == reflect.Int16 {
+		valueStr = "int16($" + strconv.Itoa(pIndex) + ")"
+	} else if reflect.TypeOf(pValue).Kind() == reflect.Int32 {
+		valueStr = "int32($" + strconv.Itoa(pIndex) + ")"
+	}
+	return valueStr
 }
 
 func (ql *Ql) updateRecord(tableName string, value reflect.Value, filterFields []string) error {
-	tx, err := ql.db.Begin()
-	if err != nil {
-		logger.Errorf("failed to start transaction.", err)
-		return err
-	}
+	logger.Debugf("updateRecord table:%s, value:%v", tableName, value)
+
 	updateStr := "UPDATE " + tableName + " SET "
 	params := []interface{}{}
 	for i := 0; i < value.NumField(); i++ {
@@ -487,7 +475,10 @@ func (ql *Ql) updateRecord(tableName string, value reflect.Value, filterFields [
 			}
 			updateStr += value.Type().Field(i).Name + "=$" + strconv.Itoa(i+1)
 
-			v := field2db(value.Type().Field(i).Type, value.Field(i).Interface())
+			v, err := field2db(value.Type().Field(i).Name, value.Type().Field(i).Type, value.Field(i).Interface())
+			if err != nil {
+				return err
+			}
 			params = append(params, v)
 		}
 	}
@@ -501,8 +492,11 @@ func (ql *Ql) updateRecord(tableName string, value reflect.Value, filterFields [
 			if whereStr != "" {
 				whereStr += " AND "
 			}
-			whereStr += name + "=$" + strconv.Itoa(len(params)+1)
-			v := field2db(field.Type, value.FieldByName(name).Interface())
+			v, err := field2db(name, field.Type, value.FieldByName(name).Interface())
+			if err != nil {
+				return err
+			}
+			whereStr += name + "=" + createParamVariableStr(v, len(params)+1)
 			params = append(params, v)
 		}
 	}
@@ -511,7 +505,23 @@ func (ql *Ql) updateRecord(tableName string, value reflect.Value, filterFields [
 		updateStr += " WHERE " + whereStr
 	}
 
+	tx, err := ql.db.Begin()
+	if err != nil {
+		logger.Errorf("failed to start transaction.", err)
+		return err
+	}
+
 	logger.Debugf("executing update: ", updateStr)
+
+	defer func() {
+		if err == nil {
+			logger.Info("updateRecord() - commiting transaction")
+			tx.Commit()
+		} else {
+			logger.Info("updateRecord() - rolling back transaction")
+			tx.Rollback()
+		}
+	}()
 
 	pstmt, err := tx.Prepare(updateStr)
 	if err != nil {
@@ -526,7 +536,6 @@ func (ql *Ql) updateRecord(tableName string, value reflect.Value, filterFields [
 		return err
 	}
 
-	tx.Commit()
 	return nil
 }
 
@@ -540,6 +549,16 @@ func (ql *Ql) deleteRecords(tableName string, whereStr string, whereArgs []inter
 		logger.Errorf("failed to start transaction.", err)
 		return err
 	}
+
+	defer func() {
+		if err == nil {
+			logger.Info("deleteRecords() - commiting transaction")
+			tx.Commit()
+		} else {
+			logger.Info("deleteRecords() - rolling back transaction")
+			tx.Rollback()
+		}
+	}()
 
 	deleteStr := "DELETE FROM " + tableName
 	if whereStr != "all" {
@@ -560,6 +579,5 @@ func (ql *Ql) deleteRecords(tableName string, whereStr string, whereArgs []inter
 		return err
 	}
 
-	tx.Commit()
 	return nil
 }

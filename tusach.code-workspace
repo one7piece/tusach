@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "client"
+		},
+		{
+			"path": "C:\\dev\\PCP100\\dev\\bluetool"
 		}
 	],
 	"settings": {}

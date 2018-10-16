@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"dv.com.tusach/logger"
+	"github.com/golang/protobuf/ptypes"
+	tspb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
 func ExtractError(err interface{}) error {
@@ -69,4 +71,25 @@ func UnixTimeNow() int64 {
 
 func UnixTimeMS(t time.Time) int64 {
 	return t.UnixNano() / (int64(time.Millisecond) / int64(time.Nanosecond))
+}
+
+func ToTimestamp(str string) (*tspb.Timestamp, error) {
+	t, err := time.Parse(time.RFC3339, str)
+	if err != nil {
+		return nil, err
+	}
+	return ptypes.TimestampProto(t)
+}
+
+func FromTimestamp(t *tspb.Timestamp) string {
+	return ptypes.TimestampString(t)
+}
+
+func ToDateTime(str string) (time.Time, error) {
+	return time.Parse(time.RFC3339, str)
+}
+
+func FromDateTime(t time.Time) (string, error) {
+	buffer, err := t.MarshalText()
+	return string(buffer), err
 }

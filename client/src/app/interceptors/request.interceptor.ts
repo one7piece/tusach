@@ -12,7 +12,7 @@ export class RequestInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let now = Date.now();
     return next.handle(request).pipe(
-      tap((event: HttpEvent<any>) => {
+      tap(event => {
         if (event instanceof HttpResponse) {
           let msg = `${request.method} "${request.urlWithParams}" OK`;
           console.log(msg);
@@ -24,6 +24,13 @@ export class RequestInterceptor implements HttpInterceptor {
           console.log(msg);
           this.messages.add(msg);
         }
+      },
+      err => {
+        console.log(err);
+        // handle error        
+        let msg = `${request.method} "${request.urlWithParams}" ERROR: ${err.error.message}`;
+        console.log(msg);
+        this.messages.add(msg);
       })
     );
   }

@@ -2,14 +2,16 @@ syntax = "proto3";
 
 package model;
 
+import "google/protobuf/timestamp.proto";
+
 message User {
   string name = 1;
-  repeated string roles = 2;
+  string roles = 2;
 }
 
 message SystemInfo {
-  int64 systemUpTime = 1;
-  int64 bookLastUpdatedTime = 2;  
+  google.protobuf.Timestamp systemUpTime = 1;
+  google.protobuf.Timestamp bookLastUpdatedTime = 2;  
 }
 
 enum BookStatusType {
@@ -21,24 +23,26 @@ enum BookStatusType {
 }
 
 message Book {
-  int32 id = 1;
+  int32 ID = 1;
   BookStatusType status = 2;
   string title = 3;
   string author = 4;
-  int64 createdTime = 5; // Epoch time in MS
+  google.protobuf.Timestamp createdTime = 5; // Epoch time in MS
   string createdBy = 6;
   int32 buildTimeSec = 7;
   string startPageUrl = 8;
   string currentPageUrl = 9;
   int32 currentPageNo = 10;
   int32 maxNumPages = 11;
-  int64 lastUpdatedTime = 12;
+  google.protobuf.Timestamp lastUpdatedTime = 12;
   string errorMsg = 13;
   bool epubCreated = 14;
+  bool deleted = 15;
 }
 
 message BookList {
   repeated Book books = 1;
+  bool isFullList = 2;
 }
 
 message NewBookRequest {

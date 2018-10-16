@@ -1,9 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Location } from '@angular/common';
-import { util } from 'protobufjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { model } from '../../../typings';
+import { Long } from 'protobufjs';
 import { TusachService } from '../../services';
+import { CommonUtils, model } from '../../common.utils';
 
 @Component({
   selector: 'app-book-detail',
@@ -34,8 +34,8 @@ export class BookDetailComponent implements OnInit {
   getBookStatus() : string {
     var lastUpdatedTimeStr = "";
     if (this.book.lastUpdatedTime > 0) {
-      let bits = util.LongBits.from(this.book.lastUpdatedTime);
-      lastUpdatedTimeStr = new Date(bits.toNumber()).toLocaleString();
+      let ms = CommonUtils.convertEpoche2Date(<number>this.book.lastUpdatedTime);      
+      lastUpdatedTimeStr = new Date(ms).toLocaleString();
     }
     return this.book.status + " (" + this.book.currentPageNo + ") lastUpdated:" + lastUpdatedTimeStr;
   }
