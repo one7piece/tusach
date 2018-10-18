@@ -91,7 +91,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 		if book.CurrentPageUrl == url {
 			newChapterNo = book.CurrentPageNo
 		}
-		newChapter := model.Chapter{BookId: book.Id, ChapterNo: newChapterNo}
+		newChapter := model.Chapter{BookId: book.ID, ChapterNo: newChapterNo}
 		nextPageUrl, err := bookMaker.CreateChapter(engine, url, &newChapter)
 
 		if err != nil {
@@ -143,16 +143,16 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 		book.Status = model.BookStatusType_COMPLETED
 	}
 
-	chapters, err := bookMaker.DB.LoadChapters(int(book.Id))
+	chapters, err := bookMaker.DB.LoadChapters(int(book.ID))
 	if err != nil {
-		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.Id, err.Error())
+		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.ID, err.Error())
 		logger.Error(errorMsg)
 		book.ErrorMsg = errorMsg
 		book.Status = model.BookStatusType_ERROR
 	} else {
 		err = bookMaker.MakeEpub(*book, chapters)
 		if err != nil {
-			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.Id, err.Error())
+			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
 			logger.Error(errorMsg)
 			book.ErrorMsg = errorMsg
 			book.Status = model.BookStatusType_ERROR
@@ -180,8 +180,8 @@ func (bookMaker BookMaker) CreateChapter(engine *ScriptEngine, chapterUrl string
 	return nextChapterURL, nil
 }
 
-func (bookMaker BookMaker) SaveBook(book *model.Book) (int, error) {
-	book.LastUpdatedTime = util.UnixTimeNow()
+func (bookMaker BookMaker) SaveBook(book *model.Book) (retId int, retErr error) {
+	book.LastUpdatedTime = util.TimestampNow()
 	id, err := bookMaker.DB.SaveBook(*book)
 	if err == nil {
 		defer func() {
@@ -214,8 +214,8 @@ func (bookMaker BookMaker) SaveBook(book *model.Book) (int, error) {
 			}
 		}
 
-		if book.Id <= 0 {
-			book.Id = int32(id)
+		if book.ID <= 0 {
+			book.ID = int32(id)
 			logger.Infof("created book - %v", book)
 		} else {
 			logger.Infof("updated book - %v", book)
@@ -239,7 +239,7 @@ func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) e
 	}
 
 	// update toc.ncx file
-	tocFile := persistence.GetBookPath(int(book.Id)) + "/OEBPS/toc.ncx"
+	tocFile := persistence.GetBookPath(int(book.ID)) + "/OEBPS/toc.ncx"
 	data, err := ioutil.ReadFile(tocFile)
 	if err != nil {
 		return errors.New("Failed to open file: " + tocFile + ". " + err.Error())
@@ -277,7 +277,7 @@ func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) e
 	}
 
 	// update content.opf
-	contentFile := persistence.GetBookPath(int(book.Id)) + "/OEBPS/content.opf"
+	contentFile := persistence.GetBookPath(int(book.ID)) + "/OEBPS/content.opf"
 	data, err = ioutil.ReadFile(contentFile)
 	if err != nil {
 		return errors.New("Failed to open file: " + contentFile + ". " + err.Error())
@@ -330,7 +330,7 @@ func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) e
 	os.Remove(epubFile)
 
 	// zip the epub file
-	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, persistence.GetBookPath(int(book.Id)))
+	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, persistence.GetBookPath(int(book.ID)))
 	out, err := cmd.CombinedOutput()
 	str = string(out)
 	logger.Infof("epub command output: %s", str)

@@ -105,26 +105,26 @@ func main() {
 func downloadBook(w http.ResponseWriter, r *http.Request) {
 	bookId, err := strconv.Atoi(r.URL.Query().Get("bookId"))
 	if err != nil {
-		http.Error(w, "Invalid book.Id", http.StatusBadRequest)
+		http.Error(w, "Invalid book.ID", http.StatusBadRequest)
 		return
 	}
 
 	book := model.Book{}
 	// find the book
 	for _, b := range books {
-		if int(b.Id) == bookId {
+		if int(b.ID) == bookId {
 			book = b
 		}
 	}
-	if book.Id == 0 {
-		http.Error(w, "Invalid book.Id", http.StatusBadRequest)
+	if book.ID == 0 {
+		http.Error(w, "Invalid book.ID", http.StatusBadRequest)
 		return
 	}
 
 	epubFile := persistence.GetBookEpubFilename(book)
 	data, err := ioutil.ReadFile(epubFile)
 	if err != nil {
-		logger.Error("Failed to read epub file (bookId=" + strconv.Itoa(int(book.Id)) + "): " + err.Error())
+		logger.Error("Failed to read epub file (bookId=" + strconv.Itoa(int(book.ID)) + "): " + err.Error())
 		http.Error(w, "Failed to read epub file: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -175,7 +175,7 @@ func GetBook(ctx *httprest.HttpContext) {
 	result := model.Book{}
 	// find the book
 	for _, book := range books {
-		if book.Id == int32(id) {
+		if book.ID == int32(id) {
 			result = book
 			break
 		}
@@ -259,9 +259,9 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		return
 	}
 
-	currentBook, err := bookMaker.DB.LoadBook(int(updateBook.Id))
+	currentBook, err := bookMaker.DB.LoadBook(int(updateBook.ID))
 	if err != nil {
-		logger.Error("Error loading book: " + strconv.Itoa(int(updateBook.Id)) + ": " + err.Error())
+		logger.Error("Error loading book: " + strconv.Itoa(int(updateBook.ID)) + ": " + err.Error())
 		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -290,9 +290,9 @@ func UpdateBook(ctx *httprest.HttpContext) {
 
 	case "delete":
 		var newBooks []model.Book
-		bookMaker.DB.DeleteBook(int(updateBook.Id))
+		bookMaker.DB.DeleteBook(int(updateBook.ID))
 		for i := 0; i < len(books); i++ {
-			if books[i].Id == updateBook.Id {
+			if books[i].ID == updateBook.ID {
 				books[i].LastUpdatedTime = util.UnixTimeNow()
 				books[i].Deleted = true
 				deletedBooks = append(deletedBooks, books[i])
@@ -354,7 +354,7 @@ func CreateBook(ctx *httprest.HttpContext) {
 		ctx.RespERRString(http.StatusInternalServerError, err.Error())
 		return
 	}
-	newBook.Id = int32(bookId)
+	newBook.ID = int32(bookId)
 
 	// schedule goroutine to create book
 	doCreateBook(&newBook)
@@ -371,7 +371,7 @@ func (sink *EventSink) ProcessEvent(event util.EventData) {
 
 		found := false
 		for i := 0; i < len(books); i++ {
-			if books[i].Id == book.Id {
+			if books[i].ID == book.ID {
 				books[i] = *book
 				found = true
 				break
@@ -389,7 +389,7 @@ func reloadBook(bookId int) {
 		logger.Errorf("Error loading book: %d - %s\n", bookId, err.Error())
 	} else {
 		for i := 0; i < len(books); i++ {
-			if books[i].Id == updatedBook.Id {
+			if books[i].ID == updatedBook.ID {
 				books[i] = updatedBook
 				break
 			}

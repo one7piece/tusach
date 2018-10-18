@@ -73,6 +73,10 @@ func UnixTimeMS(t time.Time) int64 {
 	return t.UnixNano() / (int64(time.Millisecond) / int64(time.Nanosecond))
 }
 
+func TimestampNow() (*tspb.Timestamp) {
+	return ptypes.TimestampNow()
+}
+
 func ToTimestamp(str string) (*tspb.Timestamp, error) {
 	t, err := time.Parse(time.RFC3339, str)
 	if err != nil {

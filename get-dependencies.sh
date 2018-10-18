@@ -1,3 +1,4 @@
+#!/bin/bash
 # tusach dependencies
 # flags: -v (verbose) -insecure (http)
 go get -tags purego github.com/cznic/ql
