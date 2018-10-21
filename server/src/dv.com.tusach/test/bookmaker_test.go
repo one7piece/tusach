@@ -4,12 +4,12 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-	"time"
 
 	"dv.com.tusach/logger"
 	"dv.com.tusach/maker"
 	"dv.com.tusach/persistence"
 	"dv.com.tusach/util"
+	"dv.com.tusach/model"
 	_ "github.com/cznic/ql/driver"
 )
 
@@ -61,7 +61,7 @@ func (o *Bookmaker_Test) cleanup(t *testing.T) {
 
 func (sink *Bookmaker_Test) ProcessEvent(event util.EventData) {
 	logger.Infof("Received event: %s (%v)", event.Type, event.Data)
-	book, ok := event.Data.(*persistence.Book)
+	book, ok := event.Data.(*model.Book)
 	if ok {
 		logger.Infof("Received book event: %v", book)
 	}
@@ -69,20 +69,20 @@ func (sink *Bookmaker_Test) ProcessEvent(event util.EventData) {
 
 func (o *Bookmaker_Test) testCreateBook(t *testing.T) {
 	engine := o.createEngine(t)
-	newBook := persistence.Book{}
+	newBook := model.Book{}
 	newBook.Title = "Trach Thien Ky"
 	newBook.Author = "Mieu Ni"
 	newBook.CreatedBy = "Dung Van"
 	newBook.StartPageUrl = "http://truyencuatui.net/truyen/trach-thien-ky/quyen-i-dong-hoc-thieu-nien-chuong-1-ta-doi-y/317713.html"
 	newBook.MaxNumPages = 3
-	newBook.Status = persistence.STATUS_WORKING
-	newBook.CreatedTime = time.Now()
+	newBook.Status = model.BookStatusType_IN_PROGRESS
+	newBook.CreatedTime = util.TimestampNow()
 	bookId, err := o.bookMaker.DB.SaveBook(newBook)
 	if err != nil {
 		t.Errorf("Error saving book: %s", err.Error())
 		t.FailNow()
 	}
-	newBook.ID = bookId
+	newBook.ID = int32(bookId)
 	logger.Infof("created book ID: %d\n", newBook.ID)
 	o.bookMaker.CreateBook(engine, &newBook)
 }

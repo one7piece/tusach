@@ -65,19 +65,23 @@ func ListDir(root string, filesOnly bool) ([]string, error) {
 	return filenames, nil
 }
 
-func UnixTimeNow() int64 {
-	return UnixTimeMS(time.Now())
-}
-
-func UnixTimeMS(t time.Time) int64 {
-	return t.UnixNano() / (int64(time.Millisecond) / int64(time.Nanosecond))
-}
-
 func TimestampNow() (*tspb.Timestamp) {
 	return ptypes.TimestampNow()
 }
 
-func ToTimestamp(str string) (*tspb.Timestamp, error) {
+func UnixTimeNow() int64 {
+	return Time2UnixTime(time.Now())
+}
+
+func Timestamp2UnixTime(t *tspb.Timestamp) int64 {
+	return int64(t.GetNanos()/1000000)
+}
+
+func Time2UnixTime(t time.Time) int64 {
+	return t.UnixNano() / (int64(time.Millisecond) / int64(time.Nanosecond))
+}
+
+func String2Timestamp(str string) (*tspb.Timestamp, error) {
 	t, err := time.Parse(time.RFC3339, str)
 	if err != nil {
 		return nil, err
@@ -85,15 +89,15 @@ func ToTimestamp(str string) (*tspb.Timestamp, error) {
 	return ptypes.TimestampProto(t)
 }
 
-func FromTimestamp(t *tspb.Timestamp) string {
+func Timestamp2String(t *tspb.Timestamp) string {
 	return ptypes.TimestampString(t)
 }
 
-func ToDateTime(str string) (time.Time, error) {
+func String2Time(str string) (time.Time, error) {
 	return time.Parse(time.RFC3339, str)
 }
 
-func FromDateTime(t time.Time) (string, error) {
+func Time2String(t time.Time) (string, error) {
 	buffer, err := t.MarshalText()
 	return string(buffer), err
 }

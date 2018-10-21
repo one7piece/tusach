@@ -49,7 +49,7 @@ func (h LoginHandler) GetRoles(username string) []string {
 	roles := []string{}
 	for _, u := range users {
 		if u.Name == username {
-			roles = u.Roles
+			roles = strings.Split(u.Roles, ",")
 			break
 		}
 	}
@@ -198,13 +198,14 @@ func GetBooks(ctx *httprest.HttpContext) {
 		return
 	}
 
+
 	result := []model.Book{}
-	if timestr == "0" || timestamp < systemInfo.SystemUpTime {
+	if timestr == "0" || timestamp < util.Timestamp2UnixTime(systemInfo.SystemUpTime) {
 		result = books
 	} else {
 		// find the book
 		for _, book := range books {
-			if book.LastUpdatedTime > timestamp {
+			if util.Timestamp2UnixTime(book.LastUpdatedTime) > timestamp {
 				result = append(result, book)
 			}
 		}
@@ -293,7 +294,7 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		bookMaker.DB.DeleteBook(int(updateBook.ID))
 		for i := 0; i < len(books); i++ {
 			if books[i].ID == updateBook.ID {
-				books[i].LastUpdatedTime = util.UnixTimeNow()
+				books[i].LastUpdatedTime = util.TimestampNow()
 				books[i].Deleted = true
 				deletedBooks = append(deletedBooks, books[i])
 				newBooks = append(books[0:i], books[i+1:]...)
@@ -347,7 +348,7 @@ func CreateBook(ctx *httprest.HttpContext) {
 	}
 
 	newBook.Status = model.BookStatusType_IN_PROGRESS
-	newBook.CreatedTime = util.UnixTimeNow()
+	newBook.CreatedTime = util.TimestampNow()
 	bookId, err := bookMaker.SaveBook(&newBook)
 	if err != nil {
 		logger.Error("Failed to save book: " + err.Error())
@@ -433,7 +434,7 @@ func loadData() {
 	db := persistence.Ql{}
 	db.InitDB()
 	// init system info
-	now := util.UnixTimeNow()
+	now := util.TimestampNow()
 	db.SaveSystemInfo(model.SystemInfo{SystemUpTime: now, BookLastUpdatedTime: now})
 
 	bookMaker.DB = &db
@@ -445,17 +446,17 @@ func loadData() {
 		panic("Error loading users! " + err.Error())
 	}
 	if len(users) != 3 {
-		adminUser := model.User{Name: "admin", Roles: []string{"administrator"}}
+		adminUser := model.User{Name: "admin", Roles: "administrator"}
 		err = bookMaker.DB.SaveUser(adminUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		dadUser := model.User{Name: "vinhvan", Roles: []string{"user"}}
+		dadUser := model.User{Name: "vinhvan", Roles: "user"}
 		err = bookMaker.DB.SaveUser(dadUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())
 		}
-		guestUser := model.User{Name: "guest", Roles: []string{"user"}}
+		guestUser := model.User{Name: "guest", Roles: "user"}
 		err = bookMaker.DB.SaveUser(guestUser)
 		if err != nil {
 			panic("Error saving user! " + err.Error())

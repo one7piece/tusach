@@ -60,9 +60,9 @@ func field2db(fieldName string, fieldType reflect.Type, fieldValue interface{}) 
 	var result interface{}
 	var err error
 	if fieldType == reflect.TypeOf(time.Time{}) {
-		result, _ = util.FromDateTime(fieldValue.(time.Time))
+		result, _ = util.Time2String(fieldValue.(time.Time))
 	} else if fieldType == reflect.TypeOf(&tspb.Timestamp{}) {
-		result = util.FromTimestamp(fieldValue.(*tspb.Timestamp))
+		result = util.Timestamp2String(fieldValue.(*tspb.Timestamp))
 	} else if fieldType == reflect.TypeOf(model.BookStatusType_NONE) {
 		result = fieldValue.(model.BookStatusType)
 	} else if fieldType.Kind() == reflect.Int64 {
@@ -93,9 +93,9 @@ func db2field(fieldName string, fieldType reflect.Type, dbValue interface{}) (in
 	var err error
 	var num int64
 	if fieldType == reflect.TypeOf(time.Time{}) {
-		result, _ = util.ToDateTime(dbValue.(string))
+		result, _ = util.String2Time(dbValue.(string))
 	} else if fieldType == reflect.TypeOf(&tspb.Timestamp{}) {
-		result, _ = util.ToTimestamp(dbValue.(string))
+		result, _ = util.String2Timestamp(dbValue.(string))
 	} else if fieldType == reflect.TypeOf(model.BookStatusType_NONE) {
 		num = dbValue.(int64)
 		result = model.BookStatusType(num)
