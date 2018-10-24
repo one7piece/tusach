@@ -27,7 +27,6 @@ type EventSink struct {
 var bookMaker maker.BookMaker
 var users []model.User
 var books []model.Book
-var deletedBooks []model.Book
 
 //var scripts []maker.ParserScript
 
@@ -198,7 +197,6 @@ func GetBooks(ctx *httprest.HttpContext) {
 		return
 	}
 
-
 	result := []model.Book{}
 	if timestr == "0" || timestamp < util.Timestamp2UnixTime(systemInfo.SystemUpTime) {
 		result = books
@@ -290,18 +288,14 @@ func UpdateBook(ctx *httprest.HttpContext) {
 		doCreateBook(&currentBook)
 
 	case "delete":
-		var newBooks []model.Book
 		bookMaker.DB.DeleteBook(int(updateBook.ID))
 		for i := 0; i < len(books); i++ {
 			if books[i].ID == updateBook.ID {
 				books[i].LastUpdatedTime = util.TimestampNow()
 				books[i].Deleted = true
-				deletedBooks = append(deletedBooks, books[i])
-				newBooks = append(books[0:i], books[i+1:]...)
 				break
 			}
 		}
-		books = newBooks
 	}
 
 	message := "OK"
@@ -465,7 +459,6 @@ func loadData() {
 	}
 	logger.Infof("users=%d", len(users))
 
-	deletedBooks = []model.Book{}
 	// load books
 	books, err = bookMaker.DB.LoadBooks()
 	if err != nil {

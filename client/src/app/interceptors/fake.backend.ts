@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpRequest, HttpResponse, HttpErrorResponse, HttpHandler, HttpEvent, HttpInterceptor, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, mergeMap, materialize, dematerialize } from 'rxjs/operators';
-import { Long } from 'protobufjs';
-import { CommonUtils, model } from '../common.utils';
+import { CommonUtils, model, google, Long } from '../common.utils';
 
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
@@ -38,21 +37,21 @@ export class FakeBackendInterceptor implements HttpInterceptor {
       this.books = JSON.parse(storedBooks);
       console.log("loaded " + this.books.length + " books from local storage");
     }
-    this.systemInfo.bookLastUpdatedTime = Date.now();
+    this.systemInfo.bookLastUpdatedTime = CommonUtils.convertEpoch2Timestamp(Date.now());
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
     // wrap in delayed observable to simulate server api call
     return of(null).pipe(mergeMap(() => {
-      //console.log("intercept: " + request.method + " " + request.url);
-      if (request.url.startsWith("/systemInfo")) {
+      console.log("intercept: " + request.method + " " + request.url);
+      if (request.url.startsWith("/tusach/systemInfo")) {
         var now = Date.now();
         let bookLastUpdatedTime = <number>this.systemInfo.bookLastUpdatedTime;
         if (now - bookLastUpdatedTime >= 10*1000) {
-          this.systemInfo.bookLastUpdatedTime = now;
+          this.systemInfo.bookLastUpdatedTime = CommonUtils.convertEpoch2Timestamp(now);
           let bookIndex = Math.floor(Math.random() * this.books.length);
-          this.books[bookIndex].lastUpdatedTime = now;
+          this.books[bookIndex].lastUpdatedTime = CommonUtils.convertEpoch2Timestamp(now);
           this.books[bookIndex].currentPageNo = this.books[bookIndex].currentPageNo + 1;
           this.books[bookIndex].status = Math.floor(Math.random() * 4) + 1;      
           this.books[bookIndex].epubCreated = true;
@@ -66,13 +65,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         let id = parseInt(urlParts[urlParts.length - 1]);
         var foundBook = null;
         for (let book of this.books) {
-          if (book.id == id) {
+          if (book.ID == id) {
             foundBook = book;
             break;
           }
         }
         if (foundBook != null) {
-          return of(new HttpResponse({ status: 200, body: foundBook }));
+          console.log("found book: " + foundBook.ID + "." + foundBook.title + " " 
+            + CommonUtils.convertEpoch2Date(foundBook.lastUpdatedTime).toLocaleString());
+        return of(new HttpResponse({ status: 200, body: foundBook }));
         } else {
           return throwError({ error: { message: "Book " + id + " not found!" } });
         }
@@ -83,9 +84,10 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         list.books = [];
         for (let book of this.books) {
           //console.log("parse book: " + book.title + ", lastUpdatedTime:" + <number>book.lastUpdatedTime); 
-          if (epochMS == 0 || <number>book.lastUpdatedTime >= epochMS) {
-            console.log("found updated book: " + book.title + " " 
-              + CommonUtils.convertEpoche2Date(book.lastUpdatedTime).toLocaleString());
+          var lastUpdatedTime = CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime);
+          if (epochMS == 0 || lastUpdatedTime > epochMS) {
+            console.log("found updated book: " + book.ID + "." + book.title + " " 
+              + CommonUtils.convertEpoch2Date(lastUpdatedTime).toLocaleString());
             list.books.push(book);
           }
         }
@@ -113,13 +115,14 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
   createBook(id: number, title: string, startPageURL: string) : model.Book {
     var book = new model.Book();
-    book.id = id;
+    book.ID = id;
     book.title = title;
     book.startPageUrl = startPageURL;
     book.currentPageUrl = startPageURL;
     book.currentPageNo = Math.floor(Math.random() * 100);
     book.status = Math.floor(Math.random() * 4) + 1;
-    book.lastUpdatedTime = Date.now();
+    book.lastUpdatedTime = new google.protobuf.Timestamp();
+    book.lastUpdatedTime = CommonUtils.convertEpoch2Timestamp(Date.now());
     book.deleted = false;
     book.epubCreated = true;
     return book;

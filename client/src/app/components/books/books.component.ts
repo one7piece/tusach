@@ -56,13 +56,13 @@ export class BooksComponent implements OnInit {
     } else {
       for (var i=0; i<list.books.length; i++) {
         let book = list.books[i];
-        let index = this.findBookIndex(book.id);
+        let index = this.findBookIndex(book.ID);
         if (index != -1) {
           if (book.deleted) {
-            console.log("found deleted book: " + book.id + " - " + book.title + " (" + book.status + ") #pages=" +  book.currentPageNo);
+            console.log("found deleted book: " + book.ID + " - " + book.title + " (" + book.status + ") #pages=" +  book.currentPageNo);
             this.books.splice(index, 1);
           } else {
-            console.log("found updated book " + book.id + ". " + book.title 
+            console.log("found updated book " + book.ID + ". " + book.title 
               +  " oldStatus(" + this.books[index].status + ") newStatus(" + book.status + ") #pages=" +  book.currentPageNo);
             if (this.books[index].status != book.status) {
               sortPending = true;
@@ -73,7 +73,7 @@ export class BooksComponent implements OnInit {
           // new book
           this.books.push(book);
           sortPending = true;
-          console.log("found new book: " + book.id + " - " + book.title + " (" + book.status + ") #pages=" +  book.currentPageNo);
+          console.log("found new book: " + book.ID + " - " + book.title + " (" + book.status + ") #pages=" +  book.currentPageNo);
         }
       }
     }
@@ -98,7 +98,7 @@ export class BooksComponent implements OnInit {
 
   findBookIndex(id: number) : number {
     for (var i=0; i<this.books.length; i++) {
-      if (this.books[i].id == id) {
+      if (this.books[i].ID == id) {
         return i;
       }
     }

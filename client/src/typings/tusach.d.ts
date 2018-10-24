@@ -1,6 +1,6 @@
-import { Long } from "protobufjs/minimal"; 
-import * as $protobuf from "protobufjs/minimal"; 
+import { Long } from "protobufjs/minimal";
 import * as $protobuf from "protobufjs";
+
 /** Namespace model. */
 export namespace model {
 

@@ -7,9 +7,9 @@ import (
 
 	"dv.com.tusach/logger"
 	"dv.com.tusach/maker"
+	"dv.com.tusach/model"
 	"dv.com.tusach/persistence"
 	"dv.com.tusach/util"
-	"dv.com.tusach/model"
 	_ "github.com/cznic/ql/driver"
 )
 
@@ -84,7 +84,11 @@ func (o *Bookmaker_Test) testCreateBook(t *testing.T) {
 	}
 	newBook.ID = int32(bookId)
 	logger.Infof("created book ID: %d\n", newBook.ID)
-	o.bookMaker.CreateBook(engine, &newBook)
+	err = o.bookMaker.CreateBook(engine, &newBook)
+	if err != nil {
+		t.Errorf("Error creating book: %s", err.Error())
+		t.FailNow()
+	}
 }
 
 func (o *Bookmaker_Test) createEngine(t *testing.T) *maker.ScriptEngine {

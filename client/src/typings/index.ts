@@ -1,1 +1,1 @@
-export { model } from './tusach';
+export { model, google } from './tusach';

@@ -473,12 +473,13 @@ func (ql *Ql) updateRecord(tableName string, value reflect.Value, filterFields [
 			if i > 0 {
 				updateStr += ","
 			}
-			updateStr += value.Type().Field(i).Name + "=$" + strconv.Itoa(i+1)
+			//updateStr += value.Type().Field(i).Name + "=$" + strconv.Itoa(i+1)
 
 			v, err := field2db(value.Type().Field(i).Name, value.Type().Field(i).Type, value.Field(i).Interface())
 			if err != nil {
 				return err
 			}
+			updateStr += value.Type().Field(i).Name + "=" + createParamVariableStr(v, i+1)
 			params = append(params, v)
 		}
 	}

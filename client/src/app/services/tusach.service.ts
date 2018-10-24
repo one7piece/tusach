@@ -3,9 +3,8 @@ import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ModuleWithComponentFactories } from '@angular/compiler/src/jit/compiler';
-import { util } from 'protobufjs';
-import { model } from '../../typings';
 import { MessageService } from './message.service';
+import { CommonUtils, model, google, Long } from '../common.utils';
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -23,13 +22,12 @@ export class TusachService {
   private tusachUrl = '/tusach/';
   private listeners : IBookListener[] = [];
   private interval;
-  private systemInfo : model.SystemInfo;
+  private bookLastUpdatedTime : number = 0;
   
   constructor(
     private http: HttpClient, 
     private messageService: MessageService) {
 
-    this.systemInfo = new model.SystemInfo();
     this.interval = setInterval(() => {
       if (this.listeners.length > 0) {
         this.pollForChanges();
@@ -57,25 +55,17 @@ export class TusachService {
   }
   
   pollForChanges() {
-    const url = this.tusachUrl + "systemInfo/";
-    let info = this.http.get<model.SystemInfo>(url);
-    info.subscribe(info => {
-      //this.log("systemInf bookLastUpdatedTime:" + new Date(<number>info.bookLastUpdatedTime).toLocaleString());
-      if (<number>this.systemInfo.bookLastUpdatedTime == 0) {
-        this.systemInfo.bookLastUpdatedTime = info.bookLastUpdatedTime;
-      } else if (<number>info.bookLastUpdatedTime != <number>this.systemInfo.bookLastUpdatedTime) {
-        this.systemInfo.bookLastUpdatedTime = info.bookLastUpdatedTime;
-        // call server to load the changed books
-        //this.log("system last update time changed: " 
-        //  + new Date(<number>info.bookLastUpdatedTime).toLocaleString());
-        const url = this.tusachUrl + "books/" + String(this.systemInfo.bookLastUpdatedTime);
-        //this.log("getBooks() - " + url);
-        this.http.get<model.BookList>(url).subscribe(bookList => {
-          this.log("number of updated books: " + bookList.books.length + ", isFullList: " + bookList.isFullList);
-          for (var i=0; i<this.listeners.length; i++) {
-            this.listeners[i].booksUpdated(bookList);
-          }
-        });
+    const url = this.tusachUrl + "books/" + String(this.bookLastUpdatedTime);
+    this.http.get<model.BookList>(url).subscribe(bookList => {
+      this.log("number of updated books: " + bookList.books.length + ", isFullList: " + bookList.isFullList);
+      // get the latest time
+      for (let book of bookList.books) {
+        if (CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime) > this.bookLastUpdatedTime) {
+          this.bookLastUpdatedTime = CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime);
+        }
+      }
+      for (var i=0; i<this.listeners.length; i++) {
+        this.listeners[i].booksUpdated(bookList);
       }
     });
   }

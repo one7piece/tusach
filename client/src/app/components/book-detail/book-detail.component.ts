@@ -33,8 +33,8 @@ export class BookDetailComponent implements OnInit {
 
   getBookStatus() : string {
     var lastUpdatedTimeStr = "";
-    if (this.book.lastUpdatedTime > 0) {
-      let ms = CommonUtils.convertEpoche2Date(<number>this.book.lastUpdatedTime);      
+    if (this.book.lastUpdatedTime != undefined && this.book.lastUpdatedTime != null) {
+      let ms = CommonUtils.convertTimestamp2Epoch(this.book.lastUpdatedTime);      
       lastUpdatedTimeStr = new Date(ms).toLocaleString();
     }
     return this.book.status + " (" + this.book.currentPageNo + ") lastUpdated:" + lastUpdatedTimeStr;

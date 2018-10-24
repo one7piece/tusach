@@ -95,8 +95,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 		nextPageUrl, err := bookMaker.CreateChapter(engine, url, &newChapter)
 
 		if err != nil {
-			errorMsg = err.Error()
-			logger.Error(errorMsg)
+			errorMsg = "Failed to create chapter. " + err.Error()
 			break
 		}
 
@@ -108,8 +107,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 		// save the chapter
 		err = bookMaker.DB.SaveChapter(newChapter)
 		if err != nil {
-			errorMsg = err.Error()
-			logger.Error("Error saving chapter. " + errorMsg)
+			errorMsg = "Error saving chapter. " + err.Error()
 			break
 		}
 		book.CurrentPageNo = newChapterNo
@@ -163,6 +161,9 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 	}
 
 	bookMaker.SaveBook(book)
+	if err == nil && errorMsg != "" {
+		err = errors.New(errorMsg)
+	}
 	return err
 }
 
