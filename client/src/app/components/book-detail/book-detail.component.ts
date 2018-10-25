@@ -19,7 +19,7 @@ export class BookDetailComponent implements OnInit {
     private tusachService: TusachService,
     private location: Location) {
     console.log("constructor()");
-    //this.book = new model.Book();
+    this.book = new model.Book();
   }
 
   ngOnInit() {
