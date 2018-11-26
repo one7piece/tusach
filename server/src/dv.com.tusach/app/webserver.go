@@ -75,20 +75,19 @@ func main() {
 	*/
 	rest.LOGON("/login", Login)
 	//rest.LOGOUT("/logout")
-	rest.GET(false, "/filterlog/:numLines/:filterRegex", GetFilterLog)
-	rest.GET(false, "/systeminfo", GetSystemInfo)
-	rest.GET(false, "/sites", GetSites)
-	rest.GET(false, "/books/:timestamp", GetBooks)
-	rest.GET(false, "/book/:id", GetBook)
+	rest.GET(false, "/tusach/filterlog/:numLines/:filterRegex", GetFilterLog)
+	rest.GET(false, "/tusach/sites", GetSites)
+	rest.GET(false, "/tusach/book/list/:timestamp", GetBooks)
+	rest.GET(false, "/tusach/book/get/:id", GetBook)
+	rest.POST("/tusach/book/command/:cmd", UpdateBook)
 	rest.GET(true, "/user", GetUser)
-	rest.POST("/book/:cmd", UpdateBook)
-
+	
 	// TODO handle CORS
 
 	// api handler
 	http.Handle("/api/", http.StripPrefix("/api", rest.Router))
 	// download file handler
-	http.HandleFunc("/downloadBook/", downloadBook)
+	http.HandleFunc("/tusach/download/", downloadBook)
 	// static file handler
 	http.Handle("/", http.FileServer(http.Dir(util.GetConfiguration().ServerPath)))
 
@@ -197,19 +196,25 @@ func GetBooks(ctx *httprest.HttpContext) {
 		return
 	}
 
-	result := []model.Book{}
+	bookList := model.BookList{}
 	if timestr == "0" || timestamp < util.Timestamp2UnixTime(systemInfo.SystemUpTime) {
-		result = books
+		bookList.IsFullList = true
+		bookList.Books = make([]*model.Book, len(books))
+		for i, book := range books {
+			bookList.Books[i] = &book
+		}
 	} else {
 		// find the book
+		bookList.Books = []*model.Book{}
+		bookList.IsFullList = false
 		for _, book := range books {
 			if util.Timestamp2UnixTime(book.LastUpdatedTime) > timestamp {
-				result = append(result, book)
+				bookList.Books = append(bookList.Books, &book)
 			}
 		}
 	}
 
-	ctx.RespOK(result)
+	ctx.RespOK(bookList)
 }
 
 func GetFilterLog(ctx *httprest.HttpContext) {

@@ -44,7 +44,15 @@ export class BookDetailComponent implements OnInit {
     if (this.book.title == "" || this.book.startPageUrl == "") {      
       return;
     }
-    this.tusachService.createBook(this.book);
+    this.tusachService.updateBook(this.book, "create");
+    this.router.navigate(['/books']);
+  }
+
+  update() : void {
+    if (this.book.title == "" || this.book.startPageUrl == "") {      
+      return;
+    }
+    this.tusachService.updateBook(this.book, "update");
     this.router.navigate(['/books']);
   }
 

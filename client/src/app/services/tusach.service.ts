@@ -19,7 +19,7 @@ export interface IBookListener {
 })
 
 export class TusachService {
-  private tusachUrl = '/tusach/';
+  private tusachUrl = '/api/tusach';
   private listeners : IBookListener[] = [];
   private interval;
   private bookLastUpdatedTime : number = 0;
@@ -55,37 +55,39 @@ export class TusachService {
   }
   
   pollForChanges() {
-    const url = this.tusachUrl + "books/" + String(this.bookLastUpdatedTime);
+    const url = this.tusachUrl + "/book/list/" + String(this.bookLastUpdatedTime);
     this.http.get<model.BookList>(url).subscribe(bookList => {
-      this.log("number of updated books: " + bookList.books.length + ", isFullList: " + bookList.isFullList);
-      // get the latest time
-      for (let book of bookList.books) {
-        if (CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime) > this.bookLastUpdatedTime) {
-          this.bookLastUpdatedTime = CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime);
+      if (bookList && bookList.books) {
+        this.log("number of updated books: " + bookList.books.length + ", isFullList: " + bookList.isFullList);
+        // get the latest time
+        for (let book of bookList.books) {
+          if (CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime) > this.bookLastUpdatedTime) {
+            this.bookLastUpdatedTime = CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime);
+          }
         }
-      }
-      for (var i=0; i<this.listeners.length; i++) {
-        this.listeners[i].booksUpdated(bookList);
-      }
+        for (var i=0; i<this.listeners.length; i++) {
+          this.listeners[i].booksUpdated(bookList);
+        }
+        }
     });
   }
 
   getBooks(): Observable<model.BookList> {
-    const url = this.tusachUrl + "books/0";
+    const url = this.tusachUrl + "/book/list/0";
     this.log("getBooks() - " + url);
     return this.http.get<model.BookList>(url);
   }
 
   /** GET book by id. Will 404 if id not found */
   getBook(id: number): Observable<model.Book> {
-    const url = `${this.tusachUrl}book/${id}`;
+    const url = `${this.tusachUrl}/book/get/${id}`;
     this.log("getBook() - " + url);
     return this.http.get<model.Book>(url);
   }
 
-  createBook(book: model.Book) : void {
-    const url = this.tusachUrl + "books";
-    this.log("createBook() - " + url + " - " + JSON.stringify(book));
+  updateBook(book: model.Book, cmd: string) : void {
+    const url = this.tusachUrl + "/book/command/" + cmd;
+    this.log(url + " - " + JSON.stringify(book));
     this.http.post<model.Book>(url, book);
   }
 

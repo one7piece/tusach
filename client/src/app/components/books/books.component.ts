@@ -29,8 +29,10 @@ export class BooksComponent implements OnInit {
     console.log("getting books from tusach service...");
     this.tusachService.getBooks().subscribe(bookList => {
       this.books = bookList.books;
-      this.sortBooks();
-      console.log("#books loaded: " + this.books.length);
+      if (this.books) {
+        this.sortBooks();
+        console.log("#books loaded: " + this.books.length);
+      }
     });
   }
 
@@ -84,16 +86,18 @@ export class BooksComponent implements OnInit {
   }
 
   sortBooks() {
-    this.books.sort((b1, b2) => {        
-      if (b1.status != b2.status) {
-        if (b1.status == model.BookStatusType.IN_PROGRESS) {
-          return -1;
-        } else if (b2.status == model.BookStatusType.IN_PROGRESS) {
-          return 1;
-        }
-      } 
-      return b1.title.localeCompare(b2.title);
-    });      
+    if (this.books) {
+      this.books.sort((b1, b2) => {        
+        if (b1.status != b2.status) {
+          if (b1.status == model.BookStatusType.IN_PROGRESS) {
+            return -1;
+          } else if (b2.status == model.BookStatusType.IN_PROGRESS) {
+            return 1;
+          }
+        } 
+        return b1.title.localeCompare(b2.title);
+      });      
+      }
   }
 
   findBookIndex(id: number) : number {
