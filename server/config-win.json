@@ -1,5 +1,5 @@
 {
-	"serverPath" : ".\html",
+	"serverPath" : "./html",
 	"libraryPath" : "/home/dvan/runtime/tusach/library",
 	"dbFilename" : "/home/dvan/runtime/tusach/library/tusach.ql",
 	"logLevel" : "info",

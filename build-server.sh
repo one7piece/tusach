@@ -8,14 +8,15 @@ echo "GOPATH: $GOPATH"
 echo "compile server, output_path: $output_path"
 
 cd server
+echo go compile for $1, output: $output_path/tusach
 if [ "$1" == "arm" ]; then
-echo cross compile tusach server, output: $output_path/tusach-$1
 env GOOS=linux GOARM=7 GOARCH=$1 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
 elif [ "$1" == "amd64" ] || [ "$1" == "386" ]; then
-echo building tusach server, output: $output_path/tusach-$1
 env GOOS=linux GOARCH=$1 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
+elif [ "$1" == "win" ]; then
+env GOOS=windows GOARCH=amd64 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
 else 
-echo 'Usage: build-server.sh [arm|amd64|386]'
+echo 'Usage: build-server.sh [arm|amd64|386|win]'
 exit 1
 fi
 

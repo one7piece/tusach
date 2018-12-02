@@ -12,6 +12,7 @@ import { CommonUtils, model } from '../../common.utils';
 })
 export class BookDetailComponent implements OnInit {
   book: model.Book;
+  error: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -41,7 +42,12 @@ export class BookDetailComponent implements OnInit {
   }
 
   create() : void {
-    if (this.book.title == "" || this.book.startPageUrl == "") {      
+    if (this.book.title == "") { 
+      this.error = "Book Title cannot be empty!";
+      return;
+    }
+    if (this.book.startPageUrl == "") { 
+      this.error = "First Chapter Url cannot be empty!";
       return;
     }
     this.tusachService.updateBook(this.book, "create");

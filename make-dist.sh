@@ -12,9 +12,9 @@ echo "Usage: make-dist [amd64|386|arm|win]"
 exit 1
 fi
 
-#source ./build-server.sh $1
+source ./build-server.sh $1
 
-#source ./build-client.sh $1
+source ./build-client.sh $1
 
 echo "Creating tar file..."
 chmod +x $output_path/library/make-epub.sh
