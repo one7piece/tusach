@@ -14,7 +14,7 @@ env GOOS=linux GOARM=7 GOARCH=$1 go build -v -tags purego -o $output_path/tusach
 elif [ "$1" == "amd64" ] || [ "$1" == "386" ]; then
 env GOOS=linux GOARCH=$1 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
 elif [ "$1" == "win" ]; then
-env GOOS=windows GOARCH=amd64 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
+env GOOS=windows GOARCH=amd64 go build -v -tags purego -o $output_path/tusach.exe dv.com.tusach/app
 else 
 echo 'Usage: build-server.sh [arm|amd64|386|win]'
 exit 1

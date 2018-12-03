@@ -1,2 +1,2 @@
-tusach -configFile=config-win.json
+tusach.exe -configFile=config-win.json
 

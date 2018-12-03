@@ -11,6 +11,7 @@ import (
 type Configuration struct {
 	ServerPath        string `json:serverPath`
 	LibraryPath       string `json:libraryPath`
+	MakeEpubCmd       string `json:makeEpubCmd`
 	DBFilename        string `json:dbFilename`
 	ServerBindAddress string `json:serverBindAddress`
 	ServerBindPort    int    `json:serverBindPort`
@@ -68,6 +69,12 @@ func LoadConfig(filename string) {
 	}
 	if configuration.LibraryPath == "" {
 		panic("Missing config parameter: libraryPath")
+	}
+	if configuration.MakeEpubCmd == "" {
+		panic("Missing config parameter: makeEpubCmd")
+	}
+	if _, err := os.Stat(configuration.MakeEpubCmd); os.IsNotExist(err) {
+		panic("File " + configuration.MakeEpubCmd + " does not exists")
 	}
 	if configuration.ServerBindPort == 0 {
 		panic("Missing config parameter: ServerBindPort")

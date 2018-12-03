@@ -11,6 +11,9 @@ export class RequestInterceptor implements HttpInterceptor {
  
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let now = Date.now();
+    
+    console.log(`intercept() - ${request.method} "${request.urlWithParams} - body:" ${request.body}`);
+
     return next.handle(request).pipe(
       tap(event => {
         if (event instanceof HttpResponse) {

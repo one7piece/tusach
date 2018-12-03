@@ -331,7 +331,7 @@ func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) e
 	os.Remove(epubFile)
 
 	// zip the epub file
-	cmd := exec.Command(util.GetConfiguration().LibraryPath+"/make-epub.sh", epubFile, persistence.GetBookPath(int(book.ID)))
+	cmd := exec.Command(util.GetConfiguration().MakeEpubCmd, epubFile, persistence.GetBookPath(int(book.ID)))
 	out, err := cmd.CombinedOutput()
 	str = string(out)
 	logger.Infof("epub command output: %s", str)

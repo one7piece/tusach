@@ -1,9 +1,10 @@
 {
 	"serverPath" : "./html",
-	"libraryPath" : "/home/dvan/runtime/tusach/library",
-	"dbFilename" : "/home/dvan/runtime/tusach/library/tusach.ql",
+	"libraryPath" : "./library",
+  "makeEpubCmd" : "./library/make-epub.cmd",
+	"dbFilename" : "./library/tusach.ql",
 	"logLevel" : "info",
-	"logFile" : "/home/dvan/runtime/tusach/tusach.log",
+	"logFile" : "./tusach.log",
 	"ServerBindPort" : 8888
 }
 	
