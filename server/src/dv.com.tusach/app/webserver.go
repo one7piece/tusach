@@ -64,7 +64,8 @@ func main() {
 	util.GetEventManager().StartListening("BOOK-CHANNEL", &eventSink)
 
 	rest := httprest.New()
-	rest.Auth = httprest.JWTAuth{TimeoutSec: sessionExpiredTimeSec, SecretKey: []byte("pi.tusach"), Handler: LoginHandler{}}
+	//rest.Auth = httprest.JWTAuth{TimeoutSec: sessionExpiredTimeSec, SecretKey: []byte("pi.tusach"), Handler: LoginHandler{}}
+
 	/*
 		// setup cors
 		rest.CorsPt = cors.New(cors.Options{
@@ -81,7 +82,7 @@ func main() {
 	rest.GET(false, "/tusach/book/get/:id", GetBook)
 	rest.POST("/tusach/book/command/:cmd", UpdateBook)
 	rest.GET(true, "/user", GetUser)
-	
+
 	// TODO handle CORS
 
 	// api handler

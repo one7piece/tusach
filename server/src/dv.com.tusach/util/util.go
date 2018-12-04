@@ -3,7 +3,9 @@ package util
 import (
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -65,7 +67,25 @@ func ListDir(root string, filesOnly bool) ([]string, error) {
 	return filenames, nil
 }
 
-func TimestampNow() (*tspb.Timestamp) {
+func CopyDir(fromPath string, toPath string) (string, error) {
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("robocopy", fromPath, toPath, "/MIR", "/nfl", "/ndl", "/njh", "/njs", "/nc", "/ns", "/np")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			logger.Errorf("Error copying directory %s to %s: %v", fromPath, toPath, err)
+		}
+		return string(out), err
+	} else {
+		cmd := exec.Command("cp", "-rf", fromPath, toPath)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			logger.Errorf("Error copying directory %s to %s: %v", fromPath, toPath, err)
+		}
+		return string(out), err
+	}
+}
+
+func TimestampNow() *tspb.Timestamp {
 	return ptypes.TimestampNow()
 }
 
@@ -74,7 +94,7 @@ func UnixTimeNow() int64 {
 }
 
 func Timestamp2UnixTime(t *tspb.Timestamp) int64 {
-	return int64(t.GetNanos()/1000000)
+	return int64(t.GetNanos() / 1000000)
 }
 
 func Time2UnixTime(t time.Time) int64 {

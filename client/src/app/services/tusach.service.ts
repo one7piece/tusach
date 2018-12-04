@@ -88,7 +88,10 @@ export class TusachService {
   updateBook(book: model.Book, cmd: string) : void {
     const url = this.tusachUrl + "/book/command/" + cmd;
     this.log(url + " - " + JSON.stringify(book));
-    this.http.post<model.Book>(url, book);
+    this.http.post(url, book).subscribe(
+      data => {this.log("updateBook() - " + cmd + " book successfully. " + data)},
+      error => {this.log("updateBook() - " + cmd + " book failed: " + error)}
+    );
   }
 
   /**

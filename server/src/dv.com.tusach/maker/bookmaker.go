@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -208,10 +209,10 @@ func (bookMaker BookMaker) SaveBook(book *model.Book) (retId int, retErr error) 
 			panic("Error reading directory: " + util.GetEpubPath() + ". " + err.Error())
 		}
 		for _, file := range files {
-			cmd := exec.Command("cp", "-rf", util.GetEpubPath()+"/"+file.Name(), dirPath)
-			out, retErr := cmd.CombinedOutput()
+			path := filepath.Join(util.GetEpubPath(), file.Name())
+			out, retErr := util.CopyDir(path, dirPath)
 			if retErr != nil {
-				panic("Error copying epub template file: " + util.GetEpubPath() + "/" + file.Name() + ". " + string(out))
+				panic("Error copying epub template file: " + path + ". " + string(out))
 			}
 		}
 
@@ -240,7 +241,7 @@ func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) e
 	}
 
 	// update toc.ncx file
-	tocFile := persistence.GetBookPath(int(book.ID)) + "/OEBPS/toc.ncx"
+	tocFile := filepath.Join(persistence.GetBookPath(int(book.ID)), "/OEBPS/toc.ncx")
 	data, err := ioutil.ReadFile(tocFile)
 	if err != nil {
 		return errors.New("Failed to open file: " + tocFile + ". " + err.Error())
@@ -278,7 +279,7 @@ func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) e
 	}
 
 	// update content.opf
-	contentFile := persistence.GetBookPath(int(book.ID)) + "/OEBPS/content.opf"
+	contentFile := filepath.Join(persistence.GetBookPath(int(book.ID)), "/OEBPS/content.opf")
 	data, err = ioutil.ReadFile(contentFile)
 	if err != nil {
 		return errors.New("Failed to open file: " + contentFile + ". " + err.Error())

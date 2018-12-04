@@ -23,7 +23,7 @@ export class RequestInterceptor implements HttpInterceptor {
         } else if (event instanceof HttpErrorResponse) {
           // handle error response
           let errorResponse = <HttpErrorResponse>event;          
-          let msg = `${request.method} "${request.urlWithParams}" FAILED: ${errorResponse.message}(${errorResponse.error})`;
+          let msg = `Response: ${request.method} "${request.urlWithParams}" FAILED: ${errorResponse.message}(${errorResponse.error})`;
           console.log(msg);
           this.messages.add(msg);
         }
@@ -31,7 +31,7 @@ export class RequestInterceptor implements HttpInterceptor {
       err => {
         console.log(err);
         // handle error        
-        let msg = `${request.method} "${request.urlWithParams}" ERROR: ${err.error.message}`;
+        let msg = `Response: ${request.method} "${request.urlWithParams}" ERROR: ${err.error.message}`;
         console.log(msg);
         this.messages.add(msg);
       })

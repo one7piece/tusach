@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"time"
@@ -31,19 +32,23 @@ type Persistence interface {
 }
 
 func GetBookPath(bookId int) string {
-	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", bookId)
+	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", bookId)
+	return filepath.FromSlash(path)
 }
 
 func GetBookEpubFilename(book model.Book) string {
-	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.ID) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
+	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.ID) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
+	return filepath.FromSlash(path)
 }
 
 func GetChapterFilename(chapter model.Chapter) string {
-	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d.html", chapter.BookId, chapter.ChapterNo)
+	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d.html", chapter.BookId, chapter.ChapterNo)
+	return filepath.FromSlash(path)
 }
 
 func GetRawChapterFilename(chapter model.Chapter) string {
-	return util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d-raw.html", chapter.BookId, chapter.ChapterNo)
+	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d-raw.html", chapter.BookId, chapter.ChapterNo)
+	return filepath.FromSlash(path)
 }
 
 func isPersistentField(tableType reflect.Type, fieldName string) bool {

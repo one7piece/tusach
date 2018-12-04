@@ -2,8 +2,10 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"dv.com.tusach/logger"
 )
@@ -37,11 +39,11 @@ func GetConfiguration() Configuration {
 }
 
 func GetEpubPath() string {
-	return configuration.LibraryPath + "/epub"
+	return filepath.Join(configuration.LibraryPath, "epub")
 }
 
 func GetParserPath() string {
-	return configuration.LibraryPath + "/parser"
+	return filepath.Join(configuration.LibraryPath, "parser")
 }
 
 func LoadConfig(filename string) {
@@ -61,18 +63,28 @@ func LoadConfig(filename string) {
 	if err != nil {
 		panic(err)
 	}
+	currentDir, err := filepath.Abs(filepath.Dir(configFile))
+	fmt.Printf("Current directory: %s\n", currentDir)
+
 	if configuration.ServerPath == "" {
 		panic("Missing config parameter: serverPath")
 	}
+	configuration.ServerPath = convert2absolute(currentDir, configuration.ServerPath)
+
 	if configuration.DBFilename == "" {
 		panic("Missing config parameter: dbFilename")
 	}
+	configuration.DBFilename = convert2absolute(currentDir, configuration.DBFilename)
+
 	if configuration.LibraryPath == "" {
 		panic("Missing config parameter: libraryPath")
 	}
+	configuration.LibraryPath = convert2absolute(currentDir, configuration.LibraryPath)
+
 	if configuration.MakeEpubCmd == "" {
 		panic("Missing config parameter: makeEpubCmd")
 	}
+	configuration.MakeEpubCmd = convert2absolute(currentDir, configuration.MakeEpubCmd)
 	if _, err := os.Stat(configuration.MakeEpubCmd); os.IsNotExist(err) {
 		panic("File " + configuration.MakeEpubCmd + " does not exists")
 	}
@@ -87,6 +99,8 @@ func LoadConfig(filename string) {
 		// default to the parent of the server path
 		configuration.LogFile = filepath.Dir(configuration.ServerPath)
 	}
+	configuration.LogFile = convert2absolute(currentDir, configuration.LogFile)
+
 	if configuration.LogLevel == "" {
 		configuration.LogLevel = "info"
 	}
@@ -104,5 +118,23 @@ func LoadConfig(filename string) {
 	if configuration.LogMaxBackups == 0 {
 		configuration.LogMaxBackups = 10
 	}
+
+	fmt.Printf("ServerPath: %s\n", configuration.ServerPath)
+	fmt.Printf("LibraryPath: %s\n", configuration.LibraryPath)
+	fmt.Printf("MakeEpubCmd: %s\n", configuration.MakeEpubCmd)
+	fmt.Printf("DBFilename: %s\n", configuration.DBFilename)
+	fmt.Printf("LogFile: %s\n", configuration.LogFile)
+
 	logger.Init(level, configuration.LogFile, configuration.LogMaxSizeMB, configuration.LogMaxBackups, 30)
+}
+
+func convert2absolute(curPath string, relPath string) string {
+	newPath := relPath
+	if strings.HasPrefix(relPath, "./") {
+		newPath = filepath.Join(curPath, relPath[1:])
+	}
+	if strings.HasPrefix(relPath, "../") {
+		newPath = filepath.Join(filepath.Dir(curPath), relPath[2:])
+	}
+	return newPath
 }
