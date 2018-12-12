@@ -3,7 +3,6 @@ package persistence
 import (
 	"database/sql"
 	"errors"
-	"os"
 	"reflect"
 	"sort"
 	"strconv"
@@ -64,7 +63,7 @@ func (ql *Ql) createTable(tableName string, tableType reflect.Type) error {
 		persist := isPersistentField(tableType, field.Name)
 		if persist {
 			colName := field.Name
-			//logger.Infof("parsing field: %s:%s\n", field.Name, field.Type.Name())
+			logger.Debugf("Persistent field: %s:%s:%s\n", field.Name, field.Type.String(), field.Type.Kind())
 			var colType string
 			switch field.Type.Kind() {
 			case reflect.Int64:
@@ -84,6 +83,8 @@ func (ql *Ql) createTable(tableName string, tableType reflect.Type) error {
 				stmt += ", "
 			}
 			stmt += colName + " " + colType
+		} else {
+			logger.Debugf("NON-persistent field: %s:%s:%s\n", field.Name, field.Type.String(), field.Type.Kind())
 		}
 	}
 	stmt += ")"
@@ -266,9 +267,6 @@ func (ql *Ql) DeleteBook(bookId int) error {
 	// remove book
 	err = ql.deleteRecords("book", "ID=int32($1)", args)
 
-	// remove files
-	err = os.RemoveAll(GetBookPath(bookId))
-
 	ql.info.BookLastUpdatedTime = ptypes.TimestampNow()
 	ql.SaveSystemInfo(ql.info)
 
@@ -407,7 +405,7 @@ func (ql *Ql) insertRecord(tableName string, value reflect.Value) error {
 			}
 			v, err := field2db(value.Type().Field(i).Name, value.Type().Field(i).Type, value.Field(i).Interface())
 			if err != nil {
-				logger.Errorf("failed to convert field value to db record.", err)
+				logger.Errorf("failed to convert field %s value to db record.", value.Type().Field(i).Name, err)
 				return err
 			}
 			valueStr += createParamVariableStr(v, i+1)
@@ -516,7 +514,7 @@ func (ql *Ql) updateRecord(tableName string, value reflect.Value, filterFields [
 
 	defer func() {
 		if err == nil {
-			logger.Info("updateRecord() - commiting transaction")
+			logger.Debug("updateRecord() - commiting transaction")
 			tx.Commit()
 		} else {
 			logger.Info("updateRecord() - rolling back transaction")

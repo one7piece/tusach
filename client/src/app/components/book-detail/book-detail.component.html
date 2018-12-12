@@ -29,7 +29,7 @@
       <input matInput readonly placeholder="First Chapter URL" [(ngModel)]="book.startPageUrl" name="startPageUrl">
     </mat-form-field>
     <mat-form-field flex layout="row" class="bookdetail-field">
-      <input matInput [readonly]="isBookInProgress()" placeholder="Current Chapter URL" ([ngModel])="book.currentPageUrl" name="currentPageUrl">
+      <input matInput [readonly]="isBookInProgress()" placeholder="Current Chapter URL" ([ngModel])="currentPageUrl" name="currentPageUrl">
     </mat-form-field>
     <mat-form-field class="bookdetail-field">
       <input matInput readonly type="text" placeholder="Status" value={{getBookStatus()}}>
@@ -38,7 +38,10 @@
       <input matInput readonly type="text" placeholder="Error" value={{book.errorMsg}}>
     </mat-form-field>
     <div flex layout="row">
-      <button mat-raised-button color="primary" (click)="update()">Update</button>
+      <button *ngIf="isBookInProgress()" mat-raised-button color="primary" (click)="update('abort')">Abort</button>
+      <button *ngIf="!isBookInProgress()" mat-raised-button color="primary" (click)="update('resume')">Resume</button>
+      <button *ngIf="!isBookInProgress()" mat-raised-button color="primary" (click)="update('update')">Update</button>
+      <button *ngIf="!isBookInProgress()" mat-raised-button color="primary" (click)="delete()">Delete</button>
     </div>
   </form>
 

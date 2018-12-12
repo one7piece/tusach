@@ -54,12 +54,14 @@ export class BookDetailComponent implements OnInit {
     this.router.navigate(['/books']);
   }
 
-  update() : void {
+  update(command: string) : void {
     if (this.book.title == "" || this.book.startPageUrl == "") {      
       return;
     }
-    this.tusachService.updateBook(this.book, "update");
-    this.router.navigate(['/books']);
+    this.tusachService.updateBook(this.book, command);
+    if (command == 'delete') {
+      this.router.navigate(['/books']);
+    }
   }
 
   getBook(): void {

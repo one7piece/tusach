@@ -5,6 +5,12 @@
 		},
 		{
 			"path": "client"
+		},
+		{
+			"path": "C:\\dev\\dvan\\github\\httprest"
+		},
+		{
+			"path": "C:\\bin\\development\\OpenORB"
 		}
 	],
 	"settings": {}

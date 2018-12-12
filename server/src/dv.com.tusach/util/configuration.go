@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"dv.com.tusach/logger"
 )
@@ -42,8 +41,8 @@ func GetEpubPath() string {
 	return filepath.Join(configuration.LibraryPath, "epub")
 }
 
-func GetParserPath() string {
-	return filepath.Join(configuration.LibraryPath, "parser")
+func GetParserFile() string {
+	return filepath.Join(configuration.LibraryPath, "parser.js")
 }
 
 func LoadConfig(filename string) {
@@ -64,27 +63,48 @@ func LoadConfig(filename string) {
 		panic(err)
 	}
 	currentDir, err := filepath.Abs(filepath.Dir(configFile))
-	fmt.Printf("Current directory: %s\n", currentDir)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("HOME directory: %s, current directory: %s\n", os.Getenv("HOME"), currentDir)
+
+	if os.Getenv("HOME") != currentDir {
+		fmt.Printf("Change HOME directory to %s\n", currentDir)
+		os.Chdir(currentDir)
+	}
 
 	if configuration.ServerPath == "" {
 		panic("Missing config parameter: serverPath")
 	}
-	configuration.ServerPath = convert2absolute(currentDir, configuration.ServerPath)
+	configuration.ServerPath, err = filepath.Abs(configuration.ServerPath)
 
 	if configuration.DBFilename == "" {
 		panic("Missing config parameter: dbFilename")
 	}
-	configuration.DBFilename = convert2absolute(currentDir, configuration.DBFilename)
+	configuration.DBFilename, err = filepath.Abs(configuration.DBFilename)
+	if err != nil {
+		panic(err)
+	}
 
 	if configuration.LibraryPath == "" {
 		panic("Missing config parameter: libraryPath")
 	}
-	configuration.LibraryPath = convert2absolute(currentDir, configuration.LibraryPath)
+	configuration.LibraryPath, err = filepath.Abs(configuration.LibraryPath)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := os.Stat(GetParserFile()); os.IsNotExist(err) {
+		panic("Parser file " + GetParserFile() + " does not exists")
+	}
 
 	if configuration.MakeEpubCmd == "" {
 		panic("Missing config parameter: makeEpubCmd")
 	}
-	configuration.MakeEpubCmd = convert2absolute(currentDir, configuration.MakeEpubCmd)
+	configuration.MakeEpubCmd, err = filepath.Abs(configuration.MakeEpubCmd)
+	if err != nil {
+		panic(err)
+	}
+
 	if _, err := os.Stat(configuration.MakeEpubCmd); os.IsNotExist(err) {
 		panic("File " + configuration.MakeEpubCmd + " does not exists")
 	}
@@ -99,7 +119,10 @@ func LoadConfig(filename string) {
 		// default to the parent of the server path
 		configuration.LogFile = filepath.Dir(configuration.ServerPath)
 	}
-	configuration.LogFile = convert2absolute(currentDir, configuration.LogFile)
+	configuration.LogFile, err = filepath.Abs(configuration.LogFile)
+	if err != nil {
+		panic(err)
+	}
 
 	if configuration.LogLevel == "" {
 		configuration.LogLevel = "info"
@@ -126,15 +149,4 @@ func LoadConfig(filename string) {
 	fmt.Printf("LogFile: %s\n", configuration.LogFile)
 
 	logger.Init(level, configuration.LogFile, configuration.LogMaxSizeMB, configuration.LogMaxBackups, 30)
-}
-
-func convert2absolute(curPath string, relPath string) string {
-	newPath := relPath
-	if strings.HasPrefix(relPath, "./") {
-		newPath = filepath.Join(curPath, relPath[1:])
-	}
-	if strings.HasPrefix(relPath, "../") {
-		newPath = filepath.Join(filepath.Dir(curPath), relPath[2:])
-	}
-	return newPath
 }

@@ -69,12 +69,11 @@ func ListDir(root string, filesOnly bool) ([]string, error) {
 
 func CopyDir(fromPath string, toPath string) (string, error) {
 	if runtime.GOOS == "windows" {
-		cmd := exec.Command("robocopy", fromPath, toPath, "/MIR", "/nfl", "/ndl", "/njh", "/njs", "/nc", "/ns", "/np")
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			logger.Errorf("Error copying directory %s to %s: %v", fromPath, toPath, err)
-		}
-		return string(out), err
+		destPath := filepath.Join(toPath, filepath.Base(fromPath))
+		cmd := exec.Command("robocopy", fromPath, destPath,
+			"/MIR", "/nfl", "/ndl", "/njh", "/njs", "/nc", "/ns", "/np")
+		out, _ := cmd.CombinedOutput()
+		return string(out), nil
 	} else {
 		cmd := exec.Command("cp", "-rf", fromPath, toPath)
 		out, err := cmd.CombinedOutput()

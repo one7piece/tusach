@@ -399,9 +399,10 @@ func reloadBook(bookId int) {
 }
 
 func doCreateBook(book *model.Book) {
-	data, err := ioutil.ReadFile(util.GetParserPath() + "/parser.js")
+	data, err := ioutil.ReadFile(util.GetParserFile())
 	if err != nil {
 		logger.Errorf("Failed to load js: %s\n", err)
+		return
 	}
 
 	engine, err := maker.Compile(data)

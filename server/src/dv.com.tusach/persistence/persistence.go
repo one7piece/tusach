@@ -15,6 +15,9 @@ import (
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
+var TimestampPtrType = reflect.TypeOf(util.TimestampNow())
+var TimestampType = reflect.TypeOf(*util.TimestampNow())
+
 type Persistence interface {
 	InitDB()
 	CloseDB()
@@ -56,8 +59,28 @@ func isPersistentField(tableType reflect.Type, fieldName string) bool {
 	if !found {
 		return false
 	}
+	if field.Tag.Get("protobuf") == "" {
+		return false
+	}
 
-	return field.Tag.Get("protobuf") != ""
+	if field.Type.Kind() != reflect.Bool &&
+		field.Type.Kind() != reflect.Int &&
+		field.Type.Kind() != reflect.Int8 &&
+		field.Type.Kind() != reflect.Int16 &&
+		field.Type.Kind() != reflect.Int32 &&
+		field.Type.Kind() != reflect.Int64 &&
+		field.Type.Kind() != reflect.Uint &&
+		field.Type.Kind() != reflect.Uint16 &&
+		field.Type.Kind() != reflect.Uint32 &&
+		field.Type.Kind() != reflect.Uint64 &&
+		field.Type.Kind() != reflect.Float32 &&
+		field.Type.Kind() != reflect.Float64 &&
+		field.Type.Kind() != reflect.String &&
+		field.Type != TimestampPtrType &&
+		field.Type != TimestampType {
+		return false
+	}
+	return true
 }
 
 func field2db(fieldName string, fieldType reflect.Type, fieldValue interface{}) (interface{}, error) {

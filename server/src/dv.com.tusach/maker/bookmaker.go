@@ -191,6 +191,8 @@ func (bookMaker BookMaker) SaveBook(book *model.Book) (retId int, retErr error) 
 				logger.Infof("Recover from panic: %s\n", err)
 				if id > 0 {
 					bookMaker.DB.DeleteBook(id)
+					// remove files
+					os.RemoveAll(persistence.GetBookPath(id))
 				}
 				retErr = util.ExtractError(err)
 				retId = 0
