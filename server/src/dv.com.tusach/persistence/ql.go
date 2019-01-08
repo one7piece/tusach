@@ -278,7 +278,7 @@ func (ql *Ql) LoadChapters(bookId int) ([]model.Chapter, error) {
 	var err error
 	if bookId > 0 {
 		args := []interface{}{bookId}
-		records, err = ql.loadRecords(reflect.TypeOf(model.Chapter{}), "chapter", "BookId=$1", args)
+		records, err = ql.loadRecords(reflect.TypeOf(model.Chapter{}), "chapter", "BookId=int32($1)", args)
 	} else {
 		records, err = ql.loadRecords(reflect.TypeOf(model.Chapter{}), "chapter", "", nil)
 	}
@@ -305,14 +305,6 @@ func (ql *Ql) LoadChapters(bookId int) ([]model.Chapter, error) {
 }
 
 func (ql *Ql) SaveChapter(chapter model.Chapter) error {
-	/*
-		filepath := util.GetChapterFilename(chapter.BookId, chapter.ChapterNo)
-		err := ioutil.WriteFile(filepath, chapter.Html, 0777)
-		if err != nil {
-			logger.Infof("error writing chapter file: ", filepath, err)
-			return err
-		}
-	*/
 	args := []interface{}{chapter.BookId, chapter.ChapterNo}
 	records, err := ql.loadRecords(reflect.TypeOf(model.Chapter{}), "chapter", "BookId=$1 and ChapterNo=$2", args)
 	if err != nil {
@@ -343,7 +335,8 @@ func (ql *Ql) loadRecords(tableType reflect.Type, tableName string, whereStr str
 	if whereStr != "" {
 		query += " WHERE " + whereStr
 	}
-	logger.Debugf("executing query: %s\n", query)
+
+	logger.Debugf("executing query: %s, args:%v\n", query, args)
 	rows, err := ql.db.Query(query, args...)
 	if err != nil {
 		logger.Errorf("Error executing query. ", err)

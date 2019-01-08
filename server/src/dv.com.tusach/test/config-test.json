@@ -2,12 +2,8 @@
 	"serverPath" : 	"../../../test",
 	"libraryPath" : "../../../test/library",
 	"dbFilename" :  "../../../test/library/test.ql",
-  "makeEpubCmd" : "../../../../server/library/make-epub.cmd",
 	"logLevel" : "debug",
 	"logFile" : "../../../test/test.log",
-	"ServerBindPort" : 8888,
-	"ProxyURL": "175.45.116.39:10319",
-	"ProxyUsername" : "jvand",
-	"ProxyPassword" : "Tyco0004"
+	"ServerBindPort" : 8888
 }
 	

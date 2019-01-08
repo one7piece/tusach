@@ -74,7 +74,7 @@ func (bookMaker BookMaker) GetBookSites() []string {
 
 func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) error {
 	var numPagesLoaded = 0
-	var errorMsg = ""
+	var err error
 
 	url := book.CurrentPageUrl
 	if url == "" {
@@ -96,35 +96,35 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 		nextPageUrl, err := bookMaker.CreateChapter(engine, url, &newChapter)
 
 		if err != nil {
-			errorMsg = "Failed to create chapter. " + err.Error()
+			logger.Errorf("%s - Failed to load chapter %d: %s", book.Title, newChapterNo, err)
 			break
 		}
 
 		if newChapter.Title == "" {
 			newChapter.Title = "model.Chapter " + strconv.Itoa(int(newChapter.ChapterNo))
 		}
-		logger.Infof("completed chapter: %d (%s), nextPageUrl: %s\n", newChapter.ChapterNo, newChapter.Title, nextPageUrl)
+		logger.Infof("%s - Completed chapter: %d (%s), nextPageUrl: %s\n", book.Title, newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
-		// save the chapter
-		err = bookMaker.DB.SaveChapter(newChapter)
+		err = bookMaker.SaveChapter(*book, newChapter)
 		if err != nil {
-			errorMsg = "Error saving chapter. " + err.Error()
+			logger.Errorf("%s - Failed to save chapter %d: %s", book.Title, newChapterNo, err)
 			break
 		}
+
 		book.CurrentPageNo = newChapterNo
 		book.CurrentPageUrl = url
 		numPagesLoaded++
+
+		_, err = bookMaker.SaveBook(book)
+		if err != nil {
+			logger.Errorf("%s - Failed to save book to DB: %s", book.Title, err)
+			return err
+		}
 
 		// check for no more pages
 		if nextPageUrl == "" {
 			logger.Info("No more next page url found.")
 			break
-		} else {
-			_, err := bookMaker.SaveBook(book)
-			if err != nil {
-				errorMsg = err.Error()
-				break
-			}
 		}
 
 		if nextPageUrl == url {
@@ -134,36 +134,52 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 		url = nextPageUrl
 	}
 
-	book.ErrorMsg = errorMsg
-	if book.ErrorMsg != "" {
+	if err != nil {
 		book.Status = model.BookStatusType_ERROR
-		logger.Error(book.ErrorMsg)
+		book.ErrorMsg = err.Error()
 	} else if book.Status != model.BookStatusType_ABORTED {
 		book.Status = model.BookStatusType_COMPLETED
 	}
+	book.EpubCreated = util.IsExist(persistence.GetBookEpubFilename(*book))
+	bookMaker.SaveBook(book)
 
-	chapters, err := bookMaker.DB.LoadChapters(int(book.ID))
-	if err != nil {
-		errorMsg = fmt.Sprintf("Error loading chapters for book: %d. %s", book.ID, err.Error())
-		logger.Error(errorMsg)
-		book.ErrorMsg = errorMsg
-		book.Status = model.BookStatusType_ERROR
-	} else {
-		err = bookMaker.MakeEpub(*book, chapters)
-		if err != nil {
-			errorMsg = fmt.Sprintf("Error creating epub for book: %d. %s", book.ID, err.Error())
-			logger.Error(errorMsg)
-			book.ErrorMsg = errorMsg
-			book.Status = model.BookStatusType_ERROR
-			book.EpubCreated = false
-		} else {
-			book.EpubCreated = true
+	return err
+}
+
+func (bookMaker BookMaker) SaveChapter(book model.Book, chapter model.Chapter) error {
+	logger.Infof("%s - Saving chapter: %s", book.Title, chapter.Title)
+	var err error
+	// check that the file exists
+	filepath := persistence.GetChapterFilename(chapter)
+	if !util.IsExist(filepath) {
+		return errors.New("Chapter file: " + filepath + " does not exists!")
+	}
+	defer func() {
+		if err == nil {
+			// remove the html file
+			os.Remove(filepath)
 		}
+	}()
+
+	// update the DB
+	err = bookMaker.DB.SaveChapter(chapter)
+	if err != nil {
+		return errors.New("Error saving to DB: " + err.Error())
 	}
 
-	bookMaker.SaveBook(book)
-	if err == nil && errorMsg != "" {
-		err = errors.New(errorMsg)
+	// update epub file
+	chapters, err := bookMaker.DB.LoadChapters(int(book.ID))
+	if err != nil {
+		err = errors.New("Error loading chapters from DB: " + err.Error())
+	} else {
+		if len(chapters) == 0 {
+			err = errors.New("No chapters loaded from DB!")
+		} else {
+			err = bookMaker.SaveEpub(book, persistence.GetBookEpubFilename(book), chapters)
+			if err != nil {
+				err = errors.New("Error writing epub file: " + err.Error())
+			}
+		}
 	}
 	return err
 }
@@ -229,7 +245,7 @@ func (bookMaker BookMaker) SaveBook(book *model.Book) (retId int, retErr error) 
 	return id, err
 }
 
-func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) error {
+func (bookMaker BookMaker) SaveEpub(book model.Book, epubFile string, chapters []model.Chapter) error {
 	if book.CurrentPageNo == 0 {
 		return errors.New("Book has no chapters")
 	}
@@ -329,10 +345,11 @@ func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) e
 		return err
 	}
 
-	epubFile := persistence.GetBookEpubFilename(book)
-	// delete existing epub
-	os.Remove(epubFile)
-
+	epubCmd := util.GetConfiguration().MakeEpubCmd
+	if util.IsExist(epubFile) {
+		epubCmd = util.GetConfiguration().UpdateEpubCmd
+	}
+	logger.Infof("Executing epub command: %s %s %s", epubCmd, epubFile, persistence.GetBookPath(int(book.ID)))
 	// zip the epub file
 	cmd := exec.Command(util.GetConfiguration().MakeEpubCmd, epubFile, persistence.GetBookPath(int(book.ID)))
 	out, err := cmd.CombinedOutput()
@@ -345,7 +362,7 @@ func (bookMaker BookMaker) MakeEpub(book model.Book, chapters []model.Chapter) e
 	//str = string(out)
 	//logger.Infof("epub command output: %s", str)
 
-	if _, err := os.Stat(epubFile); os.IsNotExist(err) {
+	if !util.IsExist(epubFile) {
 		logger.Error("Error creating epub file. " + epubFile)
 		return errors.New("Error creating epub file: " + epubFile)
 	}

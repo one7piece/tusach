@@ -70,10 +70,11 @@ func (sink *Bookmaker_Test) ProcessEvent(event util.EventData) {
 func (o *Bookmaker_Test) testCreateBook(t *testing.T) {
 	engine := o.createEngine(t)
 	newBook := model.Book{}
-	newBook.Title = "Trach Thien Ky"
-	newBook.Author = "Mieu Ni"
 	newBook.CreatedBy = "Dung Van"
-	newBook.StartPageUrl = "http://truyencuatui.net/truyen/trach-thien-ky/quyen-i-dong-hoc-thieu-nien-chuong-1-ta-doi-y/317713.html"
+	//newBook.Title = "Trach Thien Ky"
+	//newBook.StartPageUrl = "http://truyencuatui.net/truyen/trach-thien-ky/quyen-i-dong-hoc-thieu-nien-chuong-1-ta-doi-y/317713.html"
+	newBook.Title = "Thien Tinh Chi Lo"
+	newBook.StartPageUrl = "https://truyencv.com/thien-tinh-chi-lo/chuong-1/"
 	newBook.MaxNumPages = 3
 	newBook.Status = model.BookStatusType_IN_PROGRESS
 	newBook.CreatedTime = util.TimestampNow()

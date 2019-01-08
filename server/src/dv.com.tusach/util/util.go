@@ -14,6 +14,13 @@ import (
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 )
 
+func IsExist(path string) bool {
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
 func ExtractError(err interface{}) error {
 	// find out what exactly is err
 	switch x := err.(type) {
@@ -27,12 +34,14 @@ func ExtractError(err interface{}) error {
 }
 
 func SaveFile(filename string, data []byte) error {
-	logger.Info("saving file: %s", filename)
+	logger.Info("saving file: %s, #bytes:%d", filename, len(data))
 	fo, err := os.Create(filename)
 	if err != nil {
 		return errors.New("Error creating file " + filename + ": " + err.Error())
 	}
 	defer fo.Close()
+
+	//err := ioutil.WriteFile(filepath, chapter.Html, 0777)
 
 	_, err = fo.Write(data)
 	if err != nil {

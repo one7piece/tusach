@@ -128,6 +128,27 @@ func TestBook(t *testing.T) {
 		return
 	}
 
+	// create chapter
+	testChapter := model.Chapter{BookId: int32(bookId), ChapterNo: 1, Title: "chuong 1"}
+	err = db.SaveChapter(testChapter)
+	if err != nil {
+		t.Errorf("Error saving chapter: %s", err)
+		return
+	}
+
+	chapters, err := db.LoadChapters(bookId)
+	if err != nil {
+		t.Errorf("Error loading chapters for book: %d. %s", bookId, err)
+		return
+	}
+	if len(chapters) == 0 {
+		t.Errorf("No chapters loaded!")
+		return
+	}
+	for i := 0; i < len(chapters); i++ {
+		logger.Infof("Loaded chapter: %v", chapters[i])
+	}
+
 	books, err = db.LoadBooks()
 	if err != nil {
 		t.Errorf("Error reloading books: %s", err)

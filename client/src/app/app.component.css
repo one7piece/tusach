@@ -1,8 +1,7 @@
 /* AppComponent's private CSS styles */
 
-.bg { 
-  background: url("../assets/images/background.jpg") no-repeat center center; 
-  background-size: cover;
+.router {
+  padding: 10px 10px;
 }
 
 h1 {
@@ -33,3 +32,4 @@ nav a:hover {
 nav a.active {
   color: #039be5;
 }
+  

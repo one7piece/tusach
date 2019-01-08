@@ -6,8 +6,8 @@ source ./setenv.sh
 
 echo "Building client, output_path: $output_path"
 cd ./client
-ng build
-#ng build --prod
+ng.cmd build
+#ng.cmd build --prod
 
 if [ -d "$output_path/html" ]; then
 echo "clean client directory $output_path/html"

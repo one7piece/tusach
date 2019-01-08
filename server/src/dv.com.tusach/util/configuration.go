@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"dv.com.tusach/logger"
 )
@@ -12,7 +13,6 @@ import (
 type Configuration struct {
 	ServerPath        string `json:serverPath`
 	LibraryPath       string `json:libraryPath`
-	MakeEpubCmd       string `json:makeEpubCmd`
 	DBFilename        string `json:dbFilename`
 	ServerBindAddress string `json:serverBindAddress`
 	ServerBindPort    int    `json:serverBindPort`
@@ -24,6 +24,8 @@ type Configuration struct {
 	LogFile           string `json:logFile`
 	LogMaxSizeMB      int    `json:logMaxSizeMB`
 	LogMaxBackups     int    `json:logMaxBackups`
+	MakeEpubCmd       string
+	UpdateEpubCmd     string
 }
 
 var configFile string
@@ -97,12 +99,11 @@ func LoadConfig(filename string) {
 		panic("Parser file " + GetParserFile() + " does not exists")
 	}
 
-	if configuration.MakeEpubCmd == "" {
-		panic("Missing config parameter: makeEpubCmd")
-	}
-	configuration.MakeEpubCmd, err = filepath.Abs(configuration.MakeEpubCmd)
-	if err != nil {
-		panic(err)
+	configuration.MakeEpubCmd = filepath.Join(configuration.LibraryPath, "create-epub.sh")
+	configuration.UpdateEpubCmd = filepath.Join(configuration.LibraryPath, "update-epub.sh")
+	if runtime.GOOS == "windows" {
+		configuration.MakeEpubCmd = filepath.Join(configuration.LibraryPath, "create-epub.cmd")
+		configuration.UpdateEpubCmd = filepath.Join(configuration.LibraryPath, "update-epub.cmd")
 	}
 
 	if _, err := os.Stat(configuration.MakeEpubCmd); os.IsNotExist(err) {
@@ -144,7 +145,7 @@ func LoadConfig(filename string) {
 
 	fmt.Printf("ServerPath: %s\n", configuration.ServerPath)
 	fmt.Printf("LibraryPath: %s\n", configuration.LibraryPath)
-	fmt.Printf("MakeEpubCmd: %s\n", configuration.MakeEpubCmd)
+	fmt.Printf("MakeEpubCmd: %s, UpdateEpubCmd: %s\n", configuration.MakeEpubCmd, configuration.UpdateEpubCmd)
 	fmt.Printf("DBFilename: %s\n", configuration.DBFilename)
 	fmt.Printf("LogFile: %s\n", configuration.LogFile)
 

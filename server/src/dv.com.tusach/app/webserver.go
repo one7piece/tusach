@@ -56,7 +56,6 @@ func (h LoginHandler) GetRoles(username string) []string {
 }
 
 func main() {
-
 	loadData()
 	logger.Infof("Starting GO web server, configuration: %+v", util.GetConfiguration())
 
@@ -423,7 +422,7 @@ func loadData() {
 	flag.Parse()
 
 	if configFile == "" {
-		logger.Debug("GOWebserver - ERROR! missing parameter: configFile")
+		logger.Error("GOWebserver - ERROR! missing parameter: configFile")
 		os.Exit(1)
 	}
 
