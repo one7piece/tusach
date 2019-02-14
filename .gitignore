@@ -15,5 +15,7 @@ tusachang/bower_components
 tusachang/node_modules
 tusachang/test
 dist/*
+archive/*
 tusach-win.tar.gz
 tusach-win.tar.gz
+library.archive/*
