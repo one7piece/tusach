@@ -23,7 +23,8 @@ var logPrefixes []string = []string{"DBUG", "INFO", "WARN", "ERRO", "FATA"}
 var logLevel = LevelInfo
 
 func Init(level int, filename string, maxSizeMB int, maxBackups int, maxAgeDays int) {
-	fmt.Printf("Initialising logger: %s, level:%d, maxSizeMB:%d, maxBackups:%d, maxAgeDays:%d", filename, level, maxSizeMB, maxBackups, maxAgeDays)
+	fmt.Printf("Initialising logger: %s, level:%d, maxSizeMB:%d, maxBackups:%d, maxAgeDays:%d\n",
+		filename, level, maxSizeMB, maxBackups, maxAgeDays)
 
 	logLevel = level
 	if filename != "" {

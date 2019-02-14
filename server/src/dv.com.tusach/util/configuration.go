@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -24,8 +25,9 @@ type Configuration struct {
 	LogFile           string `json:logFile`
 	LogMaxSizeMB      int    `json:logMaxSizeMB`
 	LogMaxBackups     int    `json:logMaxBackups`
-	MakeEpubCmd       string
-	UpdateEpubCmd     string
+	CreateEpubCmd     string `json:createEpubCmd`
+	UpdateEpubCmd     string `json:updateEpubCmd`
+	ExtractEpubCmd    string `json:extractEpubCmd`
 }
 
 var configFile string
@@ -48,8 +50,12 @@ func GetParserFile() string {
 }
 
 func LoadConfig(filename string) {
-	configFile = filename
-	f, err := os.Open(filename)
+	configFile = getAbsolutePath(filename)
+	fmt.Printf("Reading configuration file: %s\n", configFile)
+	if !IsExist(configFile) {
+		panic(errors.New("Could not find configuration file: " + configFile))
+	}
+	f, err := os.Open(configFile)
 	if err != nil {
 		panic(err)
 	}
@@ -78,37 +84,58 @@ func LoadConfig(filename string) {
 	if configuration.ServerPath == "" {
 		panic("Missing config parameter: serverPath")
 	}
-	configuration.ServerPath, err = filepath.Abs(configuration.ServerPath)
+	configuration.ServerPath = getAbsolutePath(configuration.ServerPath)
 
 	if configuration.DBFilename == "" {
 		panic("Missing config parameter: dbFilename")
 	}
-	configuration.DBFilename, err = filepath.Abs(configuration.DBFilename)
-	if err != nil {
-		panic(err)
-	}
+	configuration.DBFilename = getAbsolutePath(configuration.DBFilename)
 
 	if configuration.LibraryPath == "" {
 		panic("Missing config parameter: libraryPath")
 	}
-	configuration.LibraryPath, err = filepath.Abs(configuration.LibraryPath)
-	if err != nil {
-		panic(err)
-	}
+	configuration.LibraryPath = getAbsolutePath(configuration.LibraryPath)
+
 	if _, err := os.Stat(GetParserFile()); os.IsNotExist(err) {
 		panic("Parser file " + GetParserFile() + " does not exists")
 	}
 
-	configuration.MakeEpubCmd = filepath.Join(configuration.LibraryPath, "create-epub.sh")
-	configuration.UpdateEpubCmd = filepath.Join(configuration.LibraryPath, "update-epub.sh")
-	if runtime.GOOS == "windows" {
-		configuration.MakeEpubCmd = filepath.Join(configuration.LibraryPath, "create-epub.cmd")
-		configuration.UpdateEpubCmd = filepath.Join(configuration.LibraryPath, "update-epub.cmd")
+	fmt.Printf("epub command paths: %s, %s, %s\n", configuration.CreateEpubCmd, configuration.UpdateEpubCmd, configuration.ExtractEpubCmd)
+	if configuration.CreateEpubCmd == "" {
+		if runtime.GOOS == "windows" {
+			configuration.CreateEpubCmd = filepath.Join(configuration.LibraryPath, "create-epub.cmd")
+		} else {
+			configuration.CreateEpubCmd = filepath.Join(configuration.LibraryPath, "create-epub.sh")
+		}
+	}
+	if configuration.UpdateEpubCmd == "" {
+		if runtime.GOOS == "windows" {
+			configuration.UpdateEpubCmd = filepath.Join(configuration.LibraryPath, "update-epub.cmd")
+		} else {
+			configuration.UpdateEpubCmd = filepath.Join(configuration.LibraryPath, "update-epub.sh")
+		}
+	}
+	if configuration.ExtractEpubCmd == "" {
+		if runtime.GOOS == "windows" {
+			configuration.ExtractEpubCmd = filepath.Join(configuration.LibraryPath, "extract-epub.cmd")
+		} else {
+			configuration.ExtractEpubCmd = filepath.Join(configuration.LibraryPath, "extract-epub.sh")
+		}
+	}
+	configuration.CreateEpubCmd = getAbsolutePath(configuration.CreateEpubCmd)
+	configuration.UpdateEpubCmd = getAbsolutePath(configuration.UpdateEpubCmd)
+	configuration.ExtractEpubCmd = getAbsolutePath(configuration.ExtractEpubCmd)
+
+	if !IsExist(configuration.CreateEpubCmd) {
+		panic("File " + configuration.CreateEpubCmd + " does not exists")
+	}
+	if !IsExist(configuration.UpdateEpubCmd) {
+		panic("File " + configuration.UpdateEpubCmd + " does not exists")
+	}
+	if !IsExist(configuration.ExtractEpubCmd) {
+		panic("File " + configuration.ExtractEpubCmd + " does not exists")
 	}
 
-	if _, err := os.Stat(configuration.MakeEpubCmd); os.IsNotExist(err) {
-		panic("File " + configuration.MakeEpubCmd + " does not exists")
-	}
 	if configuration.ServerBindPort == 0 {
 		panic("Missing config parameter: ServerBindPort")
 	}
@@ -145,9 +172,18 @@ func LoadConfig(filename string) {
 
 	fmt.Printf("ServerPath: %s\n", configuration.ServerPath)
 	fmt.Printf("LibraryPath: %s\n", configuration.LibraryPath)
-	fmt.Printf("MakeEpubCmd: %s, UpdateEpubCmd: %s\n", configuration.MakeEpubCmd, configuration.UpdateEpubCmd)
+	fmt.Printf("CreateEpubCmd: %s, UpdateEpubCmd: %s, ExtractEpubCmd: %s\n",
+		configuration.CreateEpubCmd, configuration.UpdateEpubCmd, configuration.ExtractEpubCmd)
 	fmt.Printf("DBFilename: %s\n", configuration.DBFilename)
 	fmt.Printf("LogFile: %s\n", configuration.LogFile)
 
 	logger.Init(level, configuration.LogFile, configuration.LogMaxSizeMB, configuration.LogMaxBackups, 30)
+}
+
+func getAbsolutePath(path string) string {
+	abPath, err := filepath.Abs(path)
+	if err != nil {
+		panic(err)
+	}
+	return abPath
 }

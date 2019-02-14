@@ -1,5 +1,5 @@
 #!/bin/sh
-# usage: update-epub.sh epub-file book-dir <list-of-files>
+# usage: extract-epub.sh epub-file book-dir <file-list>
 EPUB_FILE=$1
 BOOK_DIR=$2
 
@@ -15,8 +15,7 @@ BOOK_DIR=$2
 # -X exclude extra file attributes, -0 store only, -r recurse into directories, -x exclude the following file names
 #
 cd $BOOK_DIR
-#zip -X -u -r $EPUB_FILE $list chapter*.html content.opf toc.ncx
-echo update $EPUB_FILE with files: $3 $4 $5 $6 $7 $8 $9
-zip $EPUB_FILE $3 $4 $5 $6 $7 $8 $9
+echo extracting files: $3 $4 $5 $6 $7 $8 $9 from $EPUB_FILE
+unzip -q -o $EPUB_FILE $3 $4 $5 $6 $7 $8 $9 -d ./
 
 

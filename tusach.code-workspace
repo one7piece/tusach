@@ -10,8 +10,10 @@
 			"path": "C:\\dev\\dvan\\github\\httprest"
 		},
 		{
-			"path": "C:\\bin\\development\\OpenORB"
+			"path": "C:\\dev\\m4mms\\com.tycoint.m4mms.server\\runtime\\config\\files\\javascript"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
 }

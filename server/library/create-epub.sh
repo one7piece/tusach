@@ -9,6 +9,6 @@ rm -f $EPUB_FILE
 #
 cd $BOOK_DIR
 zip -X -0 $EPUB_FILE mimetype
-zip -X -r $EPUB_FILE * -x mimetype
+zip -X -r $EPUB_FILE * -x mimetype *.html
 
 

@@ -15,12 +15,12 @@ import (
 
 const FILENAME = "./ql_test.db"
 
-func TestSystemInfo(t *testing.T) {
+func xTestSystemInfo(t *testing.T) {
 	fmt.Println("TestSystemInfo...")
 
 	util.LoadConfig("config-test.json")
 	db := persistence.Ql{}
-	db.InitDB()
+	db.InitDB(true)
 
 	defer func() {
 		logger.Info("Closing database")
@@ -45,12 +45,12 @@ func TestSystemInfo(t *testing.T) {
 	logger.Infof("Loaded system info: %v", info)
 }
 
-func TestUser(t *testing.T) {
+func xTestUser(t *testing.T) {
 	fmt.Println("TestUser...")
 
 	util.LoadConfig("config-test.json")
 	db := persistence.Ql{}
-	db.InitDB()
+	db.InitDB(true)
 
 	defer func() {
 		logger.Info("Closing database")
@@ -89,7 +89,8 @@ func TestBook(t *testing.T) {
 
 	util.LoadConfig("config-test.json")
 	db := persistence.Ql{}
-	db.InitDB()
+	db.InitDB(false)
+	db.DisplayDB()
 
 	defer func() {
 		logger.Info("Closing database")
@@ -104,6 +105,8 @@ func TestBook(t *testing.T) {
 	for _, book := range books {
 		logger.Infof("Loaded book: %v", book)
 	}
+
+	return
 
 	testBook := model.Book{}
 	testBook.Title = "Test title 1"

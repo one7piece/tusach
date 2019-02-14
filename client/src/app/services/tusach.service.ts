@@ -63,13 +63,13 @@ export class TusachService {
         for (let book of bookList.books) {
           if (CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime) > this.bookLastUpdatedTime) {
             this.bookLastUpdatedTime = CommonUtils.convertTimestamp2Epoch(book.lastUpdatedTime);
-            this.log("bookLastUpdatedTime=" + String(this.bookLastUpdatedTime) + "," + CommonUtils.convertEpoch2Date(this.bookLastUpdatedTime));
           }
         }
+        this.log("bookLastUpdatedTime=" + String(this.bookLastUpdatedTime) + "," + CommonUtils.convertEpoch2Date(this.bookLastUpdatedTime));
         for (var i=0; i<this.listeners.length; i++) {
           this.listeners[i].booksUpdated(bookList);
         }
-        }
+      }
     });
   }
 
