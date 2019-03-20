@@ -8,12 +8,7 @@
 BAK/*
 server/pkg/*
 server/test/*
-tusachdart/build
-tusachdart/packages
-tusachdart/web
-tusachang/bower_components
-tusachang/node_modules
-tusachang/test
 dist/*
-tusach-win.tar.gz
-tusach-win.tar.gz
+tusach*.tar.gz
+backup*/*
+server/test/*
