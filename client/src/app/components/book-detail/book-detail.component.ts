@@ -51,7 +51,7 @@ export class BookDetailComponent implements OnInit {
       return;
     }
     this.tusachService.updateBook(this.book, "create");
-    this.router.navigate(['/books']);
+    this.router.navigate(['books']);
   }
 
   update(command: string) : void {
@@ -60,7 +60,7 @@ export class BookDetailComponent implements OnInit {
     }
     this.tusachService.updateBook(this.book, command);
     if (command == 'delete') {
-      this.router.navigate(['/books']);
+      this.router.navigate(['books']);
     }
   }
 

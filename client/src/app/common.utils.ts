@@ -6,7 +6,7 @@ export { Long } from 'protobufjs';
 
 export class CommonUtils {
 
-  static convertNumber2Long(n: number) {
+  static convertNumber2Long(n: number) : Long {
     let bits = util.LongBits.fromNumber(n);
     return bits.toLong();
   }
@@ -22,9 +22,9 @@ export class CommonUtils {
   static convertTimestamp2Epoch(t: google.protobuf.ITimestamp) : number {
     if (t != null) {
       if (typeof t.seconds === "number") {
-        return <number>t.seconds*1000 + t.nanos/1000000;
+        return <number>Math.floor(t.seconds*1000 + t.nanos/1000000);
       } else {
-        return CommonUtils.convertLong2Number(<Long>t.seconds)*1000 + t.nanos/1000000;
+        return CommonUtils.convertLong2Number(<Long>t.seconds)*1000 + Math.floor(t.nanos/1000000);
       }
     }
     return 0;

@@ -12,6 +12,8 @@ echo "Usage: make-dist [amd64|386|arm|win]"
 exit 1
 fi
 
+rm -rf $output_path/*
+
 source ./build-server.sh $1
 
 source ./build-client.sh $1

@@ -2,8 +2,8 @@
 <opf:package version="2.0" unique-identifier="BookId" xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <opf:metadata>
     <dc:identifier id="BookId" opf:scheme="UUID">49deff45-74b0-4657-a331-f47f12f47ee4</dc:identifier>
-    <dc:title>mytitle</dc:title>
-    <dc:creator opf:role="aut" opf:file-as="mytitle, ">mytitle</dc:creator>
+    <dc:title>{book.title}</dc:title>
+    <dc:creator opf:role="aut">{book.author}</dc:creator>
     <dc:language>vi</dc:language>
     <opf:meta name="generator" content="EPUBLib version 3.0" />
   </opf:metadata>

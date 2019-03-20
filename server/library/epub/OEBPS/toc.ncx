@@ -8,10 +8,10 @@
     <meta name="dtb:maxPageNumber" content="0" />
   </head>
   <docTitle>
-    <text>mytitle</text>
+    <text>{book.title}</text>
   </docTitle>
   <docAuthor>
-    <text>mytitle, </text>
+    <text>{book.author}</text>
   </docAuthor>
   <navMap>
   </navMap>

@@ -1,9 +1,11 @@
 <!--a mat-mini-fab class="create-button"><mat-icon>add_circle</mat-icon></a-->  
-<mat-nav-list>
-  <mat-list-item *ngFor="let book of books">
-    <button mat-icon-button routerLink="/book-detail/{{book.ID}}">
-      <mat-icon [style.color]="getIconColor(book)">book</mat-icon>{{book.title + " [" + book.currentPageNo + "]"}}
-    </button>
-  </mat-list-item>
-</mat-nav-list>
+<div class="panel">
+  <mat-nav-list>
+    <mat-list-item *ngFor="let book of books">
+      <button mat-icon-button routerLink="/book-detail/{{book.ID}}">
+        <mat-icon [style.color]="getIconColor(book)">book</mat-icon>{{book.title + " [" + book.currentPageNo + "]"}}
+      </button>
+    </mat-list-item>
+  </mat-nav-list>
+</div>
 

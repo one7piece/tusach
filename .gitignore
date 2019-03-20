@@ -2,7 +2,6 @@
 *.o
 *.so
 *.log
-*.exe
 *.go~
 **/.idea
 BAK/*
@@ -12,3 +11,4 @@ dist/*
 tusach*.tar.gz
 backup*/*
 server/test/*
+archive*/*

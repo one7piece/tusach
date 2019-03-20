@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +14,33 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	tspb "github.com/golang/protobuf/ptypes/timestamp"
 )
+
+func SplitByNewLine(str string) []string {
+	return strings.Split(strings.Replace(str, "\r\n", "\n", -1), "\n")
+}
+
+func ContainsString(list []string, a string) bool {
+	for _, item := range list {
+		if a == item {
+			return true
+		}
+	}
+	return false
+}
+
+func IsExist(path string) bool {
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		return true
+	}
+	return false
+}
+
+func IsDir(path string) bool {
+	if f, err := os.Stat(path); !os.IsNotExist(err) {
+		return f.IsDir()
+	}
+	return false
+}
 
 func ExtractError(err interface{}) error {
 	// find out what exactly is err
@@ -27,12 +55,14 @@ func ExtractError(err interface{}) error {
 }
 
 func SaveFile(filename string, data []byte) error {
-	logger.Info("saving file: %s", filename)
+	logger.Info("saving file: %s, #bytes:%d", filename, len(data))
 	fo, err := os.Create(filename)
 	if err != nil {
 		return errors.New("Error creating file " + filename + ": " + err.Error())
 	}
 	defer fo.Close()
+
+	//err := ioutil.WriteFile(filepath, chapter.Html, 0777)
 
 	_, err = fo.Write(data)
 	if err != nil {
@@ -41,41 +71,47 @@ func SaveFile(filename string, data []byte) error {
 	return nil
 }
 
-func ListDir(root string, filesOnly bool) ([]string, error) {
+func ReadDir(path string, filesOnly bool) ([]string, error) {
 	filenames := []string{}
 
-	fs, err := os.Stat(root)
-	if err != nil || !fs.IsDir() {
-		return filenames, errors.New("Unknown or not a directory")
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return filenames, err
 	}
-	rootPath := strings.TrimRight(root, "/")
 
-	filepath.Walk(root, func(path string, f os.FileInfo, _ error) error {
-		//logger.Infof("walk: rootPath=%s, path=%s, filename=%s\n", rootPath, path, f.Name())
-		path = strings.Replace(path, "\\", "/", -1)
-		index := strings.LastIndex(path, "/")
-		if (path == rootPath) || (index != -1 && path[0:index] == rootPath) {
-			if !f.IsDir() || !filesOnly {
-				filenames = append(filenames, f.Name())
-			}
-		} else {
-			//logger.Debug("ignore sub directory walk: " + path)
-			return filepath.SkipDir
+	for _, f := range files {
+		if !f.IsDir() || !filesOnly {
+			filenames = append(filenames, f.Name())
 		}
-		return nil
-	})
+	}
 	return filenames, nil
 }
 
-func CopyDir(fromPath string, toPath string) (string, error) {
+func CopyTree(fromPath string, toPath string) (string, error) {
+	if !IsExist(fromPath) {
+		return "Invalid source path: " + fromPath, errors.New("Invalid source path: " + fromPath)
+	}
+	if !IsExist(toPath) {
+		return "Invalid dest path: " + toPath, errors.New("Invalid dest path: " + toPath)
+	}
+
+	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
 		destPath := filepath.Join(toPath, filepath.Base(fromPath))
-		cmd := exec.Command("robocopy", fromPath, destPath,
-			"/MIR", "/nfl", "/ndl", "/njh", "/njs", "/nc", "/ns", "/np")
+		if IsDir(fromPath) {
+			cmd = exec.Command("robocopy", fromPath, destPath,
+				"/MIR", "/nfl", "/ndl", "/njh", "/njs", "/nc", "/ns", "/np")
+		} else {
+			cmd = exec.Command("copy", "/Y", fromPath, destPath)
+		}
 		out, _ := cmd.CombinedOutput()
 		return string(out), nil
 	} else {
-		cmd := exec.Command("cp", "-rf", fromPath, toPath)
+		if IsDir(fromPath) {
+			cmd = exec.Command("cp", "-rf", fromPath, toPath)
+		} else {
+			cmd = exec.Command("cp", "-f", fromPath, toPath)
+		}
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			logger.Errorf("Error copying directory %s to %s: %v", fromPath, toPath, err)
