@@ -1,0 +1,66 @@
+
+syntax = "proto3";
+
+package model;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service Tusach {
+  rpc GetBooks(google.protobuf.Empty) returns (BookList) {}
+}
+
+message User {
+  string name = 1;
+  string roles = 2;
+}
+
+message SystemInfo {
+  google.protobuf.Timestamp systemUpTime = 1;
+  google.protobuf.Timestamp bookLastUpdatedTime = 2;  
+}
+
+enum BookStatusType {
+  NONE = 0;
+  IN_PROGRESS = 1;
+  COMPLETED = 2;
+  ERROR = 3;
+  ABORTED = 4;
+}
+
+message Book {
+  int32 ID = 1;
+  BookStatusType status = 2;
+  string title = 3;
+  string author = 4;
+  google.protobuf.Timestamp createdTime = 5; // Epoch time in MS
+  string createdBy = 6;
+  int32 buildTimeSec = 7;
+  string startPageUrl = 8;
+  string currentPageUrl = 9;
+  int32 currentPageNo = 10;
+  int32 maxNumPages = 11;
+  google.protobuf.Timestamp lastUpdatedTime = 12;
+  string errorMsg = 13;
+  bool epubCreated = 14;
+  bool deleted = 15;
+}
+
+message BookList {
+  repeated Book books = 1;
+  bool isFullList = 2;
+}
+
+message NewBookRequest {
+  string title = 1;
+  string startPageUrl = 2;
+  string author = 3;
+  int32 maxNumPages = 4;
+}
+
+message Chapter {
+  int32 chapterNo = 1;
+  int32 bookId = 2;
+  string title = 3;
+  bytes html = 4;
+}
