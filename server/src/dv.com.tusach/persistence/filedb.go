@@ -50,18 +50,32 @@ func (f *FileDB) initBooks() {
 			// find the corresponding .json file
 			jsonfile := strings.Replace(name, ".epub", ".json", 1)
 			if util.ContainsString(list, jsonfile) {
-				logger.Infof("Loading book meta: %s", jsonfile)
+				fullname := filepath.Join(booksPath, jsonfile)
+				logger.Infof("Loading book meta: %s", fullname)
 				book := model.Book{}
-				err = read(jsonfile, book)
-				f.books = append(f.books, book)
+				err = read(fullname, &book)
+				if err != nil {
+					logger.Errorf("Failed to load book meta %s", err)
+				} else {
+					logger.Infof("Loaded book: +v", book)
+					f.books = append(f.books, book)
+				}
 			}
 		}
 	}
 
 	// reset all books in progress to aborted
 	for _, book := range f.books {
+		updated := false
+		if book.LastUpdatedTime == nil {
+			book.LastUpdatedTime = util.TimestampNow()
+			updated = true
+		}
 		if book.Status == model.BookStatusType_IN_PROGRESS {
 			book.Status = model.BookStatusType_ABORTED
+			updated = true
+		}
+		if updated {
 			f.SaveBook(&book)
 		}
 	}
@@ -135,18 +149,18 @@ func (f *FileDB) DeleteUser(userName string) error {
 	return write(filename, f.users)
 }
 
-func (f *FileDB) GetBook(id int32) *model.Book {
+func (f *FileDB) GetBook(id int32) model.Book {
 	for i := 0; i < len(f.books); i++ {
 		if f.books[i].ID == id {
-			return &f.books[i]
+			return f.books[i]
 		}
 	}
-	return nil
+	return model.Book{}
 }
 
 func (f *FileDB) GetBooks(includeDeleted bool) []model.Book {
 	books := f.books
-	if includeDeleted {
+	if includeDeleted && len(f.deletedBooks) > 0 {
 		books = append(books, f.deletedBooks...)
 	}
 	return books
@@ -280,10 +294,10 @@ func (f *FileDB) GetChapters(bookId int32) ([]model.Chapter, error) {
 
 func (f *FileDB) SaveChapter(chapter model.Chapter) error {
 	book := f.GetBook(chapter.BookId)
-	if book == nil {
+	if book.ID == 0 {
 		return errors.New("Book " + strconv.Itoa(int(chapter.BookId)) + " not found!")
 	}
-	return WriteChapter(*book, chapter)
+	return WriteChapter(book, chapter)
 }
 
 func read(filename string, dest interface{}) error {

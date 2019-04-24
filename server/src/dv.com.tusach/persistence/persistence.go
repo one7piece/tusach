@@ -33,7 +33,7 @@ type Persistence interface {
 	SaveUser(user model.User) error
 	DeleteUser(userName string) error
 	GetBooks(includeDeleted bool) []model.Book
-	GetBook(id int32) *model.Book
+	GetBook(id int32) model.Book
 	SaveBook(book *model.Book) (retId int, retErr error)
 	DeleteBook(bookId int32) error
 	SaveChapter(chapter model.Chapter) error

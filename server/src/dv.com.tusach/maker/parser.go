@@ -15,7 +15,7 @@ import (
 
 var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"}
 
-func (maker BookMaker) getURL(target string, request string) string {
+func (maker *BookMaker) getURL(target string, request string) string {
 	url := strings.TrimRight(target, "/") + "/" + strings.TrimLeft(request, "/")
 	if !strings.HasPrefix(url, "http://") {
 		url = "http://" + url
@@ -23,7 +23,7 @@ func (maker BookMaker) getURL(target string, request string) string {
 	return url
 }
 
-func (maker BookMaker) getIndexOf(source string, search string, offset int) int {
+func (maker *BookMaker) getIndexOf(source string, search string, offset int) int {
 	index := strings.Index(source[offset:], search)
 	if index != -1 {
 		index = index + offset
@@ -31,7 +31,7 @@ func (maker BookMaker) getIndexOf(source string, search string, offset int) int 
 	return index
 }
 
-func (maker BookMaker) Parse(engine *ScriptEngine, chapterURL string, inputFile string, outputFile string, timeoutSec int, numTries int) (chapterTitle, nextChapterURL string, err error) {
+func (maker *BookMaker) Parse(engine *ScriptEngine, chapterURL string, inputFile string, outputFile string, timeoutSec int, numTries int) (chapterTitle, nextChapterURL string, err error) {
 	err = nil
 	chapterTitle = ""
 	nextChapterURL = ""
@@ -74,7 +74,7 @@ func (maker BookMaker) Parse(engine *ScriptEngine, chapterURL string, inputFile 
 	return
 }
 
-func (maker BookMaker) parseChapterHTML(engine *ScriptEngine, chapterURL string, rawHTML string, chapterTitle *string,
+func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterURL string, rawHTML string, chapterTitle *string,
 	nextChapterURL *string) (string, error) {
 
 	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
@@ -230,7 +230,7 @@ func (maker BookMaker) parseChapterHTML(engine *ScriptEngine, chapterURL string,
 	return chapterHTML, nil
 }
 
-func (maker BookMaker) isNextOrPrevChapterURL(currentChapterURL string, url string) bool {
+func (maker *BookMaker) isNextOrPrevChapterURL(currentChapterURL string, url string) bool {
 	result := false
 	index0 := strings.LastIndex(currentChapterURL, "/")
 	currentChapterNo := -1
@@ -251,7 +251,7 @@ func (maker BookMaker) isNextOrPrevChapterURL(currentChapterURL string, url stri
 	return result
 }
 
-func (maker BookMaker) getChapterTitle(html string) string {
+func (maker *BookMaker) getChapterTitle(html string) string {
 	title := ""
 	for _, prefix := range chapterPrefixes {
 		restr := "\\s*" + prefix + "\\s*\\d+"
@@ -267,7 +267,7 @@ func (maker BookMaker) getChapterTitle(html string) string {
 	return title
 }
 
-func (maker BookMaker) getTagAttribute(z *html.Tokenizer, name string) string {
+func (maker *BookMaker) getTagAttribute(z *html.Tokenizer, name string) string {
 	for {
 		key, val, more := z.TagAttr()
 		if string(key) == name {
@@ -280,7 +280,7 @@ func (maker BookMaker) getTagAttribute(z *html.Tokenizer, name string) string {
 	return ""
 }
 
-func (maker BookMaker) extractChapterNumber(s string) int {
+func (maker *BookMaker) extractChapterNumber(s string) int {
 	x := -1
 	buf := []byte{}
 	for i := 0; i < len(s); i++ {

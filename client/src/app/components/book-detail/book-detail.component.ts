@@ -1,9 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Long } from 'protobufjs';
 import { TusachService } from '../../services';
-import { CommonUtils, model } from '../../common.utils';
+import * as model from '../../../typings';
 
 @Component({
   selector: 'app-book-detail',
@@ -11,7 +10,7 @@ import { CommonUtils, model } from '../../common.utils';
   styleUrls: ['./book-detail.component.css']
 })
 export class BookDetailComponent implements OnInit {
-  book: model.Book;
+  book: model.Book.AsObject;
   error: string;
 
   constructor(
@@ -19,12 +18,10 @@ export class BookDetailComponent implements OnInit {
     private router: Router,
     private tusachService: TusachService,
     private location: Location) {
-    console.log("constructor()");
-    this.book = new model.Book();
+    console.log("BookDetailComponent - constructor()");
   }
 
   ngOnInit() {
-    console.log("ngOnInit()");
     this.getBook();
   }
 
@@ -35,10 +32,21 @@ export class BookDetailComponent implements OnInit {
   getBookStatus() : string {
     var lastUpdatedTimeStr = "";
     if (this.book.lastUpdatedTime != undefined && this.book.lastUpdatedTime != null) {
-      let ms = CommonUtils.convertTimestamp2Epoch(this.book.lastUpdatedTime);      
-      lastUpdatedTimeStr = new Date(ms).toLocaleString();
+      lastUpdatedTimeStr = this.book.lastUpdatedTime.toDate().toLocaleString();
     }
-    return this.book.status + " (" + this.book.currentPageNo + ") lastUpdated:" + lastUpdatedTimeStr;
+
+    var str = model.BookStatusType[this.book.status] + " (";
+    if (this.book.currentPageNo >= 0) {
+      str += this.book.currentPageNo;
+    } else {
+      str += "?"
+    }
+    str +=  " "  + lastUpdatedTimeStr + ")";
+    return str;
+  }
+
+  getDownloadLink() : string {
+    return "/tusach/download/" + this.book.title + "?bookId=" + this.book.id;
   }
 
   create() : void {
@@ -50,7 +58,7 @@ export class BookDetailComponent implements OnInit {
       this.error = "First Chapter Url cannot be empty!";
       return;
     }
-    this.tusachService.updateBook(this.book, "create");
+    //this.tusachService.updateBook(this.book, "create");
     this.router.navigate(['books']);
   }
 
@@ -58,19 +66,21 @@ export class BookDetailComponent implements OnInit {
     if (this.book.title == "" || this.book.startPageUrl == "") {      
       return;
     }
-    this.tusachService.updateBook(this.book, command);
-    if (command == 'delete') {
-      this.router.navigate(['books']);
-    }
+    //this.tusachService.updateBook(this.book, command);
+    this.router.navigate(['books']);
   }
 
   getBook(): void {
     // route parameters are always string, +operator convert string to a number
     const id = +this.route.snapshot.paramMap.get('id');
+    console.log("BookDetailComponent - getBook:" + id);
     if (id == 0) {
-      this.book = new model.Book();      
+      this.book = new model.Book().toObject();      
     } else {
-      this.tusachService.getBook(id).subscribe(book => this.book = book);
+      this.tusachService.getBook(id).subscribe(book => {
+        this.book = book.toObject();
+        console.log("book loaded", book);
+      });
     }
   }
 }

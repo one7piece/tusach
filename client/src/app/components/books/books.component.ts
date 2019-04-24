@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { model } from '../../../typings';
+import * as model from '../../../typings';
 import { TusachService } from '../../services';
 
 @Component({
@@ -8,7 +8,7 @@ import { TusachService } from '../../services';
   styleUrls: ['./books.component.css']
 })
 export class BooksComponent implements OnInit {
-  books: model.IBook[];
+  books: model.Book[];
 
   constructor(private tusachService: TusachService,
     private ref: ChangeDetectorRef) {
@@ -28,7 +28,7 @@ export class BooksComponent implements OnInit {
   getBooks() {
     console.log("getting books from tusach service...");
     this.tusachService.getBooks().subscribe(bookList => {
-      this.books = bookList.books;
+      this.books = bookList.getBooksList();
       if (this.books) {
         this.sortBooks();
         console.log("#books loaded: " + this.books.length);
@@ -39,11 +39,11 @@ export class BooksComponent implements OnInit {
   getIconColor(book: model.Book) : String {
     let color = "blue";
     if (book != null) {
-      if (book.status == model.BookStatusType.IN_PROGRESS) {
+      if (book.getStatus() == model.BookStatusType.IN_PROGRESS) {
         color = "yellow";
-      } else if (book.epubCreated && book.status == model.BookStatusType.COMPLETED) {
+      } else if (book.getEpubCreated() && book.getStatus() == model.BookStatusType.COMPLETED) {
         color = "green";
-      } else if (book.epubCreated) {
+      } else if (book.getEpubCreated()) {
         color = "red";
       }
     }
@@ -52,21 +52,21 @@ export class BooksComponent implements OnInit {
 
   booksUpdated(list: model.BookList) {
     let sortPending = false;
-    if (list.isFullList) {
-      this.books = list.books;
+    if (list.getIsFullList()) {
+      this.books = list.getBooksList();
       sortPending = true;
     } else {
-      for (var i=0; i<list.books.length; i++) {
-        let book = list.books[i];
-        let index = this.findBookIndex(book.ID);
+      for (var i=0; i<list.getBooksList().length; i++) {
+        let book = list.getBooksList()[i];
+        let index = this.findBookIndex(book.getId());
         if (index != -1) {
-          if (book.deleted) {
-            console.log("found deleted book: " + book.ID + " - " + book.title + " (" + book.status + ") #pages=" +  book.currentPageNo);
+          if (book.getDeleted()) {
+            console.log("found deleted book: " + book.getId() + " - " + book.getTitle() + " (" + book.getStatus() + ") #pages=" +  book.getCurrentPageNo());
             this.books.splice(index, 1);
           } else {
-            console.log("found updated book " + book.ID + ". " + book.title 
-              +  " oldStatus(" + this.books[index].status + ") newStatus(" + book.status + ") #pages=" +  book.currentPageNo);
-            if (this.books[index].status != book.status) {
+            console.log("found updated book " + book.getId() + ". " + book.getTitle() 
+              +  " oldStatus(" + this.books[index].getStatus() + ") newStatus(" + book.getStatus() + ") #pages=" +  book.getCurrentPageNo());
+            if (this.books[index].getStatus() != book.getStatus()) {
               sortPending = true;
             }
             this.books[index] = book;
@@ -75,7 +75,7 @@ export class BooksComponent implements OnInit {
           // new book
           this.books.push(book);
           sortPending = true;
-          console.log("found new book: " + book.ID + " - " + book.title + " (" + book.status + ") #pages=" +  book.currentPageNo);
+          console.log("found new book: " + book.getId() + " - " + book.getTitle() + " (" + book.getStatus() + ") #pages=" +  book.getCurrentPageNo());
         }
       }
     }
@@ -88,21 +88,21 @@ export class BooksComponent implements OnInit {
   sortBooks() {
     if (this.books) {
       this.books.sort((b1, b2) => {        
-        if (b1.status != b2.status) {
-          if (b1.status == model.BookStatusType.IN_PROGRESS) {
+        if (b1.getStatus() != b2.getStatus()) {
+          if (b1.getStatus() == model.BookStatusType.IN_PROGRESS) {
             return -1;
-          } else if (b2.status == model.BookStatusType.IN_PROGRESS) {
+          } else if (b2.getStatus() == model.BookStatusType.IN_PROGRESS) {
             return 1;
           }
         } 
-        return b1.title.localeCompare(b2.title);
+        return b1.getTitle().localeCompare(b2.getTitle());
       });      
       }
   }
 
   findBookIndex(id: number) : number {
     for (var i=0; i<this.books.length; i++) {
-      if (this.books[i].ID == id) {
+      if (this.books[i].getId() == id) {
         return i;
       }
     }

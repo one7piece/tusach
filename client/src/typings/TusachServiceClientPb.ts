@@ -8,11 +8,11 @@
 
 
 import * as grpcWeb from 'grpc-web';
-import {
-  Empty,
-  Timestamp,
-  Book,
-  BookList} from './tusach_pb';
+
+import * as google_protobuf_empty_pb from 'google-protobuf/google/protobuf/empty_pb';
+import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
+
+import {BookList} from './tusach_pb';
 
 export class TusachClient {
   client_: grpcWeb.AbstractClientBase;
@@ -34,22 +34,22 @@ export class TusachClient {
 
   methodInfoGetBooks = new grpcWeb.AbstractClientBase.MethodInfo(
     BookList,
-    (request: Empty) => {
+    (request: google_protobuf_empty_pb.Empty) => {
       return request.serializeBinary();
     },
     BookList.deserializeBinary
   );
 
   getBooks(
-    request: Empty,
-    metadata: grpcWeb.Metadata,
+    request: google_protobuf_empty_pb.Empty,
+    metadata: grpcWeb.Metadata | null,
     callback: (err: grpcWeb.Error,
                response: BookList) => void) {
     return this.client_.rpcCall(
       this.hostname_ +
         '/model.Tusach/GetBooks',
       request,
-      metadata,
+      metadata || {},
       this.methodInfoGetBooks,
       callback);
   }

@@ -2,8 +2,10 @@ package maker
 
 import (
 	"errors"
+	"io/ioutil"
 	"os"
 	"strconv"
+	"sync"
 
 	"dv.com.tusach/logger"
 	"dv.com.tusach/model"
@@ -13,7 +15,8 @@ import (
 )
 
 type BookMaker struct {
-	DB persistence.Persistence
+	db  persistence.Persistence
+	mux *sync.Mutex
 }
 
 type ScriptEngine struct {
@@ -26,7 +29,14 @@ type ScriptEngine struct {
 	textFn     otto.Value
 }
 
-func Compile(scriptData []byte) (*ScriptEngine, error) {
+func NewBookMaker(db persistence.Persistence) *BookMaker {
+	bookMaker := BookMaker{}
+	bookMaker.db = db
+	bookMaker.mux = &sync.Mutex{}
+	return &bookMaker
+}
+
+func (bookMaker *BookMaker) Compile(scriptData []byte) (*ScriptEngine, error) {
 	if scriptData == nil {
 		return nil, errors.New("missing argument")
 	}
@@ -61,29 +71,132 @@ func Compile(scriptData []byte) (*ScriptEngine, error) {
 	return engine, nil
 }
 
-func (bookMaker BookMaker) GetBookSites() []string {
+func (bookMaker *BookMaker) GetBookSites() []string {
 	return []string{"www.truyencuatui.net"}
 }
 
-func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) error {
+func (bookMaker *BookMaker) AbortBook(bookId int32) error {
+	bookMaker.mux.Lock()
+	defer bookMaker.mux.Unlock()
+	current := bookMaker.db.GetBook(bookId)
+	if current.ID == 0 {
+		return errors.New("Book " + strconv.Itoa(int(bookId)) + " not found")
+	}
+	if current.Status == model.BookStatusType_IN_PROGRESS {
+		current.Status = model.BookStatusType_ABORTED
+		_, err := bookMaker.saveBook(&current)
+		return err
+	}
+	return nil
+}
+
+func (bookMaker *BookMaker) ResumeBook(bookId int32) error {
+	bookMaker.mux.Lock()
+	defer bookMaker.mux.Unlock()
+	current := bookMaker.db.GetBook(bookId)
+	if current.ID == 0 {
+		return errors.New("Book " + strconv.Itoa(int(bookId)) + " not found")
+	}
+	if current.Status == model.BookStatusType_IN_PROGRESS {
+		return errors.New("Book " + strconv.Itoa(int(bookId)) + " is currently in progress")
+	}
+	current.Status = model.BookStatusType_IN_PROGRESS
+	_, err := bookMaker.saveBook(&current)
+	if err != nil {
+		return nil
+	}
+	return bookMaker.CreateBook(&current)
+}
+
+func (bookMaker *BookMaker) UpdateBook(book model.Book) error {
+	bookMaker.mux.Lock()
+	defer bookMaker.mux.Unlock()
+	current := bookMaker.db.GetBook(book.ID)
+	if current.ID == 0 {
+		return errors.New("Book " + strconv.Itoa(int(book.ID)) + " not found")
+	}
+	if current.Status == model.BookStatusType_IN_PROGRESS {
+		return errors.New("Book " + strconv.Itoa(int(book.ID)) + " is currently in progress")
+	}
+	if current.Status != book.Status {
+		return errors.New("Cannot update book to different status!")
+	}
+	_, err := bookMaker.saveBook(&book)
+	return err
+}
+
+func (bookMaker *BookMaker) CreateBook(book *model.Book) error {
+	book.Status = model.BookStatusType_IN_PROGRESS
+	book.CreatedTime = util.TimestampNow()
+	bookId, err := bookMaker.saveBook(book)
+	book.ID = int32(bookId)
+
+	data, err := ioutil.ReadFile(util.GetParserFile())
+	if err != nil {
+		logger.Errorf("Failed to load js: %s\n", err)
+		return err
+	}
+
+	engine, err := bookMaker.Compile(data)
+	if err != nil {
+		logger.Errorf("Error compiling parser.js: %s\n", err.Error())
+		return err
+	}
+	go bookMaker.makeBook(engine, book.ID)
+	return nil
+}
+
+func (bookMaker *BookMaker) GetBooks(includeDeleted bool) []model.Book {
+	return bookMaker.db.GetBooks(includeDeleted)
+}
+
+func (bookMaker *BookMaker) GetBook(id int32) model.Book {
+	return bookMaker.db.GetBook(id)
+}
+
+func (bookMaker *BookMaker) DeleteBook(bookId int32) error {
+	bookMaker.mux.Lock()
+	defer bookMaker.mux.Unlock()
+	current := bookMaker.db.GetBook(bookId)
+	if current.ID == 0 {
+		return errors.New("Book " + strconv.Itoa(int(bookId)) + " not found")
+	}
+	if current.Status == model.BookStatusType_IN_PROGRESS {
+		return errors.New("Book " + strconv.Itoa(int(bookId)) + " is currently in progress")
+	}
+	return bookMaker.db.DeleteBook(bookId)
+}
+
+func (bookMaker *BookMaker) GetSystemInfo() model.SystemInfo {
+	return bookMaker.db.GetSystemInfo()
+}
+
+func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) {
 	var numPagesLoaded = 0
 	var err error
 
+	book := bookMaker.GetBook(bookId)
+	if book.ID == 0 {
+		logger.Errorf("Could not find book: %d", bookId)
+		return
+	}
 	url := book.CurrentPageUrl
 	if url == "" {
 		url = book.StartPageUrl
 	}
 
 	// TODO set loader configuration
-	err = persistence.InitBookDir(*book)
+	err = persistence.InitBookDir(book)
 	if err != nil {
-		return err
+		return
 	}
 	defer func() {
-		persistence.RemoveBookDir(*book)
+		persistence.RemoveBookDir(book)
 	}()
 
 	for {
+		// reload book to check change to book status
+		book := bookMaker.GetBook(bookId)
 		if book.Status == model.BookStatusType_ABORTED || book.MaxNumPages > 0 && book.MaxNumPages <= book.CurrentPageNo {
 			break
 		}
@@ -105,7 +218,7 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 		}
 		logger.Infof("%s - Completed chapter: %d (%s), nextPageUrl: %s\n", book.Title, newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
-		err = bookMaker.DB.SaveChapter(newChapter)
+		err = bookMaker.db.SaveChapter(newChapter)
 		if err != nil {
 			logger.Errorf("%s - Failed to save chapter %d: %s", book.Title, newChapterNo, err)
 			break
@@ -115,10 +228,10 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 		book.CurrentPageUrl = url
 		numPagesLoaded++
 
-		_, err = bookMaker.SaveBook(book)
+		_, err = bookMaker.saveBook(&book)
 		if err != nil {
 			logger.Errorf("%s - Failed to save book to DB: %s", book.Title, err)
-			return err
+			return
 		}
 
 		// check for no more pages
@@ -140,12 +253,12 @@ func (bookMaker BookMaker) CreateBook(engine *ScriptEngine, book *model.Book) er
 	} else if book.Status != model.BookStatusType_ABORTED {
 		book.Status = model.BookStatusType_COMPLETED
 	}
-	bookMaker.SaveBook(book)
+	bookMaker.saveBook(&book)
 
-	return err
+	return
 }
 
-func (bookMaker BookMaker) DownloadChapter(engine *ScriptEngine, chapterUrl string, chapter *model.Chapter) (string, error) {
+func (bookMaker *BookMaker) DownloadChapter(engine *ScriptEngine, chapterUrl string, chapter *model.Chapter) (string, error) {
 	rawFilename := persistence.GetRawChapterFilename(*chapter)
 	filename := persistence.GetChapterFilename(*chapter)
 
@@ -159,20 +272,15 @@ func (bookMaker BookMaker) DownloadChapter(engine *ScriptEngine, chapterUrl stri
 	return nextChapterURL, nil
 }
 
-func (bookMaker BookMaker) SaveBook(book *model.Book) (retId int, retErr error) {
+func (bookMaker *BookMaker) saveBook(book *model.Book) (retId int, retErr error) {
+	//bookMaker.mux.Lock()
+	//defer bookMaker.mux.Unlock()
+
 	book.LastUpdatedTime = util.TimestampNow()
 	book.EpubCreated = util.IsExist(persistence.GetBookEpubFilename(*book))
 
-	id, err := bookMaker.DB.SaveBook(book)
+	id, err := bookMaker.db.SaveBook(book)
 	if err == nil {
-		defer func() {
-			if err := recover(); err != nil {
-				logger.Infof("Recover from panic: %s\n", err)
-				retErr = util.ExtractError(err)
-				retId = 0
-			}
-		}()
-
 		if book.ID <= 0 {
 			book.ID = int32(id)
 			logger.Infof("created book - %v", book)

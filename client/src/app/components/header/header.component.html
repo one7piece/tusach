@@ -3,12 +3,13 @@
     <button mat-icon-button [matMenuTriggerFor]="menu">
       <mat-icon>menu</mat-icon>
     </button>
+
     <mat-menu #menu="matMenu">
       <button mat-menu-item routerLink="books">
         <mat-icon>home</mat-icon>
         <span>Home</span>
       </button>
-      <button mat-menu-item routerLink="/book-detail/0">
+      <button mat-menu-item routerLink="book/0">
         <mat-icon>library_add</mat-icon>
         <span>Create Book</span>
       </button>
@@ -19,5 +20,5 @@
       </mat-menu>
   </span>
 
-  <span class="fill-remaining-space">One-7-Piece</span>
+  <span class="fill-remaining-space">=== Thư Viện Di Động ===</span>
 </mat-toolbar>

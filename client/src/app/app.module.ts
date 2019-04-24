@@ -10,6 +10,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { httpInterceptorProviders } from './interceptors';
 import { AppRoutingModule } from './routing/app-routing.module';
 import { AppComponent, HeaderComponent, MessagesComponent, BooksComponent, BookDetailComponent } from './components';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { AppComponent, HeaderComponent, MessagesComponent, BooksComponent, BookD
     FormsModule,
     AppRoutingModule,
     HttpClientModule,
+    FlexLayoutModule,
   ],
   providers: [
     httpInterceptorProviders

@@ -1,5 +1,5 @@
 <div class="bookdetail-form" *ngIf="book" layout="column" layout-align="center center">
-  <form *ngIf="book.ID == 0">
+  <form *ngIf="book.id == 0">
     <h2>New Book</h2>
     <mat-divider></mat-divider>
     <mat-form-field flex layout="row" class="bookdetail-field">
@@ -11,12 +11,15 @@
     <mat-form-field flex layout="row" class="bookdetail-field">
       <input matInput placeholder="Author" [(ngModel)]="book.author" name="author">
     </mat-form-field>
+    <mat-form-field flex layout="row" class="bookdetail-field">
+      <input type="number" matInput placeholder="Number Of Chapters" [(ngModel)]="book.maxNumPages" name="maxNumPages">
+    </mat-form-field>
     <div flex layout="row">
       <button type="button" mat-raised-button color="primary" (click)="create()">Create</button>
     </div>
   </form>
 
-  <form *ngIf="book.ID > 0">
+  <form *ngIf="book.id > 0">
     <h2>{{book.ID}} - {{book.title}}</h2>
     <mat-divider></mat-divider>
     <mat-form-field flex layout="row" class="bookdetail-field">
@@ -29,17 +32,21 @@
       <input matInput readonly placeholder="First Chapter URL" [(ngModel)]="book.startPageUrl" name="startPageUrl">
     </mat-form-field>
     <mat-form-field flex layout="row" class="bookdetail-field">
-      <input matInput [readonly]="isBookInProgress()" placeholder="Current Chapter URL" ([ngModel])="currentPageUrl" name="currentPageUrl">
+      <input matInput [readonly]="isBookInProgress()" placeholder="Current Chapter URL" [(ngModel)]="book.currentPageUrl" name="currentPageUrl">
     </mat-form-field>
+    <mat-form-field flex layout="row" class="bookdetail-field">
+      <input type="number" matInput [readonly]="isBookInProgress()" placeholder="Number Of Chapters" [(ngModel)]="book.maxNumPages" name="maxNumPages">
+    </mat-form-field>    
     <mat-form-field class="bookdetail-field">
       <input matInput readonly type="text" placeholder="Status" value={{getBookStatus()}}>
     </mat-form-field>
     <mat-form-field class="bookdetail-field">
       <input matInput readonly type="text" placeholder="Error" value={{book.errorMsg}}>
     </mat-form-field>
-    <div flex layout="row">
+    <div fxLayout="row" fxLayoutGap="5px">
+      <a *ngIf="!isBookInProgress()" mat-raised-button color="primary" href="{{getDownloadLink()}}">Download</a>
       <button *ngIf="isBookInProgress()" mat-raised-button color="primary" (click)="update('abort')">Abort</button>
-      <button *ngIf="!isBookInProgress()" mat-raised-button color="primary" (click)="update('resume')">Resume</button>
+      <button *ngIf="!isBookInProgress() && book.startPageUrl.length > 0" mat-raised-button color="primary" (click)="update('resume')">Resume</button>
       <button *ngIf="!isBookInProgress()" mat-raised-button color="primary" (click)="update('update')">Update</button>
       <button *ngIf="!isBookInProgress()" mat-raised-button color="primary" (click)="delete()">Delete</button>
     </div>

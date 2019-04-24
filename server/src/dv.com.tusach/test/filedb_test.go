@@ -1,6 +1,7 @@
 package test
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -67,7 +68,7 @@ func TestBooks(t *testing.T) {
 	db.InitDB()
 	maxId, err := db.GetMaxBookId()
 	CheckErr(t, err)
-	log.Printf("cAsurrent max book id: %d\n", maxId)
+	log.Printf("current max book id: %d\n", maxId)
 	newBook := model.Book{Title: "test book 1", StartPageUrl: "http://start page"}
 	id, err := db.SaveBook(&newBook)
 	CheckErr(t, err)
@@ -75,6 +76,11 @@ func TestBooks(t *testing.T) {
 	loadBook := db.GetBook(newBook.ID)
 	AssertTrue(t, "Expecting book id: "+strconv.Itoa(int(newBook.ID))+", found: "+strconv.Itoa(int(loadBook.ID)), loadBook.ID == newBook.ID)
 	fmt.Printf("Created book: %d. %s\n", newBook.ID, newBook.Title)
+
+	// test json marshalling of Book object
+	str, err := json.Marshal(newBook)
+	CheckErr(t, err)
+	fmt.Printf("marshall JSON string: %s\n", string(str))
 
 	persistence.InitBookDir(newBook)
 

@@ -16,7 +16,11 @@ const (
 	address = "192.168.43.20:9999"
 )
 
-func Test(t *testing.T) {
+func TestGoogleProtobufTimestamp(t *testing.T) {
+
+}
+
+func TestGrpcConnection(t *testing.T) {
 	// test assume that the grpc is already up and running on port 9999
 
 	log.Printf("connecting to grpc server: %s\n", address)

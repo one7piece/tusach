@@ -2,8 +2,8 @@
 <div class="panel">
   <mat-nav-list>
     <mat-list-item *ngFor="let book of books">
-      <button mat-icon-button routerLink="/book-detail/{{book.ID}}">
-        <mat-icon [style.color]="getIconColor(book)">book</mat-icon>{{book.title + " [" + book.currentPageNo + "]"}}
+      <button mat-icon-button routerLink="/book/{{book.getId()}}">
+        <mat-icon [style.color]="getIconColor(book)">book</mat-icon>{{book.getTitle() + " [" + book.getCurrentPageNo() + "]"}}
       </button>
     </mat-list-item>
   </mat-nav-list>

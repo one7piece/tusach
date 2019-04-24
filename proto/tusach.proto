@@ -16,8 +16,8 @@ message User {
 }
 
 message SystemInfo {
-  google.protobuf.Timestamp systemUpTime = 1;
-  google.protobuf.Timestamp bookLastUpdatedTime = 2;  
+  google.protobuf.Timestamp system_up_time = 1;
+  google.protobuf.Timestamp book_last_updated_time = 2;  
 }
 
 enum BookStatusType {
@@ -33,34 +33,34 @@ message Book {
   BookStatusType status = 2;
   string title = 3;
   string author = 4;
-  google.protobuf.Timestamp createdTime = 5; // Epoch time in MS
-  string createdBy = 6;
-  int32 buildTimeSec = 7;
-  string startPageUrl = 8;
-  string currentPageUrl = 9;
-  int32 currentPageNo = 10;
-  int32 maxNumPages = 11;
-  google.protobuf.Timestamp lastUpdatedTime = 12;
-  string errorMsg = 13;
-  bool epubCreated = 14;
+  google.protobuf.Timestamp created_time = 5; // Epoch time in MS
+  string created_by = 6;
+  int32 build_time_sec = 7;
+  string start_page_url = 8;
+  string current_page_url = 9;
+  int32 current_page_no = 10;
+  int32 max_num_pages = 11;
+  google.protobuf.Timestamp last_updated_time = 12;
+  string error_msg = 13;
+  bool epub_created = 14;
   bool deleted = 15;
 }
 
 message BookList {
   repeated Book books = 1;
-  bool isFullList = 2;
+  bool is_full_list = 2;
 }
 
 message NewBookRequest {
   string title = 1;
-  string startPageUrl = 2;
+  string start_page_url = 2;
   string author = 3;
-  int32 maxNumPages = 4;
+  int32 max_num_pages = 4;
 }
 
 message Chapter {
-  int32 chapterNo = 1;
-  int32 bookId = 2;
+  int32 chapter_no = 1;
+  int32 book_id = 2;
   string title = 3;
   bytes html = 4;
 }
