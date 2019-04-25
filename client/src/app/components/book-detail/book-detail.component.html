@@ -20,7 +20,7 @@
   </form>
 
   <form *ngIf="book.id > 0">
-    <h2>{{book.ID}} - {{book.title}}</h2>
+    <h2>{{book.id}} - {{book.title}}</h2>
     <mat-divider></mat-divider>
     <mat-form-field flex layout="row" class="bookdetail-field">
       <input matInput [readonly]="isBookInProgress()" placeholder="Title" [(ngModel)]="book.title" name="title" required>

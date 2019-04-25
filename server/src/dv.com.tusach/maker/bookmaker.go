@@ -121,7 +121,18 @@ func (bookMaker *BookMaker) UpdateBook(book model.Book) error {
 	if current.Status != book.Status {
 		return errors.New("Cannot update book to different status!")
 	}
-	_, err := bookMaker.saveBook(&book)
+	// allow updating fields: title, author, currentPageUrl
+	if book.Title != "" {
+		current.Title = book.Title
+	}
+	if book.Author != "" {
+		current.Author = book.Author
+	}
+	if book.CurrentPageUrl != "" {
+		current.CurrentPageUrl = book.CurrentPageUrl
+	}
+
+	_, err := bookMaker.saveBook(&current)
 	return err
 }
 

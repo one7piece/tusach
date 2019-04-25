@@ -12,6 +12,7 @@ import * as model from '../../../typings';
 export class BookDetailComponent implements OnInit {
   book: model.Book.AsObject;
   error: string;
+  timestampAdapter = new model.JsonTimestampAdapter();
 
   constructor(
     private route: ActivatedRoute,
@@ -31,11 +32,11 @@ export class BookDetailComponent implements OnInit {
 
   getBookStatus() : string {
     var lastUpdatedTimeStr = "";
-    if (this.book.lastUpdatedTime != undefined && this.book.lastUpdatedTime != null) {
-      lastUpdatedTimeStr = this.book.lastUpdatedTime.toDate().toLocaleString();
+    if (this.book.lastUpdatedTime) {
+      lastUpdatedTimeStr = this.timestampAdapter.adapt(this.book.lastUpdatedTime).toDate().toLocaleString();
     }
 
-    var str = model.BookStatusType[this.book.status] + " (";
+    var str = model.getBookStatusAsString(this.book.status) + " (";
     if (this.book.currentPageNo >= 0) {
       str += this.book.currentPageNo;
     } else {
@@ -78,8 +79,9 @@ export class BookDetailComponent implements OnInit {
       this.book = new model.Book().toObject();      
     } else {
       this.tusachService.getBook(id).subscribe(book => {
-        this.book = book.toObject();
         console.log("book loaded", book);
+        this.book = book.toObject();
+        console.log("book.AsObject:", this.book);
       });
     }
   }
