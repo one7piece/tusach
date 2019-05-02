@@ -51,6 +51,24 @@ export namespace SystemInfo {
   }
 }
 
+export class BookID extends jspb.Message {
+  getId(): number;
+  setId(value: number): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): BookID.AsObject;
+  static toObject(includeInstance: boolean, msg: BookID): BookID.AsObject;
+  static serializeBinaryToWriter(message: BookID, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): BookID;
+  static deserializeBinaryFromReader(message: BookID, reader: jspb.BinaryReader): BookID;
+}
+
+export namespace BookID {
+  export type AsObject = {
+    id: number,
+  }
+}
+
 export class Book extends jspb.Message {
   getId(): number;
   setId(value: number): void;

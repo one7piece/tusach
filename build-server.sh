@@ -21,12 +21,16 @@ exit 1
 fi
 
 echo "copying library and configuration files..."
-if [ -d $output_path/library ]; then
-rm -rf $output_path/library
-fi
+#if [ -d $output_path/library ]; then
+#rm -rf $output_path/library
+#fi
 cp -r ./library $output_path/
 cp ./*.json $output_path/
 cp ./*.sh $output_path/
 cp ./*.cmd $output_path/
 
+if ! [ -d $output_path/envoy ]; then
+mkdir $output_path/envoy
+fi
 cd ..
+cp ./grpc/grpcenvoy.sh ./grpc/grpcenvoy.yaml $output_path/envoy/

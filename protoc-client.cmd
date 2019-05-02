@@ -2,6 +2,7 @@
 echo generating typescript from proto file using google grpc-web
 echo Ensure that you've installed protoc-gen-grpc-web.exe from https://github.com/grpc/grpc-web/releases
 echo and make sure that protoc-gen-grpc-web.exe is on the $PATH (eg. add $GOPATH/bin to $PATH)
+pause
 
 set PROTO_DIR=.\proto
 set OUT_DIR=.\client\src\typings

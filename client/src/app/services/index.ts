@@ -1,3 +1,3 @@
 export { MessageService } from './message.service';
-export { TusachService } from './tusach.service';
+export { ServiceType, TusachService } from './tusach.service';
 

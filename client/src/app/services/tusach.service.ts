@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Location } from '@angular/common'
 import { MessageService } from './message.service';
 import * as model from '../../typings';
-import {IBookListener, ITusachProxy} from './tusach.proxy';
+import { IBookListener, ITusachProxy} from './tusach.proxy';
 
-// TODO replace TusachFake with TusachJson or TusachGrpc in production
-import { TusachJson as TusachProxy } from './tusach.json';
-//import { TusachFake as TusachProxy } from './tusach.fake';
+import { TusachRest } from './tusach.rest';
+import { TusachGrpc } from './tusach.grpc';
+
+export enum ServiceType {
+  GRPC = "grpc",
+  REST = "rest"
+} 
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +21,26 @@ import { TusachJson as TusachProxy } from './tusach.json';
 export class TusachService {
   private listeners : IBookListener[] = [];
   private proxy : ITusachProxy;
+  private grpcService : TusachGrpc;
+  private restService : TusachRest;
   
   constructor(
+    private location : Location,
     private http: HttpClient, 
     private messageService: MessageService) {  
-    this.proxy = new TusachProxy(http, messageService, this);
+    this.grpcService = new TusachGrpc(location, messageService, this);
+    this.restService = new TusachRest(http, messageService, this);
+    this.proxy = this.grpcService;
+  }
+
+  setServiceType(type: ServiceType) {
+    if (type == ServiceType.REST) {
+      this.proxy = this.restService;
+      console.log("setServiceType - selected REST");
+    } else {
+      this.proxy = this.grpcService;
+      console.log("setServiceType - selected GRPC");
+    }
   }
 
   booksUpdated(list: model.BookList) {
