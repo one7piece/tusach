@@ -187,5 +187,49 @@ export class TusachClient {
       callback);
   }
 
+  methodInfoAbortBook = new grpcWeb.AbstractClientBase.MethodInfo(
+    google_protobuf_empty_pb.Empty,
+    (request: BookID) => {
+      return request.serializeBinary();
+    },
+    google_protobuf_empty_pb.Empty.deserializeBinary
+  );
+
+  abortBook(
+    request: BookID,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.Error,
+               response: google_protobuf_empty_pb.Empty) => void) {
+    return this.client_.rpcCall(
+      this.hostname_ +
+        '/model.Tusach/AbortBook',
+      request,
+      metadata || {},
+      this.methodInfoAbortBook,
+      callback);
+  }
+
+  methodInfoResumeBook = new grpcWeb.AbstractClientBase.MethodInfo(
+    google_protobuf_empty_pb.Empty,
+    (request: BookID) => {
+      return request.serializeBinary();
+    },
+    google_protobuf_empty_pb.Empty.deserializeBinary
+  );
+
+  resumeBook(
+    request: BookID,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.Error,
+               response: google_protobuf_empty_pb.Empty) => void) {
+    return this.client_.rpcCall(
+      this.hostname_ +
+        '/model.Tusach/ResumeBook',
+      request,
+      metadata || {},
+      this.methodInfoResumeBook,
+      callback);
+  }
+
 }
 

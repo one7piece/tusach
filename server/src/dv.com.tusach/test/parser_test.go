@@ -42,7 +42,18 @@ func (o Parser_Test) cleanup(t *testing.T) {
 
 func (o Parser_Test) testParser(t *testing.T, chapterURL string, title string) {
 	bookMaker := maker.BookMaker{}
-	engine := o.createEngine(t)
+
+	data, err := ioutil.ReadFile(o.parserFile)
+	if err != nil {
+		t.Errorf("Failed to load %s: %s\n", o.parserFile, err)
+		t.FailNow()
+	}
+	engine, err := bookMaker.Compile(data)
+	if err != nil {
+		t.Errorf("Error compiling parser.js: %s\n", err.Error())
+		t.FailNow()
+	}
+
 	prefix := util.GetConfiguration().LibraryPath + "/" + title
 	chapterTitle, nextChapterURL, err := bookMaker.Parse(engine, chapterURL, prefix+"_raw.html", prefix+".html", 10, 1)
 	if err != nil {
@@ -51,19 +62,4 @@ func (o Parser_Test) testParser(t *testing.T, chapterURL string, title string) {
 	}
 	t.Logf("chapterTitle: %s", chapterTitle)
 	t.Logf("nextChapterURL: %s", nextChapterURL)
-}
-
-func (o Parser_Test) createEngine(t *testing.T) *maker.ScriptEngine {
-	data, err := ioutil.ReadFile(o.parserFile)
-	if err != nil {
-		t.Errorf("Failed to load %s: %s\n", o.parserFile, err)
-		t.FailNow()
-	}
-
-	engine, err := maker.Compile(data)
-	if err != nil {
-		t.Errorf("Error compiling parser.js: %s\n", err.Error())
-		t.FailNow()
-	}
-	return engine
 }

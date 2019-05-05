@@ -13,6 +13,7 @@ export class BookDetailComponent implements OnInit {
   book: model.Book.AsObject;
   error: string;
   timestampAdapter = new model.JsonTimestampAdapter();
+  private bookListAdapter = new model.JsonBookListAdapter();
 
   constructor(
     private route: ActivatedRoute,
@@ -24,6 +25,11 @@ export class BookDetailComponent implements OnInit {
 
   ngOnInit() {
     this.getBook();
+    this.tusachService.subscribe(this);
+  }
+
+  ngOnDestroy() {
+    this.tusachService.unsubscribe(this);
   }
 
   isBookInProgress() : boolean {
@@ -36,7 +42,7 @@ export class BookDetailComponent implements OnInit {
       lastUpdatedTimeStr = this.timestampAdapter.adapt(this.book.lastUpdatedTime).toDate().toLocaleString();
     }
 
-    var str = model.getBookStatusAsString(this.book.status) + " (";
+    var str = model.getBookStatusAsString(this.book.status) + " (pages#";
     if (this.book.currentPageNo >= 0) {
       str += this.book.currentPageNo;
     } else {
@@ -59,7 +65,8 @@ export class BookDetailComponent implements OnInit {
       this.error = "First Chapter Url cannot be empty!";
       return;
     }
-    //this.tusachService.updateBook(this.book, "create");
+    let book = this.bookListAdapter.bookAdapter.adapt(this.book);
+    this.tusachService.updateBook(book, "create");    
     this.router.navigate(['books']);
   }
 
@@ -67,8 +74,9 @@ export class BookDetailComponent implements OnInit {
     if (this.book.title == "" || this.book.startPageUrl == "") {      
       return;
     }
-    //this.tusachService.updateBook(this.book, command);
-    this.router.navigate(['books']);
+    let book = this.bookListAdapter.bookAdapter.adapt(this.book);
+    console.log("update() - '" + command + "' : ", book);
+    this.tusachService.updateBook(book, command);
   }
 
   getBook(): void {
@@ -85,4 +93,23 @@ export class BookDetailComponent implements OnInit {
       });
     }
   }
+
+  bookUpdated(book: model.Book) {
+    if (this.book.id == book.getId()) {
+      this.book = book.toObject();
+    }
+  }
+
+  booksUpdated(list: model.BookList) {
+    for (var book of list.getBooksList()) {
+      if (this.book.id == book.getId()) {
+        this.book = book.toObject();        
+        break;
+      }
+    }
+    if (this.book.deleted) {
+      this.router.navigate(['books']);
+    }
+  }
+
 }

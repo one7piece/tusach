@@ -14,6 +14,8 @@ service Tusach {
   rpc CreateBook(NewBookRequest) returns (Book);
   rpc UpdateBook(Book) returns (Book);
   rpc DeleteBook(BookID) returns (google.protobuf.Empty);  
+  rpc AbortBook(BookID) returns (google.protobuf.Empty);  
+  rpc ResumeBook(BookID) returns (google.protobuf.Empty);  
 }
 
 message User {
@@ -35,11 +37,11 @@ enum BookStatusType {
 }
 
 message BookID {
-  int32 ID = 1;
+  int32 id = 1;
 }
 
 message Book {
-  int32 ID = 1;
+  int32 id = 1;
   BookStatusType status = 2;
   string title = 3;
   string author = 4;

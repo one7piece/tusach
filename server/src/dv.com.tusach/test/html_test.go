@@ -16,7 +16,7 @@ func Test1(t *testing.T) {
 	var url = "https://truyenyy.com/truyen/bien-kiem-vu-si/chuong-2.html"
 	resp, err := http.Get(url)
 	if err != nil {
-		t.Errorf("failed to load htlm page: ", err)
+		t.Errorf("failed to load htlm page: " + err.Error())
 		t.Fail()
 	}
 

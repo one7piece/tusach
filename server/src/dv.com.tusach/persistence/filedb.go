@@ -151,7 +151,7 @@ func (f *FileDB) DeleteUser(userName string) error {
 
 func (f *FileDB) GetBook(id int32) model.Book {
 	for i := 0; i < len(f.books); i++ {
-		if f.books[i].ID == id {
+		if f.books[i].Id == id {
 			return f.books[i]
 		}
 	}
@@ -169,8 +169,8 @@ func (f *FileDB) GetBooks(includeDeleted bool) []model.Book {
 func (f *FileDB) GetMaxBookId() (int32, error) {
 	var maxBookId int32 = 0
 	for i := 0; i < len(f.books); i++ {
-		if f.books[i].ID > maxBookId {
-			maxBookId = f.books[i].ID
+		if f.books[i].Id > maxBookId {
+			maxBookId = f.books[i].Id
 		}
 	}
 	// check the book id from the epub files
@@ -196,8 +196,8 @@ func (f *FileDB) GetMaxBookId() (int32, error) {
 func (f *FileDB) SaveBook(book *model.Book) (retId int, retErr error) {
 	logger.Infof("Saving book: %v", book)
 	foundIndex := -1
-	for i := 0; book.ID > 0 && i < len(f.books); i++ {
-		if f.books[i].ID == book.ID {
+	for i := 0; book.Id > 0 && i < len(f.books); i++ {
+		if f.books[i].Id == book.Id {
 			foundIndex = i
 			break
 		}
@@ -209,7 +209,7 @@ func (f *FileDB) SaveBook(book *model.Book) (retId int, retErr error) {
 		if err != nil {
 			return 0, err
 		}
-		book.ID = maxBookId + 1
+		book.Id = maxBookId + 1
 		f.books = append(f.books, *book)
 	}
 	book.LastUpdatedTime = util.TimestampNow()
@@ -220,14 +220,14 @@ func (f *FileDB) SaveBook(book *model.Book) (retId int, retErr error) {
 
 	f.SaveSystemInfo(model.SystemInfo{BookLastUpdatedTime: book.LastUpdatedTime, SystemUpTime: f.info.SystemUpTime})
 
-	return int(book.ID), err
+	return int(book.Id), err
 }
 
 func (f *FileDB) DeleteBook(bookId int32) error {
 	logger.Infof("Deleting book ID=" + strconv.Itoa(int(bookId)))
 	foundIndex := -1
 	for i := 0; i < len(f.books); i++ {
-		if f.books[i].ID == bookId {
+		if f.books[i].Id == bookId {
 			foundIndex = i
 			break
 		}
@@ -294,7 +294,7 @@ func (f *FileDB) GetChapters(bookId int32) ([]model.Chapter, error) {
 
 func (f *FileDB) SaveChapter(chapter model.Chapter) error {
 	book := f.GetBook(chapter.BookId)
-	if book.ID == 0 {
+	if book.Id == 0 {
 		return errors.New("Book " + strconv.Itoa(int(chapter.BookId)) + " not found!")
 	}
 	return WriteChapter(book, chapter)
@@ -313,5 +313,6 @@ func write(filename string, source interface{}) error {
 	if err != nil {
 		return err
 	}
+	logger.Debugf("write to %s: [%s]", filename, string(bytes))
 	return ioutil.WriteFile(filename, bytes, 0644)
 }

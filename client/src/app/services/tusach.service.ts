@@ -43,6 +43,12 @@ export class TusachService {
     }
   }
 
+  bookUpdated(book: model.Book) {
+    for (var i=0; i<this.listeners.length; i++) {
+      this.listeners[i].bookUpdated(book);
+    }
+  }
+
   booksUpdated(list: model.BookList) {
     for (var i=0; i<this.listeners.length; i++) {
       this.listeners[i].booksUpdated(list);

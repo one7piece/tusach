@@ -4,13 +4,7 @@
 			"path": "."
 		},
 		{
-			"path": "client"
-		},
-		{
-			"path": "C:\\dev\\dvan\\github\\httprest"
-		},
-		{
-			"path": "C:\\dev\\m4mms\\com.tycoint.m4mms.server\\source\\config\\files\\javascript"
+			"path": "server\\src\\dv.com.tusach"
 		}
 	],
 	"settings": {

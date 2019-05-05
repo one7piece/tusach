@@ -50,6 +50,33 @@ export class BooksComponent implements OnInit {
     return color;
   }
 
+  bookUpdated(book: model.Book) {
+    let sortPending = false;
+    let index = this.findBookIndex(book.getId());
+    if (index != -1) {
+      if (book.getDeleted()) {
+        console.log("found deleted book: " + book.getId() + " - " + book.getTitle() + " (" + book.getStatus() + ") #pages=" +  book.getCurrentPageNo());
+        this.books.splice(index, 1);
+      } else {
+        console.log("found updated book " + book.getId() + ". " + book.getTitle() 
+          +  " oldStatus(" + this.books[index].getStatus() + ") newStatus(" + book.getStatus() + ") #pages=" +  book.getCurrentPageNo());
+        if (this.books[index].getStatus() != book.getStatus()) {
+          sortPending = true;
+        }
+        this.books[index] = book;
+      }
+    } else {
+      // new book
+      this.books.push(book);
+      sortPending = true;
+      console.log("found new book: " + book.getId() + " - " + book.getTitle() + " (" + book.getStatus() + ") #pages=" +  book.getCurrentPageNo());
+    }
+
+    if (sortPending) {
+      this.sortBooks();
+    }
+  }
+
   booksUpdated(list: model.BookList) {
     let sortPending = false;
     if (list.getIsFullList()) {

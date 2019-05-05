@@ -40,7 +40,7 @@ export class JsonTimestampAdapter implements Adapter<google_protobuf_timestamp_p
 export class JsonBookAdapter implements Adapter<model.Book> {
   adapt(obj: any): model.Book {
     let book = new model.Book();
-    book.setId(obj.ID);
+    book.setId(obj.id);
     book.setAuthor(obj.author);
     book.setTitle(obj.title);
     book.setBuildTimeSec(obj.buildTimeSec);

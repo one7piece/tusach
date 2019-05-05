@@ -42,7 +42,7 @@ type Persistence interface {
 
 // remove the book file, called when book is deleted
 func RemoveBookDir(book model.Book) error {
-	dirPath := GetBookPath(int(book.ID))
+	dirPath := GetBookPath(int(book.Id))
 	logger.Infof("Deleting book dir: ", dirPath)
 	err := os.RemoveAll(dirPath)
 	if err != nil {
@@ -55,9 +55,9 @@ func RemoveBookDir(book model.Book) error {
 // initialise the book directory, called before book is created/resumed to prepare the
 // epub files
 func InitBookDir(book model.Book) error {
-	logger.Infof("InitBookDir: %d - %s", book.ID, book.Title)
+	logger.Infof("InitBookDir: %d - %s", book.Id, book.Title)
 	// create book dir
-	dirPath := GetBookPath(int(book.ID))
+	dirPath := GetBookPath(int(book.Id))
 	logger.Infof("Creating book dir: ", dirPath)
 	os.MkdirAll(dirPath, 0777)
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
@@ -151,7 +151,7 @@ func WriteChapter(book model.Book, chapter model.Chapter) error {
 	}
 
 	// update the epub file
-	bookDir := GetBookPath(int(book.ID))
+	bookDir := GetBookPath(int(book.Id))
 	epubFile := GetBookEpubFilename(book)
 	logger.Infof("WriteChapter - update epub file: %s with new chappter: %s", epubFile, chapterFilePath)
 	cmd := exec.Command(util.GetConfiguration().UpdateEpubCmd, epubFile, bookDir,
@@ -168,7 +168,7 @@ func WriteChapter(book model.Book, chapter model.Chapter) error {
 
 func UpdateContentFile(book model.Book, chapter model.Chapter) error {
 	chapterFilePath := GetChapterFilename(chapter)
-	bookDir := GetBookPath(int(book.ID))
+	bookDir := GetBookPath(int(book.Id))
 	contentFile := filepath.Join(bookDir, "/OEBPS/content.opf")
 	data, err := ioutil.ReadFile(contentFile)
 	if err != nil {
@@ -215,7 +215,7 @@ func UpdateContentFile(book model.Book, chapter model.Chapter) error {
 
 func UpdateTOCFile(book model.Book, chapter model.Chapter) error {
 	chapterFilePath := GetChapterFilename(chapter)
-	bookDir := GetBookPath(int(book.ID))
+	bookDir := GetBookPath(int(book.Id))
 	// open toc file
 	tocFile := filepath.Join(bookDir, "/OEBPS/toc.ncx")
 	data, err := ioutil.ReadFile(tocFile)
@@ -268,12 +268,12 @@ func GetBookPath(bookId int) string {
 }
 
 func GetBookEpubFilename(book model.Book) string {
-	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.ID) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
+	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.Id) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
 	return filepath.FromSlash(path)
 }
 
 func GetBookMetaFilename(book model.Book) string {
-	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.ID) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".json"
+	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.Id) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".json"
 	return filepath.FromSlash(path)
 }
 
