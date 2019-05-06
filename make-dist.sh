@@ -19,7 +19,7 @@ source ./build-server.sh $1
 source ./build-client.sh $1
 
 echo "Creating tar file..."
-chmod +x $output_path/library/make-epub.sh
+chmod +x $output_path/library/*.sh
 chmod +x $output_path/*.sh
 chmod +x $output_path/tusach
 cd $output_path

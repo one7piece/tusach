@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "server\\src\\dv.com.tusach"
+		},
+		{
+			"path": "client"
 		}
 	],
 	"settings": {

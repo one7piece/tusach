@@ -91,6 +91,10 @@ export class TusachService {
     this.proxy.updateBook(book, cmd);
   }
 
+  deleteBook(id: number) : void {
+    this.proxy.deleteBook(id);
+  }
+
   /** Log a HeroService message with the MessageService */
   private log(message: string) {
     this.messageService.add(`TusachService: ${message}`);

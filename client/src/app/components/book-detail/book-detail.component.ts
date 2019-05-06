@@ -1,8 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Location } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { TusachService } from '../../services';
 import * as model from '../../../typings';
+import { filter } from 'rxjs/operators'; 
 
 @Component({
   selector: 'app-book-detail',
@@ -19,12 +20,18 @@ export class BookDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private tusachService: TusachService,
-    private location: Location) {
+    private location: Location) {    
     console.log("BookDetailComponent - constructor()");
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(() => {
+      console.log("NavigationEnd event!");
+      //this.initBook();
+    });      
   }
 
   ngOnInit() {
-    this.getBook();
+    this.initBook();
     this.tusachService.subscribe(this);
   }
 
@@ -70,6 +77,11 @@ export class BookDetailComponent implements OnInit {
     this.router.navigate(['books']);
   }
 
+  delete() : void {
+    console.log("delete() - " + this.book.title + "(" + this.book.id + ")");
+    this.tusachService.deleteBook(this.book.id);
+  }
+
   update(command: string) : void {
     if (this.book.title == "" || this.book.startPageUrl == "") {      
       return;
@@ -79,10 +91,10 @@ export class BookDetailComponent implements OnInit {
     this.tusachService.updateBook(book, command);
   }
 
-  getBook(): void {
+  initBook(): void {
     // route parameters are always string, +operator convert string to a number
     const id = +this.route.snapshot.paramMap.get('id');
-    console.log("BookDetailComponent - getBook:" + id);
+    console.log("BookDetailComponent - initBook:" + id);
     if (id == 0) {
       this.book = new model.Book().toObject();      
     } else {
@@ -95,7 +107,7 @@ export class BookDetailComponent implements OnInit {
   }
 
   bookUpdated(book: model.Book) {
-    if (this.book.id == book.getId()) {
+    if (this.book.id > 0 && this.book.id == book.getId()) {
       this.book = book.toObject();
     }
   }
