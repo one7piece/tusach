@@ -1,0 +1,14 @@
+[
+  {
+    "name": "admin",
+    "roles": "administrator"
+  },
+  {
+    "name": "vinhvan",
+    "roles": "user"
+  },
+  {
+    "name": "guest",
+    "roles": "user"
+  }
+]
