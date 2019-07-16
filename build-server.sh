@@ -32,5 +32,8 @@ cp ./*.cmd $output_path/
 if ! [ -d $output_path/envoy ]; then
 mkdir $output_path/envoy
 fi
+if ! [ -d $output_path/library/books ]; then
+mkdir $output_path/library/books
+fi
 cd ..
-cp ./grpc/grpcenvoy.sh ./grpc/grpcenvoy.yaml $output_path/envoy/
+cp ./grpcproxy/grpcenvoy.sh ./grpcproxy/grpcenvoy.yaml $output_path/envoy/

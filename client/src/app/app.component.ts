@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef } from '@angular/core';
 import {ServiceType, TusachService } from './services';
 
 @Component({
@@ -8,12 +8,14 @@ import {ServiceType, TusachService } from './services';
 })
 export class AppComponent {
   title = 'Tusach';
-  mode  = "grpc";  
 
   constructor(
-    private tusachService: TusachService) {
-    console.log("AppComponent - mode: " + this.mode);
-    if (this.mode == "rest") {
+    private tusachService: TusachService,
+    private elementRef : ElementRef) {
+    
+    let mode = this.elementRef.nativeElement.getAttribute("mode");
+    console.log("AppComponent - mode: " + mode);
+    if (mode == "rest") {
       tusachService.setServiceType(ServiceType.REST);
     } else {
       tusachService.setServiceType(ServiceType.GRPC);

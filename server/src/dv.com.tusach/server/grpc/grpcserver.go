@@ -40,10 +40,10 @@ func (sink *GrpcEventSink) ProcessEvent(event util.EventData) {
 }
 
 func (app *GrpcServer) Start(bookMaker *maker.BookMaker) error {
-	logger.Infof("Starting GRPC server")
+	logger.Infof("Starting GRPC server on port: " + strconv.Itoa(util.GetConfiguration().GrpcBindPort))
 	app.bookMaker = bookMaker
 
-	lis, err := net.Listen("tcp", ":9999")
+	lis, err := net.Listen("tcp", ":"+strconv.Itoa(util.GetConfiguration().GrpcBindPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

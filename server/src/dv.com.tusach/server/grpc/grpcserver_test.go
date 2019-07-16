@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	address = "127.0.0.1:9999"
+	address = "192.168.1.108:8080"
 )
 
 var bookMaker *maker.BookMaker

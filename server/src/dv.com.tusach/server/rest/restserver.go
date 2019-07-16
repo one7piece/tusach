@@ -30,7 +30,6 @@ func (app *RestServer) ProcessEvent(event util.EventData) {
 }
 
 func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
-	logger.Infof("Starting REST server")
 	app.bookMaker = bookMaker
 	app.marshaler = JsonPbMarshaler{}
 	logger.Infof("Register event listening on channel %s", "BOOK-CHANNEL")
@@ -54,7 +53,7 @@ func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	// static file handler
 	http.Handle("/", http.FileServer(http.Dir(util.GetConfiguration().ServerPath)))
 
-	logger.Info("GOWebServer started successfully")
+	logger.Infof("Starting REST server on port: " + strconv.Itoa(util.GetConfiguration().ServerBindPort))
 
 	if err := http.ListenAndServe(util.GetConfiguration().ServerBindAddress+":"+
 		strconv.Itoa(util.GetConfiguration().ServerBindPort), nil); err != nil {

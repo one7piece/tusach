@@ -1,5 +1,5 @@
 #!/bin/bash
-export GOPATH=/c/dev/dvan/github/tusach/server
+export GOPATH=/c/dev/GO:/c/dev/dvan/github/tusach/server
 
 if [ "$output_path" == "" ]; then
 my_dir=$(cd `dirname $0` && pwd)

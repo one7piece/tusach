@@ -17,6 +17,7 @@ type Configuration struct {
 	DBFilename        string `json:dbFilename`
 	ServerBindAddress string `json:serverBindAddress`
 	ServerBindPort    int    `json:serverBindPort`
+	GrpcBindPort    	int    `json:grpcBindPort`
 	MaxActionBooks    int    `json:maxActiveBooks`
 	ProxyURL          string `json:proxyURL`
 	ProxyUsername     string `json:proxyUsername`
@@ -135,9 +136,11 @@ func LoadConfig(filename string) {
 	if !IsExist(configuration.ExtractEpubCmd) {
 		panic("File " + configuration.ExtractEpubCmd + " does not exists")
 	}
-
 	if configuration.ServerBindPort == 0 {
 		panic("Missing config parameter: ServerBindPort")
+	}
+	if configuration.GrpcBindPort == 0 {
+		panic("Missing config parameter: GrpcBindPort")
 	}
 	if configuration.MaxActionBooks == 0 {
 		configuration.MaxActionBooks = 2

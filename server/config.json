@@ -4,6 +4,7 @@
 	"dbFilename" : "./library/tusach.ql",
 	"logLevel" : "info",
 	"logFile" : "./tusach.log",
-	"ServerBindPort" : 8888
+	"ServerBindPort" : 8888,
+	"GrpcBindPort" : 9999
 }
 	

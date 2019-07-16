@@ -1,13 +1,13 @@
 {
 	"folders": [
 		{
-			"path": "."
-		},
-		{
-			"path": "server\\src\\dv.com.tusach"
-		},
-		{
 			"path": "client"
+		},
+		{
+			"path": "server"
+		},
+		{
+			"path": "C:\\dev\\m4mms\\com.tycoint.m4mms.server\\source\\config\\files\\javascript"
 		}
 	],
 	"settings": {
