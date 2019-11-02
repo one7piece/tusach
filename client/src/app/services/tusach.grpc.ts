@@ -22,7 +22,7 @@ export class TusachGrpc {
     const route = location.path();
     const host = url.substr(0, url.indexOf(":", "http://".length))
     console.log("current url:" + url + ", angular path:" + route + ", host:" + host + ", route:" + route);
-    this.service = new model.TusachClient(host + ":8080", null, null);
+    this.service = new model.TusachClient(host + ":8899", null, null);
     this.subscribe();
   }
 

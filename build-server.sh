@@ -36,4 +36,4 @@ if ! [ -d $output_path/library/books ]; then
 mkdir $output_path/library/books
 fi
 cd ..
-cp ./grpcproxy/grpcenvoy.sh ./grpcproxy/grpcenvoy.yaml $output_path/envoy/
+cp ./envoy/* $output_path/envoy/

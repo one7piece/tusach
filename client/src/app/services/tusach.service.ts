@@ -30,7 +30,7 @@ export class TusachService {
     private messageService: MessageService) {  
     this.grpcService = new TusachGrpc(location, messageService, this);
     this.restService = new TusachRest(http, messageService, this);
-    this.proxy = this.grpcService;
+    this.setServiceType(ServiceType.GRPC);
   }
 
   setServiceType(type: ServiceType) {

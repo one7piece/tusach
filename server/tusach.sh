@@ -16,7 +16,7 @@ export PIDFILE
 pid=""
 
 getpid() {
-  pid=`ps -ef | grep 'tusach' | grep -v grep | awk '{ print $2}'`
+  pid=`ps -ef | grep 'tusach -configFile' | grep -v grep | awk '{ print $2}'`
 }
 
 start() {
