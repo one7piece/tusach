@@ -96,7 +96,7 @@ export class BookDetailComponent implements OnInit {
     const id = +this.route.snapshot.paramMap.get('id');
     console.log("BookDetailComponent - initBook:" + id);
     if (id == 0) {
-      this.book = new model.Book().toObject();      
+      this.book = new model.Book().toObject();
     } else {
       this.tusachService.getBook(id).subscribe(book => {
         console.log("book loaded", book);

@@ -1,6 +1,7 @@
 package util
 
 import (
+	"reflect"
 	"sync"
 
 	"dv.com.tusach/logger"
@@ -59,7 +60,17 @@ func (em EventManager) GetListeners(channel string) []EventHandler {
 	return arr
 }
 
-func findArrayItemIndex(arr []EventHandler, item EventHandler) int {
+func FindArrayItemIndex(slice interface{}, item interface{}) int {
+	s := reflect.ValueOf(slice)
+	if s.Kind() != reflect.Slice {
+		panic("FindArrayItemIndex() given a non-slice type")
+	}
+	// convert interface{} to []interface{}
+	arr := make([]interface{}, s.Len())
+	for i := 0; i < s.Len(); i++ {
+		arr[i] = s.Index(i).Interface()
+	}
+
 	index := -1
 	for i, l := range arr {
 		if l == item {
@@ -72,7 +83,7 @@ func findArrayItemIndex(arr []EventHandler, item EventHandler) int {
 
 func (em *EventManager) StopListening(listener EventHandler) {
 	for key, arr := range em.listeners {
-		index := findArrayItemIndex(arr, listener)
+		index := FindArrayItemIndex(arr, listener)
 		if index != -1 {
 			em.listeners[key] = append(arr[:index], arr[index+1:]...)
 		} else {

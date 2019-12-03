@@ -5,6 +5,7 @@
 	"logLevel" : "debug",
 	"logFile" : "../../../test/test.log",
 	"ServerBindPort" : 8888,
+	"GrpcBindPort" : 9999,
   "createEpubCmd" : "../../../library/create-epub.cmd",
   "updateEpubCmd" : "../../../library/update-epub.cmd",
   "extractEpubCmd" : "../../../library/extract-epub.cmd"  

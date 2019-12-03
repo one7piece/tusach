@@ -668,7 +668,6 @@ proto.model.Book.prototype.toObject = function(opt_includeInstance) {
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.Book.toObject = function(includeInstance, msg) {
-  var f;
   var obj = {
     id: jspb.Message.getFieldWithDefault(msg, 1, 0),
     status: jspb.Message.getFieldWithDefault(msg, 2, 0),

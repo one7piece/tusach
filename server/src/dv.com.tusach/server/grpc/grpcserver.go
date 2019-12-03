@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"time"
 
 	"dv.com.tusach/logger"
 	"dv.com.tusach/maker"
@@ -19,11 +20,13 @@ import (
 // server is used to implement tusach service interface
 type GrpcServer struct {
 	bookMaker *maker.BookMaker
+	sinks     []*GrpcEventSink
 }
 
 type GrpcEventSink struct {
-	subsriber model.Tusach_SubscribeServer
-	notifier  chan string
+	subsriber    model.Tusach_SubscribeServer
+	notifier     chan string
+	lastSentTime int64
 }
 
 func (sink *GrpcEventSink) ProcessEvent(event util.EventData) {
@@ -36,6 +39,16 @@ func (sink *GrpcEventSink) ProcessEvent(event util.EventData) {
 			util.GetEventManager().StopListening(sink)
 			sink.notifier <- err.Error()
 		}
+	}
+}
+
+func (sink *GrpcEventSink) SendHeartbeat(book *model.Book) {
+	logger.Infof("Sending heartbeat book event: (%v)", book)
+	err := sink.subsriber.Send(book)
+	if err != nil {
+		logger.Errorf("Error while streaming book: %s", err.Error())
+		util.GetEventManager().StopListening(sink)
+		sink.notifier <- err.Error()
 	}
 }
 
@@ -52,6 +65,23 @@ func (app *GrpcServer) Start(bookMaker *maker.BookMaker) error {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+
+	ticker := time.NewTicker(10 * time.Second)
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				book := model.Book{}
+				// go thru each sink and send dummy book
+				for _, sink := range app.sinks {
+					sink.SendHeartbeat(&book)
+				}
+			}
+		}
+	}()
 	return nil
 }
 
@@ -61,8 +91,16 @@ func (app *GrpcServer) Subscribe(empty *empty.Empty, sub model.Tusach_SubscribeS
 	sink := GrpcEventSink{subsriber: sub, notifier: ch}
 	logger.Infof("Register event listening on channel %s", "BOOK-CHANNEL")
 	util.GetEventManager().StartListening("BOOK-CHANNEL", &sink)
+	app.sinks = append(app.sinks, &sink)
 	// block until notify via channel
 	errorMsg := <-ch
+	// stop listening
+	util.GetEventManager().StopListening(&sink)
+	// removing from cache
+	index := util.FindArrayItemIndex(app.sinks, &sink)
+	if index != -1 {
+		app.sinks = append(app.sinks[:index], app.sinks[index+1:]...)
+	}
 	logger.Infof("Book subscription ends: %s", errorMsg)
 	return nil
 }

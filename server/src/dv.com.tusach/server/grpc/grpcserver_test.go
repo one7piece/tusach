@@ -19,14 +19,14 @@ import (
 )
 
 const (
-	address = "192.168.1.108:8080"
+	address = "localhost:8899"
 )
 
 var bookMaker *maker.BookMaker
 
 func TestMain(m *testing.M) {
 	// set up rest server
-	util.LoadConfig("../../../../test/config-test.json")
+	util.LoadConfig("../../test/config-test.json")
 	db := persistence.FileDB{}
 	db.InitDB()
 	bookMaker = maker.NewBookMaker(&db)
