@@ -31,7 +31,7 @@ func (maker *BookMaker) getIndexOf(source string, search string, offset int) int
 	return index
 }
 
-func (maker *BookMaker) Parse(engine *ScriptEngine, chapterURL string, inputFile string, outputFile string, timeoutSec int, numTries int) (chapterTitle, nextChapterURL string, err error) {
+func (maker *BookMaker) Parse(engine *ScriptEngine, chapterNo int, chapterURL string, inputFile string, outputFile string, timeoutSec int, numTries int) (chapterTitle, nextChapterURL string, err error) {
 	err = nil
 	chapterTitle = ""
 	nextChapterURL = ""
@@ -55,7 +55,7 @@ func (maker *BookMaker) Parse(engine *ScriptEngine, chapterURL string, inputFile
 		return
 	}
 
-	chapterHTML, err = maker.parseChapterHTML(engine, chapterURL, rawHTML, &chapterTitle, &nextChapterURL)
+	chapterHTML, err = maker.parseChapterHTML(engine, chapterNo, chapterURL, rawHTML, &chapterTitle, &nextChapterURL)
 	if err != nil {
 		err = errors.New("Error parsing chapter content from: " + inputFile + ". " + err.Error())
 		return
@@ -74,7 +74,7 @@ func (maker *BookMaker) Parse(engine *ScriptEngine, chapterURL string, inputFile
 	return
 }
 
-func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterURL string, rawHTML string, chapterTitle *string,
+func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterNo int, chapterURL string, rawHTML string, chapterTitle *string,
 	nextChapterURL *string) (string, error) {
 
 	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
@@ -146,7 +146,7 @@ func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterURL string
 		logger.Errorf("Error getting function 'text': %s", err)
 		return "", err
 	}
-	_, err = beginFn.Call(otto.NullValue(), string(template), chapterURL)
+	_, err = beginFn.Call(otto.NullValue(), string(template), chapterNo, chapterURL)
 	if err != nil {
 		return "", errors.New("Failed to call js function 'begin': " + err.Error())
 	}

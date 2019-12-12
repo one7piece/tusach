@@ -32,10 +32,10 @@ type GrpcEventSink struct {
 func (sink *GrpcEventSink) ProcessEvent(event util.EventData) {
 	book, ok := event.Data.(model.Book)
 	if ok {
-		logger.Infof("Received book event: %s (%v)", event.Type, book)
+		logger.Infof("(%v) Received book event: %s (%v)", sink.subsriber, event.Type, book)
 		err := sink.subsriber.Send(&book)
 		if err != nil {
-			logger.Errorf("Error while streaming book: %s", err.Error())
+			logger.Errorf("(%v) Error while streaming book: %s", sink.subsriber, err.Error())
 			util.GetEventManager().StopListening(sink)
 			sink.notifier <- err.Error()
 		}
@@ -43,10 +43,10 @@ func (sink *GrpcEventSink) ProcessEvent(event util.EventData) {
 }
 
 func (sink *GrpcEventSink) SendHeartbeat(book *model.Book) {
-	logger.Infof("Sending heartbeat book event: (%v)", book)
+	logger.Infof("(%v) Sending heartbeat book event: (%v)", sink.subsriber, book)
 	err := sink.subsriber.Send(book)
 	if err != nil {
-		logger.Errorf("Error while streaming book: %s", err.Error())
+		logger.Errorf("(%v) Error while streaming book: %s", sink.subsriber, err.Error())
 		util.GetEventManager().StopListening(sink)
 		sink.notifier <- err.Error()
 	}
@@ -62,18 +62,17 @@ func (app *GrpcServer) Start(bookMaker *maker.BookMaker) error {
 	}
 	s := grpc.NewServer()
 	model.RegisterTusachServer(s, app)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
 
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(60 * time.Second)
 	done := make(chan bool)
 	go func() {
 		for {
 			select {
 			case <-done:
+				//logger.Infof("heartbeat timer stop")
 				return
 			case <-ticker.C:
+				logger.Infof("execute heartbeat timer, %d sinks", len(app.sinks))
 				book := model.Book{}
 				// go thru each sink and send dummy book
 				for _, sink := range app.sinks {
@@ -82,6 +81,11 @@ func (app *GrpcServer) Start(bookMaker *maker.BookMaker) error {
 			}
 		}
 	}()
+
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+
 	return nil
 }
 

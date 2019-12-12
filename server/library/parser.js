@@ -15,10 +15,12 @@ title = "";
 currentChapterURL = "";
 templateHTML = "";
 fullPathPrefix = "";
+currentChapterNo = 0;
 
 logDebug("executing script...");
 
-function begin(template, url) {
+function begin(template, chapterNo, url) {
+  currentChapterNo = chapterNo;
   currentChapterURL = url;
   index = currentChapterURL.indexOf("/", "http://..".length)
   fullPathPrefix = currentChapterURL.substr(0, index)
@@ -30,8 +32,13 @@ function begin(template, url) {
 function end() {
   logInfo(">>>>>>>> chapter: " + chapterTitle + " <<<<<<<<<<<");
   index = templateHTML.indexOf("</body>");
+
+	if (chapterTitle == "") {
+		chapterTitle = "Chapter " + currentChapterNo;
+  }
+  chapterHTML = "<h2>" + chapterTitle + "</h2>" + chapterHTML;
   chapterHTML = templateHTML.substr(0, index) + chapterHTML + "</body></html>"
-  logDebug(chapterHTML);
+  logInfo(chapterHTML);
   logInfo(">>>>>>>> Next chapter: " + nextChapterURL + " <<<<<<<<<<<");
 }
 

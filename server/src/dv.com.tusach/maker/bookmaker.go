@@ -2,6 +2,7 @@ package maker
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -86,6 +87,7 @@ func (bookMaker *BookMaker) AbortBook(bookId int32) error {
 	}
 	if current.Status == model.BookStatusType_IN_PROGRESS {
 		logger.Infof("aborting book: '%s'", current.Title)
+		current.Status = model.BookStatusType_ABORTED
 		bookMaker.abortedBooks[bookId] = true
 	} else {
 		logger.Warnf("cannot abort book: '%s' due to unexpected status %d", current.Title, current.Status)
@@ -184,17 +186,40 @@ func (bookMaker *BookMaker) GetSystemInfo() model.SystemInfo {
 	return bookMaker.db.GetSystemInfo()
 }
 
-func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) {
+func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) (err error) {
 	var numPagesLoaded = 0
-	var err error
-
+	//var err error
+	err = nil
 	book := bookMaker.GetBook(bookId)
+
+	bookMaker.abortedBooks[book.Id] = false
+	defer func() {
+		if book.Id != 0 {
+			if err != nil {
+				book.Status = model.BookStatusType_ERROR
+				book.ErrorMsg = err.Error()
+				logger.Errorf("makeBook - error during making '%s' - %s", book.Title, book.ErrorMsg)
+			} else if bookMaker.abortedBooks[book.Id] {
+				logger.Infof("makeBook - abort making '%s'", book.Title)
+				book.Status = model.BookStatusType_ABORTED
+				book.ErrorMsg = ""
+			} else {
+				book.ErrorMsg = ""
+				book.Status = model.BookStatusType_COMPLETED
+				logger.Infof("makeBook - finished making '%s'", book.Title)
+			}
+			bookMaker.saveBook(&book)
+			persistence.RemoveBookDir(book)
+		}
+	}()
+
 	if book.Status != model.BookStatusType_IN_PROGRESS {
-		logger.Errorf("Unexpected book status: %v", book.Status)
+		err = fmt.Errorf("book %d has invalid status: %v", book.Id, book.Status)
 		return
 	}
+
 	if book.Id == 0 {
-		logger.Errorf("Could not find book: %d", bookId)
+		err = fmt.Errorf("Could not find book: %d", bookId)
 		return
 	}
 	url := book.CurrentPageUrl
@@ -207,16 +232,8 @@ func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) {
 	if err != nil {
 		return
 	}
-	defer func() {
-		persistence.RemoveBookDir(book)
-	}()
 
-	bookMaker.abortedBooks[book.Id] = false
-	defer func() {
-		logger.Infof("makeBook - finished making '%s'", book.Title)
-		bookMaker.abortedBooks[book.Id] = false
-	}()
-
+	nextPageUrl := ""
 	for {
 		// reload book to check change to book status
 		book = bookMaker.GetBook(bookId)
@@ -229,16 +246,16 @@ func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) {
 			newChapterNo = book.CurrentPageNo
 		}
 		newChapter := model.Chapter{BookId: book.Id, ChapterNo: newChapterNo}
-		nextPageUrl, err := bookMaker.DownloadChapter(engine, url, &newChapter)
+		nextPageUrl, err = bookMaker.DownloadChapter(engine, url, &newChapter)
 
 		if err != nil {
 			logger.Errorf("%s - Failed to load chapter %d: %s", book.Title, newChapterNo, err)
 			break
 		}
 
-		if newChapter.Title == "" {
-			newChapter.Title = "model.Chapter " + strconv.Itoa(int(newChapter.ChapterNo))
-		}
+		//if newChapter.Title == "" {
+		//	newChapter.Title = "model.Chapter " + strconv.Itoa(int(newChapter.ChapterNo))
+		//}
 		logger.Infof("%s - Completed chapter: %d (%s), nextPageUrl: %s\n", book.Title, newChapter.ChapterNo, newChapter.Title, nextPageUrl)
 
 		err = bookMaker.db.SaveChapter(newChapter)
@@ -257,7 +274,7 @@ func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) {
 		}
 		_, err = bookMaker.saveBook(&book)
 		if err != nil {
-			logger.Errorf("%s - Failed to save book to DB: %s", book.Title, err)
+			err = fmt.Errorf("%s - Failed to save book to DB: %s", book.Title, err)
 			return
 		}
 
@@ -274,25 +291,14 @@ func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) {
 		url = nextPageUrl
 	}
 
-	if err != nil {
-		book.Status = model.BookStatusType_ERROR
-		book.ErrorMsg = err.Error()
-	} else if bookMaker.abortedBooks[book.Id] {
-		book.Status = model.BookStatusType_ABORTED
-	} else {
-		book.Status = model.BookStatusType_COMPLETED
-	}
-
-	bookMaker.saveBook(&book)
-
-	return
+	return err
 }
 
 func (bookMaker *BookMaker) DownloadChapter(engine *ScriptEngine, chapterUrl string, chapter *model.Chapter) (string, error) {
 	rawFilename := persistence.GetRawChapterFilename(*chapter)
 	filename := persistence.GetChapterFilename(*chapter)
 
-	chapterTitle, nextChapterURL, err := bookMaker.Parse(engine, chapterUrl, rawFilename, filename, 10, 2)
+	chapterTitle, nextChapterURL, err := bookMaker.Parse(engine, int(chapter.ChapterNo), chapterUrl, rawFilename, filename, 10, 2)
 	if err != nil {
 		return "", err
 	}

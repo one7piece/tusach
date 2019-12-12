@@ -65,7 +65,7 @@ export class BooksComponent implements OnInit {
         }
         this.books[index] = book;
       }
-    } else {
+    } else if (book.getId() > 0) {
       // new book
       this.books.push(book);
       sortPending = true;

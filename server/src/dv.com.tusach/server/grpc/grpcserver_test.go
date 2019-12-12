@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 )
 
 const (
-	address = "localhost:8899"
+	address = "localhost:9999"
 )
 
 var bookMaker *maker.BookMaker
@@ -36,17 +37,21 @@ func TestMain(m *testing.M) {
 		if err != nil {
 			logger.Errorf("Failed to start GRPC server: %s", err)
 			os.Exit(1)
+		} else {
+			logger.Infof("GRPC server started")
 		}
 	}()
 	// delay waiting for server to start
 	fmt.Println("waiting for grpcserver to start")
 	time.Sleep(5 * time.Second)
-	m.Run()
-	os.Exit(0)
+	fmt.Println("executing unit test...")
+	retval := m.Run()
+	fmt.Println("test return code: " + strconv.Itoa(retval))
+	os.Exit(retval)
 }
 
 func Test_Connection(t *testing.T) {
-	fmt.Printf("connecting to grpc server: %s\n", address)
+	t.Logf("connecting to grpc server: %s\n", address)
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
@@ -63,14 +68,14 @@ func Test_Connection(t *testing.T) {
 	fmt.Println("getting books from grpc server...")
 	bookList, err := client.GetBooks(ctx, &empty.Empty{})
 	if err != nil {
-		t.Errorf("failed to GetBooks from grpc server: %v\n", err)
+		t.Fatalf("failed to GetBooks from grpc server: %v\n", err)
 		t.FailNow()
 	}
-	fmt.Printf("bookList: %+v\n", bookList)
+	t.Logf("bookList: %+v\n", bookList)
 }
 
 func Test_Subscribe(t *testing.T) {
-	fmt.Printf("connecting to grpc server: %s\n", address)
+	t.Logf("connecting to grpc server: %s\n", address)
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure())
 	if err != nil {
@@ -100,7 +105,7 @@ func Test_Subscribe(t *testing.T) {
 		time.Sleep(2 * time.Second)
 		err := bookMaker.AbortBook(book.Id)
 		if err != nil {
-			fmt.Printf("failed to abort book: %s\n", err.Error())
+			t.Logf("failed to abort book: %s\n", err.Error())
 		}
 	}()
 
@@ -113,6 +118,6 @@ func Test_Subscribe(t *testing.T) {
 			t.Errorf("Error while streaming: %v\n", err)
 			break
 		}
-		fmt.Printf("Book from stream: %v\n", book)
+		t.Logf("Book from stream: %v\n", book)
 	}
 }
