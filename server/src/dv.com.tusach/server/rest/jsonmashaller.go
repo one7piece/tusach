@@ -18,7 +18,7 @@ type JsonMarshaler interface {
 	GetRequestPayload(r *http.Request, dest interface{}) error
 	SetResponseValue(w http.ResponseWriter, value interface{})
 	SetResponseError(w http.ResponseWriter, status int, message string)
-	SetResponseString(w http.ResponseWriter, value string)
+	SetResponseOK(w http.ResponseWriter)
 }
 
 type JsonPbMarshaler struct {
@@ -39,11 +39,12 @@ func (jpb JsonPbMarshaler) GetRequestPayload(r *http.Request, dest interface{}) 
 	return err
 }
 
-func (jpb JsonPbMarshaler) SetResponseString(w http.ResponseWriter, value string) {
+func (jpb JsonPbMarshaler) SetResponseOK(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "%s", value)
-	logger.Infof("Response body: [%s]", value)
+	json := "{error: \"" + "\"}"
+	fmt.Fprintf(w, "%s", json)
+	logger.Infof("Response body: [%s]", json)
 }
 
 func (jpb JsonPbMarshaler) SetResponseValue(w http.ResponseWriter, value interface{}) {
@@ -67,6 +68,7 @@ func (jpb JsonPbMarshaler) SetResponseValue(w http.ResponseWriter, value interfa
 
 func (jpb JsonPbMarshaler) SetResponseError(w http.ResponseWriter, status int, message string) {
 	w.WriteHeader(status)
-	fmt.Fprintf(w, "%s", message)
-	logger.Warnf("Response error: %d [%s]", status, message)
+	json := "{error: \"" + message + "\"}"
+	fmt.Fprintf(w, "%s", json)
+	logger.Warnf("Response error: %d [%s]", status, json)
 }

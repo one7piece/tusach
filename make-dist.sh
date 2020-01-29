@@ -12,6 +12,12 @@ echo "Usage: make-dist [amd64|386|arm|win]"
 exit 1
 fi
 
+if ! [ -d ./server/library.bak ]; then
+mkdir ./server/library.bak
+fi
+# backup books
+cp -r $output_path/library/books ./server/library.bak/
+
 rm -rf $output_path/*
 
 source ./build-server.sh $1

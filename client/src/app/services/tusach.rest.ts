@@ -12,7 +12,6 @@ export class TusachRest {
   private interval;
   private bookLastUpdatedTime : number;
   private detectChanges: boolean;
-  private bookListAdapter = new model.JsonBookListAdapter();
   
   constructor(
     private http: HttpClient, 
@@ -26,6 +25,7 @@ export class TusachRest {
   }
 
   enableChangeDetection(enabled: boolean) : void {
+    console.log("enableChangeDetection: " + enabled);
     this.detectChanges = enabled;
   }
 
@@ -33,41 +33,38 @@ export class TusachRest {
     return this.tusachUrl;
   }
   
-  pollForChanges() {
-/*    
+  pollForChanges() {    
     if (this.detectChanges) {
-      let url = this.tusachUrl + "/book/list/" + String(this.bookLastUpdatedTime);
-
-      this.http.get<model.BookListObject>(url).subscribe(bookListObj => {
-        if (bookListObj && bookListObj.books) {
-          this.log("number of updated books: " + bookListObj.books.length + ", isFullList: " + bookListObj.isFullList);
-          let bookList = model.BookListObject.fromObject(bookListObj);
-          // get the latest time
-          for (let book of bookList.getBooksList()) {
-            let millis = timstamp2millis(book.getLastUpdatedTime());
-            if (millis > this.bookLastUpdatedTime) {
-              this.bookLastUpdatedTime = millis;
-            }
+      console.log("pollForChanges - t: " + String(this.bookLastUpdatedTime));
+      this.doGetBooks(this.bookLastUpdatedTime).subscribe(bookList => {
+        // get the latest time
+        for (let book of bookList.getBooksList()) {
+          let millis = timstamp2millis(book.getLastUpdatedTime());
+          if (millis > this.bookLastUpdatedTime) {
+            this.bookLastUpdatedTime = millis;
           }
-          this.log("bookLastUpdatedTime = " + new Date(this.bookLastUpdatedTime));
-          this.listener.booksUpdated(bookList);
         }
-      });      
-    }
-*/    
+        this.log("bookLastUpdatedTime = " + new Date(this.bookLastUpdatedTime));
+        this.listener.booksUpdated(bookList);
+      });    
+    } 
   }
 
   getBooks(): Observable<model.BookList> {    
-    const url = this.tusachUrl + "/book/list/0";
-    this.log("getBooks() - url:" + url);
+    return this.doGetBooks(0);
+  }
+
+  doGetBooks(t: number): Observable<model.BookList> {    
+    const url = this.tusachUrl + "/book/list/" + String(t);
+    this.log("doGetBooks() - url:" + url);
 
     // convert to BookList
     return this.http.get(url).pipe(
       map(list => {
-        console.log("getBooks() - received json books:");
+        console.log("doGetBooks() - received json books:");
         console.log(list);
-        let bookList = this.bookListAdapter.adapt(list);
-        console.log("getBooks() - converted books:");
+        let bookList = model.toGrpcBookList(list);
+        console.log("doGetBooks() - converted books:");
         console.log(bookList);
         return bookList;
       })
@@ -79,14 +76,15 @@ export class TusachRest {
     const url = `${this.tusachUrl}/book/get/${id}`;
     this.log("getBook() - " + url);
     return this.http.get(url).pipe(
-      map(book => this.bookListAdapter.bookAdapter.adapt(book))
+      map(book => model.toGrpcBook(book))
     );
   }
 
   updateBook(book: model.Book, cmd: string) : void {
     const url = this.tusachUrl + "/book/command/" + cmd;
-    this.log(url + " - " + JSON.stringify(book));
-    this.http.post(url, book).subscribe(
+    var jsonBook = model.toJsonBook(book);
+    this.log(url + " - " + JSON.stringify(jsonBook));
+    this.http.post(url, jsonBook).subscribe(
       data => {this.log("updateBook() - " + cmd + " book successfully. " + data)},
       error => {this.log("updateBook() - " + cmd + " book failed: " + error)}
     );
@@ -97,7 +95,7 @@ export class TusachRest {
     this.log(url + " - " + id);
     let book = new model.Book();
     book.setId(id);
-    this.http.post(url, book).subscribe(
+    this.http.post(url, model.toJsonBook(book)).subscribe(
       data => {this.log("deleteBook() - book deleted successfully. " + data)},
       error => {this.log("deleteBook() - book deleted error: " + error)}
     );

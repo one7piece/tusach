@@ -18,57 +18,84 @@ export function getBookStatusAsString(status: model.BookStatusType) {
   }
 }
 
-export interface Adapter<T> {
-  adapt(obj: any): T;
+export function getBookStatusFromString(str: String) {
+  var status = model.BookStatusType.ERROR;
+  if (str == "ABORTED") {
+    status = model.BookStatusType.ABORTED;
+  } else if (str == "COMPLETED") {
+    status = model.BookStatusType.COMPLETED;
+  } else if (str == "IN_PROGRESS") {
+    status = model.BookStatusType.IN_PROGRESS;
+  }
+  return status;
 }
 
-export class JsonTimestampAdapter implements Adapter<google_protobuf_timestamp_pb.Timestamp> {
-  adapt(obj: any): google_protobuf_timestamp_pb.Timestamp {
-    var timestamp = new google_protobuf_timestamp_pb.Timestamp()
-    if (obj) {
-      if (typeof obj == "string") {
-        timestamp.fromDate(new Date(<string>obj));
-      } else if (obj.seconds && obj.nanos) {
-        timestamp.setSeconds(obj.seconds);
-        timestamp.setNanos(obj.nanos);
-      }
+export function toGoogleTime(obj: any) : google_protobuf_timestamp_pb.Timestamp {
+  var timestamp = new google_protobuf_timestamp_pb.Timestamp()
+  if (obj) {
+    if (typeof obj == "string") {
+      timestamp.fromDate(new Date(<string>obj));
+    } else if (obj.seconds && obj.nanos) {
+      timestamp.setSeconds(obj.seconds);
+      timestamp.setNanos(obj.nanos);
     }
-    return timestamp;
   }
+  return timestamp;
 }
 
-export class JsonBookAdapter implements Adapter<model.Book> {
-  adapt(obj: any): model.Book {
-    let book = new model.Book();
-    book.setId(obj.id);
-    book.setAuthor(obj.author);
-    book.setTitle(obj.title);
-    book.setBuildTimeSec(obj.buildTimeSec);
-    book.setCreatedBy(obj.createdBy);
-    book.setCurrentPageNo(obj.currentPageNo);
-    book.setCurrentPageUrl(obj.currentPageUrl);
-    book.setDeleted(obj.deleted);
-    book.setEpubCreated(obj.epubCreated);
-    book.setErrorMsg(obj.errorMsg);
-    book.setMaxNumPages(obj.maxNumPages);
-    book.setStartPageUrl(obj.startPageUrl);
-    book.setStatus(obj.status);
-    let timestampAdapter = new JsonTimestampAdapter();
-    book.setCreatedTime(timestampAdapter.adapt(obj.createdTime));
-    book.setLastUpdatedTime(timestampAdapter.adapt(obj.lastUpdatedTime));
-    return book;
-  }
+export function toJsonTime(t: google_protobuf_timestamp_pb.Timestamp) : String {
+  var str = new Date(t.seconds*1000 + t.nanos/1000000).toJSON();        
+  return str;
 }
 
-export class JsonBookListAdapter implements Adapter<model.BookList> {
-  public bookAdapter = new JsonBookAdapter();
+export function toJsonBook(book: model.Book) : Object {
+  let obj = { 
+    id: book.getId(),
+    author: book.getAuthor(),
+    title: book.getTitle(),
+    buildTimeSec: book.getBuildTimeSec(),
+    createdBy: book.getCreatedBy(),
+    currentPageNo: book.getCurrentPageNo(),
+    currentPageUrl: book.getCurrentPageUrl(),
+    deleted: book.getDeleted(),
+    errorMsg: book.getErrorMsg(),
+    epubCreated: book.getEpubCreated(),
+    maxNumPages: book.getMaxNumPages(),
+    startPageUrl: book.getStartPageUrl(),
+    status: getBookStatusAsString(book.getStatus()),
+    createdTime: toJsonTime(book.getCreatedTime()),
+    lastUpdatedTime: toJsonTime(book.getLastUpdatedTime())
+   };
 
-  adapt(obj: any) : model.BookList {
-    let bookList = new model.BookList();
-    bookList.setIsFullList(obj.isFullList);
-    for (let i=0; i<obj.books.length; i++) {
-      bookList.addBooks(this.bookAdapter.adapt(obj.books[i]));
-    }
-    return bookList;
-  }
+  return obj;
 }
+
+export function toGrpcBook(obj: any) : model.Book {
+  let book = new model.Book();
+  book.setId(obj.id);
+  book.setAuthor(obj.author);
+  book.setTitle(obj.title);
+  book.setBuildTimeSec(obj.buildTimeSec);
+  book.setCreatedBy(obj.createdBy);
+  book.setCurrentPageNo(obj.currentPageNo);
+  book.setCurrentPageUrl(obj.currentPageUrl);
+  book.setDeleted(obj.deleted);
+  book.setEpubCreated(obj.epubCreated);
+  book.setErrorMsg(obj.errorMsg);
+  book.setMaxNumPages(obj.maxNumPages);
+  book.setStartPageUrl(obj.startPageUrl);
+  book.setStatus(getBookStatusFromString(obj.status));
+  book.setCreatedTime(toGoogleTime(obj.createdTime));
+  book.setLastUpdatedTime(toGoogleTime(obj.lastUpdatedTime));
+  return book;
+}
+
+export function toGrpcBookList(obj: any) : model.BookList {
+  let bookList = new model.BookList();
+  bookList.setIsFullList(obj.isFullList);
+  for (let i=0; i<obj.books.length; i++) {
+    bookList.addBooks(toGrpcBook(obj.books[i]));
+  }
+  return bookList;
+}
+

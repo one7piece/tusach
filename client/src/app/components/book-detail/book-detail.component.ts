@@ -13,8 +13,6 @@ import { filter } from 'rxjs/operators';
 export class BookDetailComponent implements OnInit {
   book: model.Book.AsObject;
   error: string;
-  timestampAdapter = new model.JsonTimestampAdapter();
-  private bookListAdapter = new model.JsonBookListAdapter();
 
   constructor(
     private route: ActivatedRoute,
@@ -46,7 +44,7 @@ export class BookDetailComponent implements OnInit {
   getBookStatus() : string {
     var lastUpdatedTimeStr = "";
     if (this.book.lastUpdatedTime) {
-      lastUpdatedTimeStr = this.timestampAdapter.adapt(this.book.lastUpdatedTime).toDate().toLocaleString();
+      lastUpdatedTimeStr = model.toGoogleTime(this.book.lastUpdatedTime).toDate().toLocaleString();
     }
 
     var str = model.getBookStatusAsString(this.book.status) + " (pages#";
@@ -72,7 +70,7 @@ export class BookDetailComponent implements OnInit {
       this.error = "First Chapter Url cannot be empty!";
       return;
     }
-    let book = this.bookListAdapter.bookAdapter.adapt(this.book);
+    let book = model.toGrpcBook(this.book);
     this.tusachService.updateBook(book, "create");    
     this.router.navigate(['books']);
   }
@@ -86,7 +84,7 @@ export class BookDetailComponent implements OnInit {
     if (this.book.title == "" || this.book.startPageUrl == "") {      
       return;
     }
-    let book = this.bookListAdapter.bookAdapter.adapt(this.book);
+    let book = model.toGrpcBook(this.book);
     console.log("update() - '" + command + "' : ", book);
     this.tusachService.updateBook(book, command);
   }

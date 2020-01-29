@@ -11,43 +11,61 @@ import { subscribeOn } from 'rxjs/operators';
 export class TusachGrpc {
   private detectChanges: boolean;
   private service : model.TusachClient;
+  private stream : grpcWeb.ClientReadableStream<model.Book>;
   
   constructor(
-    private location: Location,
+    private host: String,
     private messageService: MessageService,
     private listener: IBookListener) {
     
     this.detectChanges = false;
-    const url = window.location.href;
-    const route = location.path();
-    const host = url.substr(0, url.indexOf(":", "http://".length))
-    console.log("current url:" + url + ", angular path:" + route + ", host:" + host + ", route:" + route);
     this.service = new model.TusachClient(host + ":8899", null, null);
+    this.stream = null;
     this.subscribe();
   }
 
   enableChangeDetection(enabled: boolean) : void {
-    this.detectChanges = enabled;
+    if (this.detectChanges != enabled) {
+      this.detectChanges = enabled;
+      if (this.detectChanges) {
+        this.subscribe();
+      } else {
+        this.unsubscribe();
+      }
+    }
   }
   
-  subscribe() {
+  subscribe() {    
     console.log("tusach.grpc.subscribe() - start");
+    if (this.stream != null) {
+      this.stream.cancel();
+      this.stream = null;
+    }
+
     const request = new google_protobuf_empty_pb.Empty();
-    const stream = this.service.subscribe(request, {});
-    stream.on('data', (book) =>{
+    this.stream = this.service.subscribe(request, {});
+    
+    this.stream.on('data', (book) =>{
       console.log("tusach.grpc.subscribe() - received stream book:");
       console.log(book);
       this.listener.bookUpdated(book);
     });
-    stream.on('status', (status: grpcWeb.Status) => {
+    this.stream.on('status', (status: grpcWeb.Status) => {
       if (status.metadata) {
         console.log("tusach.grpc.subscribe() - received stream metadata:");
         console.log(status.metadata);
       }
     });    
-    stream.on('end', () => {
+    this.stream.on('end', () => {
       console.log("tusach.grpc.subscribe() - received end stream signal");
     });    
+  }
+
+  unsubscribe() {
+    console.log("tusach.grpc.unsubscribe() - start");
+    if (this.stream != null) {
+      this.stream.cancel();
+    }
   }
 
   getBooks(): Observable<model.BookList> {    

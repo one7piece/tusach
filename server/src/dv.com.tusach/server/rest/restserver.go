@@ -185,17 +185,16 @@ func (app *RestServer) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	} else {
 		err = errors.New("Unknown operation: " + op)
 	}
-	message := "OK"
 	if err != nil {
-		message = "ERROR: " + err.Error()
+		app.marshaler.SetResponseError(w, http.StatusBadRequest, err.Error())
+	} else {
+		app.marshaler.SetResponseOK(w)
 	}
-	logger.Infof("updateBook - response message: %s", message)
-	app.marshaler.SetResponseString(w, message)
 }
 
 func (app *RestServer) CreateBook(w http.ResponseWriter, r *http.Request) {
 	newBook := model.Book{}
-	err := app.marshaler.GetRequestPayload(r, newBook)
+	err := app.marshaler.GetRequestPayload(r, &newBook)
 	if err != nil {
 		logger.Errorf("Invalid request book payload: %v\n", err)
 		app.marshaler.SetResponseError(w, http.StatusInternalServerError, "Invalid request book payload: "+err.Error())
@@ -235,5 +234,5 @@ func (app *RestServer) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.marshaler.SetResponseValue(w, newBook)
+	app.marshaler.SetResponseValue(w, &newBook)
 }

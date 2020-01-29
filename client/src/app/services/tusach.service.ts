@@ -8,6 +8,7 @@ import { IBookListener, ITusachProxy} from './tusach.proxy';
 
 import { TusachRest } from './tusach.rest';
 import { TusachGrpc } from './tusach.grpc';
+import { Message } from '@angular/compiler/src/i18n/i18n_ast';
 
 export enum ServiceType {
   GRPC = "grpc",
@@ -23,17 +24,36 @@ export class TusachService {
   private proxy : ITusachProxy;
   private grpcService : TusachGrpc;
   private restService : TusachRest;
+  private host : String;
   
   constructor(
-    private location : Location,
+    //private location : Location,
     private http: HttpClient, 
     private messageService: MessageService) {  
-    this.grpcService = new TusachGrpc(location, messageService, this);
-    this.restService = new TusachRest(http, messageService, this);
-    this.setServiceType(ServiceType.GRPC);
+
+    const url = window.location.href;
+    this.host = url.substr(0, url.indexOf(":", "http://".length))
+    console.log("current url:" + url + ", host:" + this.host);
+
+    var serviceType = ServiceType.GRPC;
+    const search = window.location.search;
+    if (search.length > 1 && search.substring(1).startsWith("serviceType=") == true) {
+      var value = search.substring(1 + "serviceType=".length);
+      console.log("using service type: " + value);
+      if (value == "rest") {
+        serviceType = ServiceType.REST;
+      }
+    }
+    this.setServiceType(serviceType);
   }
 
   setServiceType(type: ServiceType) {
+    if (type == ServiceType.GRPC && this.grpcService == null) {
+      this.grpcService = new TusachGrpc(this.host, this.messageService, this);
+    } else if (type == ServiceType.REST && this.restService == null) {
+      this.restService = new TusachRest(this.http, this.messageService, this);
+    }
+
     if (type == ServiceType.REST) {
       this.proxy = this.restService;
       console.log("setServiceType - selected REST");
