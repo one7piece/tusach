@@ -116,10 +116,14 @@ func (app *RestServer) GetBooks(w http.ResponseWriter, r *http.Request) {
 		app.marshaler.SetResponseError(w, http.StatusBadRequest, "Invalid timestamp: '"+timestr+"'")
 		return
 	}
-	logger.Infof("GetBooks - timestamp:%s", timestr)
 	systemInfo := app.bookMaker.GetSystemInfo()
+	systemTimestamp := util.Timestamp2UnixTime(systemInfo.SystemUpTime)
+	requestTimeStr, _ := util.Time2String(util.UnixTime2Time(timestamp))
+	systemTimeStr, _ := util.Time2String(util.UnixTime2Time(systemTimestamp))
+	logger.Infof("GetBooks - timestamp:%d(%s), systemUpTime:%d(%s)",
+		timestamp, requestTimeStr, systemTimestamp, systemTimeStr)
 	bookList := model.BookList{}
-	if timestr == "0" || timestamp < util.Timestamp2UnixTime(systemInfo.SystemUpTime) {
+	if timestr == "0" {
 		bookList.IsFullList = true
 		books := app.bookMaker.GetBooks(false)
 		bookList.Books = []*model.Book{}
@@ -138,9 +142,11 @@ func (app *RestServer) GetBooks(w http.ResponseWriter, r *http.Request) {
 		for i := 0; i < len(books); i++ {
 			if util.Timestamp2UnixTime(books[i].LastUpdatedTime) > timestamp {
 				bookList.Books = append(bookList.Books, &books[i])
+				logger.Infof("GetBooks - found matched book: %v", books[i])
 			}
 		}
 	}
+	logger.Infof("GetBooks - #book found:%d", len(bookList.Books))
 	app.marshaler.SetResponseValue(w, &bookList)
 }
 

@@ -42,7 +42,7 @@ func (jpb JsonPbMarshaler) GetRequestPayload(r *http.Request, dest interface{}) 
 func (jpb JsonPbMarshaler) SetResponseOK(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json := "{error: \"" + "\"}"
+	json := "{\"error\": \"" + "\"}"
 	fmt.Fprintf(w, "%s", json)
 	logger.Infof("Response body: [%s]", json)
 }
@@ -68,7 +68,7 @@ func (jpb JsonPbMarshaler) SetResponseValue(w http.ResponseWriter, value interfa
 
 func (jpb JsonPbMarshaler) SetResponseError(w http.ResponseWriter, status int, message string) {
 	w.WriteHeader(status)
-	json := "{error: \"" + message + "\"}"
+	json := "{\"error\": \"" + message + "\"}"
 	fmt.Fprintf(w, "%s", json)
 	logger.Warnf("Response error: %d [%s]", status, json)
 }

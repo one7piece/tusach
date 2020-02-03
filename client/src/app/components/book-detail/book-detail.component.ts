@@ -87,6 +87,9 @@ export class BookDetailComponent implements OnInit {
     let book = model.toGrpcBook(this.book);
     console.log("update() - '" + command + "' : ", book);
     this.tusachService.updateBook(book, command);
+    if (command == "resume") {
+      this.router.navigate(['books']);
+    }
   }
 
   initBook(): void {

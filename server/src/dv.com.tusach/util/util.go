@@ -129,11 +129,15 @@ func UnixTimeNow() int64 {
 }
 
 func Timestamp2UnixTime(t *tspb.Timestamp) int64 {
-	return int64(t.GetNanos() / 1000000)
+	return int64(t.GetSeconds()*1000 + int64(t.GetNanos())/1000000)
 }
 
 func Time2UnixTime(t time.Time) int64 {
-	return t.UnixNano() / (int64(time.Millisecond) / int64(time.Nanosecond))
+	return t.UnixNano() / 1000000
+}
+
+func UnixTime2Time(n int64) time.Time {
+	return time.Unix(n/1000, (n%1000)*1000000)
 }
 
 func String2Timestamp(str string) (*tspb.Timestamp, error) {
