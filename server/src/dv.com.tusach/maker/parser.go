@@ -13,6 +13,15 @@ import (
 	"golang.org/x/net/html"
 )
 
+func (maker *BookMaker) DownloadChapter(int bookId, chapterUrl string, int chapterNo) (Chapter, error) {
+	// call otto to download chapter
+	// otto will login by call back send
+	// send(url..., requestId) -> new goroutine: dispatch request, wait for response, call otto
+	// beginFn(requestId, status, header)
+	// ...
+	// endFn(requestId)
+}
+
 var chapterPrefixes = [...]string{"Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"}
 
 func (maker *BookMaker) getURL(target string, request string) string {

@@ -157,7 +157,7 @@ func (bookMaker *BookMaker) CreateBook(book model.Book) error {
 		logger.Errorf("Error compiling parser.js: %s\n", err.Error())
 		return err
 	}
-	go bookMaker.makeBook(engine, current.Id)
+	go bookMaker.MakeBook(engine, &current)
 	return nil
 }
 
@@ -186,11 +186,9 @@ func (bookMaker *BookMaker) GetSystemInfo() model.SystemInfo {
 	return bookMaker.db.GetSystemInfo()
 }
 
-func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) (err error) {
+func (bookMaker *BookMaker) MakeBook(engine *ScriptEngine, book *model.Book) (err error) {
 	var numPagesLoaded = 0
-	//var err error
 	err = nil
-	book := bookMaker.GetBook(bookId)
 
 	bookMaker.abortedBooks[book.Id] = false
 	defer func() {
@@ -208,8 +206,8 @@ func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) (err er
 				book.Status = model.BookStatusType_COMPLETED
 				logger.Infof("makeBook - finished making '%s'", book.Title)
 			}
-			bookMaker.saveBook(&book)
-			persistence.RemoveBookDir(book)
+			bookMaker.saveBook(book)
+			persistence.RemoveBookDir(*book)
 		}
 	}()
 
@@ -219,7 +217,7 @@ func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) (err er
 	}
 
 	if book.Id == 0 {
-		err = fmt.Errorf("Could not find book: %d", bookId)
+		err = fmt.Errorf("Could not find book: %d", book.GetId())
 		return
 	}
 	url := book.CurrentPageUrl
@@ -228,15 +226,13 @@ func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) (err er
 	}
 
 	// TODO set loader configuration
-	err = persistence.InitBookDir(book)
+	err = persistence.InitBookDir(*book)
 	if err != nil {
 		return
 	}
 
 	nextPageUrl := ""
 	for {
-		// reload book to check change to book status
-		book = bookMaker.GetBook(bookId)
 		if bookMaker.abortedBooks[book.Id] || book.MaxNumPages > 0 && book.MaxNumPages <= book.CurrentPageNo {
 			break
 		}
@@ -272,7 +268,7 @@ func (bookMaker *BookMaker) makeBook(engine *ScriptEngine, bookId int32) (err er
 		if bookMaker.abortedBooks[book.Id] {
 			break
 		}
-		_, err = bookMaker.saveBook(&book)
+		_, err = bookMaker.saveBook(book)
 		if err != nil {
 			err = fmt.Errorf("%s - Failed to save book to DB: %s", book.Title, err)
 			return

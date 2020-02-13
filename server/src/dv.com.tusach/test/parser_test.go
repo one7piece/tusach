@@ -55,7 +55,7 @@ func (o Parser_Test) testParser(t *testing.T, chapterURL string, title string) {
 	}
 
 	prefix := util.GetConfiguration().LibraryPath + "/" + title
-	chapterTitle, nextChapterURL, err := bookMaker.Parse(engine, chapterURL, prefix+"_raw.html", prefix+".html", 10, 1)
+	chapterTitle, nextChapterURL, err := bookMaker.Parse(engine, 1, chapterURL, prefix+"_raw.html", prefix+".html", 10, 1)
 	if err != nil {
 		t.Errorf("Failed to parse %s - %s\n", chapterURL, err)
 		t.FailNow()
