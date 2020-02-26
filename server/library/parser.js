@@ -1,9 +1,13 @@
 chapterPrefixes = ["Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"];
 
-var chapterHTML = "";
-var chapterTitle = "";
-var nextChapterURL = "";
+var settings = {
+  templateHTML: "",
+  siteParams: {},
+  siteHeaders: {}
+};
+var chapterData;
 
+fullPathPrefix = "";
 buffer = "";
 titleBuffer = "";
 divDepth = 0;
@@ -12,14 +16,29 @@ isHeaderTag = false;
 href = "";
 links = [];
 title = "";
-currentChapterURL = "";
-templateHTML = "";
-fullPathPrefix = "";
-currentChapterNo = 0;
 
 logDebug("executing script...");
 
-function begin(template, chapterNo, url) {
+// methods from GO
+//------------------------------------------------------------------------------
+function js_downloadChapter(chapterNo, url) {
+  chapterData = {
+    currentChapterURL: url,
+    currentChapterNo: chapterNo,
+    chapterHTML: "",
+    chapterTitle: "",
+    nextChapterURL: ""
+  };
+  if (isTruyenYY(url)) {
+    // need to login and authenticate
+    if (!siteParams.sessionId) {
+      loginTruyenYY();
+    }
+  }
+  sendHttpRequest(chapterData.currentChapterURL);
+}
+
+function js_begin(template, chapterNo, url) {
   currentChapterNo = chapterNo;
   currentChapterURL = url;
   index = currentChapterURL.indexOf("/", "http://..".length)
@@ -29,7 +48,7 @@ function begin(template, chapterNo, url) {
   logDebug("begin() - " + url + ", fullPathPrefix: " + fullPathPrefix + ", template: " + template);
 }
 
-function end() {
+function js_end() {
   logInfo(">>>>>>>> chapter: " + chapterTitle + " <<<<<<<<<<<");
   index = templateHTML.indexOf("</body>");
 
@@ -42,7 +61,7 @@ function end() {
   logInfo(">>>>>>>> Next chapter: " + nextChapterURL + " <<<<<<<<<<<");
 }
 
-function startTag(tagName, isSelfClosingTag) {
+function js_startTag(tagName, isSelfClosingTag) {
   //logDebug("startTag: " + tagName + ", isSelfClosingTag=" + isSelfClosingTag)
   if (tagName == "h1" || tagName == "h2" || tagName == "h3") {
     isHeaderTag = true;
@@ -68,7 +87,7 @@ function startTag(tagName, isSelfClosingTag) {
   }
 }
 
-function endTag(tagName) {
+function js_endTag(tagName) {
   //logDebug("endTag: " + tagName + ", divDepth:" + divDepth);
   if (tagName == "h1" || tagName == "h2" || tagName == "h3") {
     isHeaderTag = false;
@@ -90,7 +109,7 @@ function endTag(tagName) {
   }
 }
 
-function text(text) {
+function js_text(text) {
   if (divDepth > 0) {
     //logDebug("found text node: " + text + "");
     buffer += text;
@@ -104,6 +123,8 @@ function text(text) {
     nextChapterURL = getFullPath(href);
   }
 }
+// 
+//------------------------------------------------------------------------------
 
 function updateChapterHTML() {
   if (buffer.indexOf("function") == -1 && buffer.indexOf("return") == -1) {
@@ -166,6 +187,31 @@ function getChapterTitle(html) {
 	return title;
 }
 
+function sendHttpRequest(method, url) {
+  go_sendHttpRequest(method, url, settings.siteHeaders, settings.siteParams);
+}
+
+// site specific methods
+//------------------------------------------------------------------------------
+
+function isTruyenCuaTui(url) {
+  return url.indexOf("truyencuatui") != -1;
+}
+
+function isTruyenYY(url) {
+  return url.indexOf("truyenyy.com") != -1;
+}
+
+function loginTruyenYY() {
+  // clear cache
+  settings.siteHeaders = {}
+  settings.siteParams = {}
+  sendHttpRequest("GET", "")
+}
+
+// common helper methods
+//------------------------------------------------------------------------------
+
 function extractChapterNumber(url) {
   parent = getParentPath(url);
   s = url.substr(parent+1);
@@ -225,8 +271,4 @@ function endsWith(source, str) {
     return (source.substr(source.length-str.length) == str);
   }
   return false;
-}
-
-function isTruyenCuaTui() {
-  return currentChapterURL.indexOf("truyencuatui") != -1;
 }
