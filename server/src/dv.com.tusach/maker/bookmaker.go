@@ -12,23 +12,12 @@ import (
 	"dv.com.tusach/model"
 	"dv.com.tusach/persistence"
 	"dv.com.tusach/util"
-	"github.com/robertkrimen/otto"
 )
 
 type BookMaker struct {
 	db           persistence.Persistence
 	mux          *sync.Mutex
 	abortedBooks map[int32]bool
-}
-
-type ScriptEngine struct {
-	jsVM       *otto.Otto
-	script     *otto.Script
-	beginFn    otto.Value
-	endFn      otto.Value
-	startTagFn otto.Value
-	endTagFn   otto.Value
-	textFn     otto.Value
 }
 
 func NewBookMaker(db persistence.Persistence) *BookMaker {
@@ -39,39 +28,20 @@ func NewBookMaker(db persistence.Persistence) *BookMaker {
 	return &bookMaker
 }
 
-func (bookMaker *BookMaker) Compile(scriptData []byte) (*ScriptEngine, error) {
-	if scriptData == nil {
-		return nil, errors.New("missing argument")
-	}
-	engine := new(ScriptEngine)
-	engine.jsVM = otto.New()
-	logger.Infof("Compiling script...\n")
-	script, err := engine.jsVM.Compile("", scriptData)
+func (bookMaker *BookMaker) CreateContentLoader(url string) (*maker.ContentLoader, error) {
+	// get the domain from the url
+	u, err := url.Parse(url)
 	if err != nil {
-		logger.Errorf("Error compiling script: %s", err)
+		return fmt.Errorf("Invalid url: %s. %w", url, err)
 		return nil, err
 	}
-	engine.script = script
-	// check if this is needed
-	//engine.jsVM.Run(engine.script)
 
-	engine.jsVM.Set("logDebug", func(call otto.FunctionCall) otto.Value {
-		logger.Debug(call.Argument(0).String())
-		return otto.Value{}
-	})
-
-	engine.jsVM.Set("logInfo", func(call otto.FunctionCall) otto.Value {
-		logger.Info(call.Argument(0).String())
-		return otto.Value{}
-	})
-
-	engine.jsVM.Set("logError", func(call otto.FunctionCall) otto.Value {
-		logger.Error(call.Argument(0).String())
-		return otto.Value{}
-	})
-
-	logger.Info("script compiled succesffuly!")
-	return engine, nil
+	contentLoader := ContentLoader{Hostname: u.Hostname()}
+	err = contentLoader.Init()
+	if err != nil {
+		return nil, err
+	}
+	return contentLoader, nil
 }
 
 func (bookMaker *BookMaker) GetBookSites() []string {

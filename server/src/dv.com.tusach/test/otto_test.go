@@ -29,7 +29,7 @@ function sayHello(arg1, arg2) {
 }
 `
 
-func testOtto1(t *testing.T) {
+func TestOtto1(t *testing.T) {
 	t.Log("\nTestGoQuery...\n")
 	util.LoadConfig("c:/dev/dvan/github/tusach/server/config.json")
 	config := util.GetConfiguration()
