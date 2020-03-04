@@ -3,8 +3,7 @@ package maker
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"os"
+	"net/url"
 	"strconv"
 	"sync"
 
@@ -28,12 +27,11 @@ func NewBookMaker(db persistence.Persistence) *BookMaker {
 	return &bookMaker
 }
 
-func (bookMaker *BookMaker) CreateContentLoader(url string) (*maker.ContentLoader, error) {
+func (bookMaker *BookMaker) CreateContentLoader(chapterUrl string) (*ContentLoader, error) {
 	// get the domain from the url
-	u, err := url.Parse(url)
+	u, err := url.Parse(chapterUrl)
 	if err != nil {
-		return fmt.Errorf("Invalid url: %s. %w", url, err)
-		return nil, err
+		return nil, fmt.Errorf("Invalid chapterUrl: %s. %w", chapterUrl, err)
 	}
 
 	contentLoader := ContentLoader{Hostname: u.Hostname()}
@@ -41,7 +39,7 @@ func (bookMaker *BookMaker) CreateContentLoader(url string) (*maker.ContentLoade
 	if err != nil {
 		return nil, err
 	}
-	return contentLoader, nil
+	return &contentLoader, nil
 }
 
 func (bookMaker *BookMaker) GetBookSites() []string {
@@ -116,18 +114,12 @@ func (bookMaker *BookMaker) CreateBook(book model.Book) error {
 	bookId, err := bookMaker.saveBook(&current)
 	current.Id = int32(bookId)
 
-	data, err := ioutil.ReadFile(util.GetParserFile())
-	if err != nil {
-		logger.Errorf("Failed to load js: %s\n", err)
-		return err
-	}
-
-	engine, err := bookMaker.Compile(data)
+	loader, err := bookMaker.CreateContentLoader(current.CurrentPageUrl)
 	if err != nil {
 		logger.Errorf("Error compiling parser.js: %s\n", err.Error())
 		return err
 	}
-	go bookMaker.MakeBook(engine, &current)
+	go bookMaker.MakeBook(loader, &current)
 	return nil
 }
 
@@ -156,7 +148,7 @@ func (bookMaker *BookMaker) GetSystemInfo() model.SystemInfo {
 	return bookMaker.db.GetSystemInfo()
 }
 
-func (bookMaker *BookMaker) MakeBook(engine *ScriptEngine, book *model.Book) (err error) {
+func (bookMaker *BookMaker) MakeBook(loader *ContentLoader, book *model.Book) (err error) {
 	var numPagesLoaded = 0
 	err = nil
 
@@ -200,6 +192,10 @@ func (bookMaker *BookMaker) MakeBook(engine *ScriptEngine, book *model.Book) (er
 	if err != nil {
 		return
 	}
+	err = loader.Init()
+	if err != nil {
+		return
+	}
 
 	nextPageUrl := ""
 	for {
@@ -212,10 +208,15 @@ func (bookMaker *BookMaker) MakeBook(engine *ScriptEngine, book *model.Book) (er
 			newChapterNo = book.CurrentPageNo
 		}
 		newChapter := model.Chapter{BookId: book.Id, ChapterNo: newChapterNo}
-		nextPageUrl, err = bookMaker.DownloadChapter(engine, url, &newChapter)
+		rawFilename := persistence.GetRawChapterFilename(newChapter)
+		filename := persistence.GetChapterFilename(newChapter)
+		nextPageUrl, err = loader.DownloadChapter(url, &newChapter, rawFilename, filename)
+
+		// TODO remove when finish debuging
+		//defer os.Remove(rawFilename)
 
 		if err != nil {
-			logger.Errorf("%s - Failed to load chapter %d: %s", book.Title, newChapterNo, err)
+			logger.Errorf("%s\n", err.Error)
 			break
 		}
 
@@ -258,20 +259,6 @@ func (bookMaker *BookMaker) MakeBook(engine *ScriptEngine, book *model.Book) (er
 	}
 
 	return err
-}
-
-func (bookMaker *BookMaker) DownloadChapter(engine *ScriptEngine, chapterUrl string, chapter *model.Chapter) (string, error) {
-	rawFilename := persistence.GetRawChapterFilename(*chapter)
-	filename := persistence.GetChapterFilename(*chapter)
-
-	chapterTitle, nextChapterURL, err := bookMaker.Parse(engine, int(chapter.ChapterNo), chapterUrl, rawFilename, filename, 10, 2)
-	if err != nil {
-		return "", err
-	}
-	chapter.Title = chapterTitle
-	os.Remove(rawFilename)
-
-	return nextChapterURL, nil
 }
 
 func (bookMaker *BookMaker) saveBook(book *model.Book) (retId int, retErr error) {
