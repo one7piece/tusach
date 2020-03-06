@@ -197,7 +197,6 @@ func (bookMaker *BookMaker) MakeBook(loader *ContentLoader, book *model.Book) (e
 		return
 	}
 
-	nextPageUrl := ""
 	for {
 		if bookMaker.abortedBooks[book.Id] || book.MaxNumPages > 0 && book.MaxNumPages <= book.CurrentPageNo {
 			break
@@ -207,23 +206,42 @@ func (bookMaker *BookMaker) MakeBook(loader *ContentLoader, book *model.Book) (e
 		if book.CurrentPageUrl == url {
 			newChapterNo = book.CurrentPageNo
 		}
-		newChapter := model.Chapter{BookId: book.Id, ChapterNo: newChapterNo}
-		rawFilename := persistence.GetRawChapterFilename(newChapter)
-		filename := persistence.GetChapterFilename(newChapter)
-		nextPageUrl, err = loader.DownloadChapter(url, &newChapter, rawFilename, filename)
-
-		// TODO remove when finish debuging
-		//defer os.Remove(rawFilename)
-
-		if err != nil {
+		downloadedChapter, err2 := loader.DownloadChapter(int(book.Id), int(newChapterNo), url)
+		if err2 != nil {
 			logger.Errorf("%s\n", err.Error)
 			break
 		}
 
-		//if newChapter.Title == "" {
-		//	newChapter.Title = "model.Chapter " + strconv.Itoa(int(newChapter.ChapterNo))
-		//}
-		logger.Infof("%s - Completed chapter: %d (%s), nextPageUrl: %s\n", book.Title, newChapter.ChapterNo, newChapter.Title, nextPageUrl)
+		newChapter := model.Chapter{BookId: book.Id, ChapterNo: newChapterNo, Title: downloadedChapter.ChapterTitle}
+
+		if downloadedChapter.ChapterHmtlRaw != "" {
+			rawFilename := persistence.GetRawChapterFilename(newChapter)
+			// save raw file
+			if err = util.SaveFile(rawFilename, []byte(downloadedChapter.ChapterHmtlRaw)); err != nil {
+				break
+			}
+		} else {
+			err = errors.New("Missing raw chapter html!")
+			break
+		}
+		if downloadedChapter.ChapterHtml != "" {
+			filename := persistence.GetChapterFilename(newChapter)
+			// save html file
+			err = util.SaveFile(filename, []byte(downloadedChapter.ChapterHtml))
+			if err != nil {
+				logger.Errorf("%s\n", err.Error)
+				break
+			}
+		} else {
+			err = errors.New("Missing chapter html!")
+			break
+		}
+
+		// TODO remove when finish debuging
+		//defer os.Remove(rawFilename)
+
+		logger.Infof("%s - Completed chapter: %d (%s), nextPageUrl: %s\n", book.Title,
+			newChapter.ChapterNo, newChapter.Title, downloadedChapter.NextChapterUrl)
 
 		err = bookMaker.db.SaveChapter(newChapter)
 		if err != nil {
@@ -241,21 +259,21 @@ func (bookMaker *BookMaker) MakeBook(loader *ContentLoader, book *model.Book) (e
 		}
 		_, err = bookMaker.saveBook(book)
 		if err != nil {
-			err = fmt.Errorf("%s - Failed to save book to DB: %s", book.Title, err)
+			logger.Errorf("%s - Failed to save book to DB: %s", book.Title, err)
 			return
 		}
 
 		// check for no more pages
-		if nextPageUrl == "" {
+		if downloadedChapter.NextChapterUrl == "" {
 			logger.Info("No more next page url found.")
 			break
 		}
 
-		if nextPageUrl == url {
+		if downloadedChapter.NextChapterUrl == url {
 			logger.Errorf("Internal error. next page url is same as current page url: %s", url)
 			break
 		}
-		url = nextPageUrl
+		url = downloadedChapter.NextChapterUrl
 	}
 
 	return err

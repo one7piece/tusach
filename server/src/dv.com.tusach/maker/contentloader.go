@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"dv.com.tusach/logger"
-	"dv.com.tusach/model"
 	"dv.com.tusach/util"
 	"github.com/robertkrimen/otto"
 	"golang.org/x/net/html"
@@ -35,10 +34,20 @@ type ScriptEngine struct {
 	jsMethods []otto.Value
 }
 
+type CurrentChapter struct {
+	ChapterNo      int
+	ChapterTitle   string
+	ChapterUrl     string
+	NextChapterUrl string
+	ChapterHtml    string
+	ChapterHmtlRaw string
+}
+
 type ContentLoader struct {
 	Hostname   string
 	Params     map[string]string
-	Chapter    *model.Chapter
+	Chapter    *CurrentChapter
+	Template   string
 	engine     *ScriptEngine
 	transport  *Transport
 	parentTag  map[string]string
@@ -130,53 +139,40 @@ func (loader *ContentLoader) Init() error {
 	if err != nil {
 		return fmt.Errorf("Failed to read template file: %s. %w", templateFilename, err)
 	}
-	loader.Params["template"] = string(template)
+	loader.Template = string(template)
 	return nil
 }
 
-func (loader *ContentLoader) DownloadChapter(chapterUrl string, chapter *model.Chapter, chapterFilenameRaw string, chapterFilename string) (string, error) {
+func (loader *ContentLoader) DownloadChapter(bookId int, chapterNo int, chapterUrl string) (*CurrentChapter, error) {
+	// create new chapter
+	loader.Chapter = new(CurrentChapter)
+	loader.Chapter.ChapterNo = chapterNo
+	loader.Chapter.ChapterUrl = chapterUrl
+
 	// call otto to download chapter
-	loader.Params["chapterUrl"] = chapterUrl
-	loader.Params["chapterTitle"] = ""
-	loader.Params["chapterHtml"] = ""
-	loader.Params["chapterHtmlRaw"] = ""
-	loader.Params["nextChapterUrl"] = ""
 	loader.Params["lastResponseBody"] = ""
 
-	logger.Infof("start downloading chapter %d/%d: %s\n", chapter.BookId, chapter.ChapterNo, chapterUrl)
-	if value, err := loader.engine.jsMethods[DOWNLOAD_CHAPTER_METHOD].Call(otto.NullValue(), chapterUrl); err == nil {
+	logger.Infof("start downloading chapter %d/%d: %s\n", bookId, chapterNo, chapterUrl)
+	if value, err := loader.engine.jsMethods[DOWNLOAD_CHAPTER_METHOD].Call(otto.NullValue()); err == nil {
 		s, err := value.ToString()
 		if err != nil {
-			return "", fmt.Errorf("Error during otto ToString: %w\n", err)
+			return nil, fmt.Errorf("Error during otto ToString: %w\n", err)
 		}
 		if s != "" {
-			return "", errors.New(s)
+			return nil, errors.New(s)
 		}
 	} else {
-		return "", err
+		return nil, err
 	}
 
 	if loader.Params["chapterHtml"] == "" {
-		return "", errors.New("No chapter data!")
+		return nil, errors.New("No chapter data!")
 	}
 
-	// save raw file
-	err := util.SaveFile(chapterFilenameRaw, []byte(loader.Params["chapterHtmlRaw"]))
-	if err != nil {
-		return "", fmt.Errorf("Error saving file: %s. %w", chapterFilenameRaw, err)
-	}
-	// save html file
-	err = util.SaveFile(chapterFilename, []byte(loader.Params["chapterHtml"]))
-	if err != nil {
-		return "", fmt.Errorf("Error saving file: %s. %w", chapterFilename, err)
-	}
-
-	chapter.Title = loader.Params["chapterTitle"]
-
-	logger.Infof("successfully downloaded chapter %d/%d: %s\n", chapter.BookId, chapter.ChapterNo, chapterUrl)
-	logger.Infof("chapterTitle: '%s', nextChapterUrl: '%s', chapterHtml:\n", chapter.Title, loader.Params["nextChapterUrl"])
+	logger.Infof("successfully downloaded chapter %d/%d: %s\n", bookId, chapterNo, chapterUrl)
+	logger.Infof("chapterTitle: '%s', nextChapterUrl: '%s', chapterHtml:\n", loader.Chapter.ChapterTitle, loader.Params["nextChapterUrl"])
 	//
-	return loader.Params["nextChapterUrl"], nil
+	return loader.Chapter, nil
 }
 
 func (loader *ContentLoader) Send(method string, url string, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) {
