@@ -1,10 +1,10 @@
 package maker
 
 import (
-	"errors"
 	"io"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	"net/http"
 	"net/url"
@@ -23,13 +23,15 @@ type Request struct {
 	Url      string
 	Header   map[string]string
 	Formdata map[string]string
+	Cookies  map[string]string
 }
 
 type Response struct {
-	Url    string
-	Status int
-	Body   []byte
-	Header map[string]string
+	Url     string
+	Status  int
+	Body    []byte
+	Header  http.Header
+	Cookies map[string]string
 }
 
 func (t *Transport) init(timeout time.Duration) (*http.Client, error) {
@@ -67,22 +69,31 @@ func (t *Transport) Send(request Request, timeoutSec int, numTries int) (Respons
 	}
 
 	var requestBody io.Reader
+	contentLength := 0
 	if request.Formdata != nil {
 		form := url.Values{}
 		for key, value := range request.Formdata {
+			logger.Infof("add formdata %s=%s\n", key, value)
 			form.Add(key, value)
 		}
-		requestBody = strings.NewReader(form.Encode())
+		bodyStr := form.Encode()
+		contentLength = len(bodyStr)
+		requestBody = strings.NewReader(bodyStr)
 	}
 	httpReq, err := http.NewRequest(request.Method, request.Url, requestBody)
 	if err != nil {
 		return response, err
 	}
 
+	// set cookies
+	for name, value := range request.Cookies {
+		httpReq.AddCookie(&http.Cookie{Name: name, Value: value})
+	}
 	// set headers
 	for key, value := range request.Header {
 		httpReq.Header.Add(key, value)
 	}
+	httpReq.Header.Add("Content-Length", strconv.Itoa(contentLength))
 
 	_, hasUserAgent := request.Header["User-Agent"]
 	if !hasUserAgent {
@@ -98,11 +109,18 @@ func (t *Transport) Send(request Request, timeoutSec int, numTries int) (Respons
 
 	var httpResp *http.Response
 	for i := 0; i < n; i++ {
-		logger.Infof("Attempt %d of %d to load from %s\n", (i + 1), n, request.Url)
+		logger.Debugf("Attempt %d of %d to send request: %v, headers:%v\n", (i + 1), n, httpReq.URL, httpReq.Header)
 		httpResp, err = client.Do(httpReq)
 		if err != nil {
 			logger.Errorf("Error loading from %s. %s\n", request.Url, err.Error())
 		} else {
+			logger.Debugf("Received response status: %s, headers: %v, cookies: %v\n", httpResp.Status, httpResp.Header, httpResp.Cookies())
+			response.Cookies = make(map[string]string)
+			for _, cookie := range httpResp.Cookies() {
+				response.Cookies[cookie.Name] = cookie.Value
+			}
+			response.Header = httpResp.Header
+			response.Status = httpResp.StatusCode
 			defer httpResp.Body.Close()
 			response.Body, err = ioutil.ReadAll(httpResp.Body)
 			if response.Body != nil && err == nil {
@@ -117,11 +135,6 @@ func (t *Transport) Send(request Request, timeoutSec int, numTries int) (Respons
 
 	if err != nil {
 		return response, err
-	}
-
-	if response.Body == nil || len(response.Body) == 0 {
-		logger.Error("No html data loaded")
-		return response, errors.New("No html data loaded")
 	}
 
 	return response, nil

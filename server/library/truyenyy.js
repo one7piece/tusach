@@ -1,7 +1,8 @@
 chapterPrefixes = ["Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"];
 
-var settings = {};
-var chapterData = {};
+// loginGet loginPost download
+var parsingState = "";
+var csrfToken = "";
 
 fullPathPrefix = "";
 buffer = "";
@@ -17,27 +18,13 @@ logDebug("executing script...");
 
 // methods from GO
 //------------------------------------------------------------------------------
-function js_downloadChapter(template, chapterNo, url) {
-  chapterData = {
-    currentChapterURL: url,
-    currentChapterNo: chapterNo,
-    chapterHTML: "",
-    chapterTitle: "",
-    nextChapterURL: ""
-  };
+function js_downloadChapter() {
   //var index = currentChapterURL.indexOf("/", "http://..".length)
   //settings.fullPathPrefix = currentChapterURL.substr(0, index)
-  var sessionId = readParamValue("sessionId");
-  logDebug("js_downloadChapter() - " + url + ", sessionId:" + sessionId + ", template: " + template);
+  var sessionId = goContext.Params["sessionId"];
+  logDebug("js_downloadChapter() - " + goContext.Chapter.ChapterUrl + ", sessionId:" + sessionId + ", template: " + goContext.Template);
 
   if (!sessionId) {
-    settings = {
-      templateHTML: template,
-      siteParams: {},
-      siteHeaders: {},
-      parsingState: "",
-      fullPathPrefix: "https://truyenyy.com"
-    };    
     login();    
   }
   if (sessionId && sessionId != "") {
@@ -45,34 +32,61 @@ function js_downloadChapter(template, chapterNo, url) {
   }
 }
 
+//func (loader *ContentLoader) Send(method string, url string, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) {
+
 function login() {
-  // clear cache
-  settings.siteHeaders = {
-    username: "one777piece",
-    password: "Song0vui"
+  //formdata = {}
+  logInfo("loginGet to truyenyy.com ...");
+  csrfToken = "";
+  parsingState = "loginGet"
+  var status = goContext.Send("GET", "https://truyenyy.com/login/", 10, 1, {}, {});
+  parsingState = "";
+  if (status == 5000) {
+    logInfo("loginGet to truyenyy.com failed: " + status);
+    return false;
   }
-  settings.siteParams = {}
-  settings.parsingState = "";
-  logInfo("login to truyenyy.com ...");
-  var status = sendHttpRequest("GET", "https://truyenyy.com/login/");
-  if (status == 200) {
-    logInfo("login to truyenyy.com succeeded");
-    settings.parsingState = "login";
-  } else {
-    logInfo("login to truyenyy.com failed: " + status);
+  if (csrfToken == "") {
+    logInfo("loginGet failed to get crsfToken from response");
+    return false;
   }
+  logInfo("loginGet crsfToken: " + csrfToken);
+
+  headers = {username: "one777piece", password: "Song0vui", next: "/"};
+  headers["content-type"] = "application/x-www-form-urlencoded";
+  headers["X-CSRFToken"] = csrfToken;
+  headers["Origin"] = "https://truyenyy.com/login/";
+  headers["Referer"] = "https://truyenyy.com";
+  parsingState = "loginPost";
+  var status = goContext.Send("POST", "https://truyenyy.com/login/", 10, 1, headers, {});
+  parsingState = "";
+  if (status == 5000) {
+    logInfo("loginPost to truyenyy.com failed: " + status);
+    return false;
+  }
+
+  // read cookies
+  goContext.Params["sessionId"] = goContext.Cookies["truyenyy_sessionid"]
+  goContext.Params["csrfToken"] = goContext.Cookies["csrftoken"]
+    
+  if (goContext.Params["sessionId"] && goContext.Params["csrfToken"]) {
+    logInfo("loginPost to truyenyy.com succeeded, sessionId: " + sessionId + ", crsfToken: " + goContext.Params["csrfToken"]);
+    return true;
+  }
+  logInfo("loginPost to truyenyy.com failed, status: " + status);
+  return false;
 }
 
-function js_begin(url) {
-  if (settings.parsingState == "login") {
-    // extract the session id
-  } else {
+function js_begin(url, status) {
+  if (parsingState == "loginGet") {
+    // extract the crsf token
 
+  } else if (parsingState == "loginPost") {
+    // extract the session id
   }
 }
 
 function js_end() {
-  if (settings.parsingState == "login") {
+  if (parsingState == "loginGet" || parsingState == "loginPost") {
   } else {
     logInfo(">>>>>>>> chapter: " + chapterData.chapterTitle + " <<<<<<<<<<<");
     var index = settings.templateHTML.indexOf("</body>");
@@ -88,10 +102,17 @@ function js_end() {
 }
 
 function js_startTag(tagName, isSelfClosingTag) {
-  if (settings.parsingState == "login") {
-    if (tagName == "") {
-      
+  if (parsingState == "loginGet") {
+    if (csrfToken != "") {
+      return;
     }
+    // reading the csrfmiddlewaretoken value from then input tag
+    if (tagName == "input") {
+      if (goContext.CurrentTagValues["name"] == "csrfmiddlewaretoken") {
+        csrfToken = goContext.CurrentTagValues["name"];
+      }
+    }
+  } else if (parsingState == "loginPost") {
   } else {
     //logDebug("startTag: " + tagName + ", isSelfClosingTag=" + isSelfClosingTag)
     if (tagName == "h1" || tagName == "h2" || tagName == "h3") {
@@ -120,55 +141,52 @@ function js_startTag(tagName, isSelfClosingTag) {
 }
 
 function js_endTag(tagName) {
-  //logDebug("endTag: " + tagName + ", divDepth:" + divDepth);
-  if (tagName == "h1" || tagName == "h2" || tagName == "h3") {
-    isHeaderTag = false;
-    // check title
-    if (chapterTitle == "") {
-      chapterTitle = getChapterTitle(titleBuffer);
+  if (parsingState == "login") {
+    if (goContext.Params["sessionId"]) {
+      return
     }
-  }
-  //if (divDepth > 0 && tagName == "p") {
-  if (tagName == "p") {
-    buffer += "</p>";
-  }
-  if (divDepth > 0 && tagName == "div") {    
-    divDepth--;
-    updateChapterHTML();
-  }
-  if (tagName == "a") {
-    href = "";
+  } else {
+    //logDebug("endTag: " + tagName + ", divDepth:" + divDepth);
+    if (tagName == "h1" || tagName == "h2" || tagName == "h3") {
+      isHeaderTag = false;
+      // check title
+      if (chapterTitle == "") {
+        chapterTitle = getChapterTitle(titleBuffer);
+      }
+    }
+    //if (divDepth > 0 && tagName == "p") {
+    if (tagName == "p") {
+      buffer += "</p>";
+    }
+    if (divDepth > 0 && tagName == "div") {    
+      divDepth--;
+      updateChapterHTML();
+    }
+    if (tagName == "a") {
+      href = "";
+    }
   }
 }
 
 function js_text(text) {
-  if (divDepth > 0) {
-    //logDebug("found text node: " + text + "");
-    buffer += text;
+  if (parsingState == "login") {
   } else {
-    //logDebug("outside text node: " + text + "");
-  }
-  if (isHeaderTag) {
-    titleBuffer += text;
-  }
-  if (href != "" && text.toLowerCase() == "next" && nextChapterURL == "") {
-    nextChapterURL = getFullPath(href);
+    if (divDepth > 0) {
+      //logDebug("found text node: " + text + "");
+      buffer += text;
+    } else {
+      //logDebug("outside text node: " + text + "");
+    }
+    if (isHeaderTag) {
+      titleBuffer += text;
+    }
+    if (href != "" && text.toLowerCase() == "next" && nextChapterURL == "") {
+      nextChapterURL = getFullPath(href);
+    }
   }
 }
 // 
 //------------------------------------------------------------------------------
-
-function sendHttpRequest(method, url) {
-  go_sendHttpRequest(method, url, settings.siteHeaders, settings.siteParams);
-}
-
-function readParamValue(name) {
-  return go_readParamValue(name);
-}
-
-function setParamValue(name, value) {
-  go_setParamValue(name, value)
-}
 
 function updateChapterHTML() {
   if (buffer.indexOf("function") == -1 && buffer.indexOf("return") == -1) {

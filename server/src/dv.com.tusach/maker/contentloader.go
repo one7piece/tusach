@@ -31,7 +31,7 @@ const (
 type ScriptEngine struct {
 	jsVM      *otto.Otto
 	script    *otto.Script
-	jsMethods []otto.Value
+	jsMethods [len(jsMethodNames)]otto.Value
 }
 
 type CurrentChapter struct {
@@ -44,18 +44,21 @@ type CurrentChapter struct {
 }
 
 type ContentLoader struct {
-	Hostname   string
-	Params     map[string]string
-	Chapter    *CurrentChapter
-	Template   string
-	engine     *ScriptEngine
-	transport  *Transport
-	parentTag  map[string]string
-	currentTag map[string]string
+	Hostname         string
+	Params           map[string]string
+	Chapter          *CurrentChapter
+	Template         string
+	engine           *ScriptEngine
+	transport        *Transport
+	CurrentTagValues map[string]string
+	Cookies          map[string]string
 }
 
 func (loader *ContentLoader) Init() error {
 	loader.transport = new(Transport)
+	loader.Params = make(map[string]string)
+	loader.CurrentTagValues = make(map[string]string)
+	loader.Cookies = make(map[string]string)
 
 	domain := ""
 	parts := strings.Split(loader.Hostname, ".")
@@ -115,9 +118,9 @@ func (loader *ContentLoader) Init() error {
 	if err != nil {
 		return fmt.Errorf("Error during ToValue: %w", err)
 	}
-	err = loader.engine.jsVM.Set("contentLoader", jsLoader)
+	err = loader.engine.jsVM.Set("goContext", jsLoader)
 	if err != nil {
-		return fmt.Errorf("Error during Set: %w", err)
+		return fmt.Errorf("Error during Set goContext: %w", err)
 	}
 
 	logger.Infof("running javascript...\n")
@@ -130,6 +133,7 @@ func (loader *ContentLoader) Init() error {
 		logger.Infof("getting javascript method: %s\n", jsMethodNames[i])
 		loader.engine.jsMethods[i], err = loader.engine.jsVM.Get(jsMethodNames[i])
 		if err != nil {
+			logger.Errorf("Failed to get method: %s. %s\n", jsMethodNames[i], err)
 			return fmt.Errorf("Failed to get method: %s. %w", jsMethodNames[i], err)
 		}
 	}
@@ -140,6 +144,7 @@ func (loader *ContentLoader) Init() error {
 		return fmt.Errorf("Failed to read template file: %s. %w", templateFilename, err)
 	}
 	loader.Template = string(template)
+	logger.Infof("content loader initialised, template: %s\n", loader.Template)
 	return nil
 }
 
@@ -175,38 +180,43 @@ func (loader *ContentLoader) DownloadChapter(bookId int, chapterNo int, chapterU
 	return loader.Chapter, nil
 }
 
-func (loader *ContentLoader) Send(method string, url string, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) {
+func (loader *ContentLoader) Send(method string, url string, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) int {
 	// ADD to javascript
 	//header["referer"] = chapterURL
 
-	request := Request{Method: method, Url: url, Header: header, Formdata: formdata}
-	logger.Infof("Sending request: %s %s headers: %v, formdata: %v\n", method, url)
-
+	request := Request{Method: method, Url: url, Header: header, Formdata: formdata, Cookies: loader.Cookies}
+	logger.Infof("Sending request: %v\n", request)
 	response, err := loader.transport.Send(request, timeoutSec, numTries)
+
 	status := 0
 	if err != nil {
-		status = 5000
-		logger.Errorf("Failed to send request %s\n", err.Error)
+		logger.Errorf("Failed to send request: %s\n", err)
+		return 5000
 	} else {
 		status = response.Status
-		logger.Infof("Received response status: %d\n", response.Status)
+		logger.Infof("Received response status: %d, header: %v\n", response.Status, response.Header)
+	}
+
+	for name, value := range response.Cookies {
+		loader.Cookies[name] = value
+		logger.Infof("found cookie: &s=%s\n", name, value)
 	}
 
 	// start the parsing process
 	_, err = loader.engine.jsMethods[BEGIN_METHOD].Call(otto.NullValue(), url, status)
 	if err != nil {
 		logger.Errorf("Failed to call js function %s: %s", jsMethodNames[BEGIN_METHOD], err.Error())
-		return
+		return 5000
 	}
 	loader.Params["lastResponseBody"] = string(response.Body)
-	if status != 200 {
+	if len(loader.Params["lastResponseBody"]) > 0 {
 		reader := strings.NewReader(loader.Params["lastResponseBody"])
 		logger.Infof("rawHTML len: %d\n", reader.Len)
 		z := html.NewTokenizer(reader)
 
 		logger.Debug("parsing loop begin")
-		loader.currentTag = map[string]string{}
-		loader.parentTag = map[string]string{}
+		loader.CurrentTagValues = map[string]string{}
+		//loader.parentTag = map[string]string{}
 
 		for {
 			tt := z.Next()
@@ -215,11 +225,11 @@ func (loader *ContentLoader) Send(method string, url string, timeoutSec int, num
 			}
 			switch tt {
 			case html.StartTagToken, html.SelfClosingTagToken:
-				loader.parentTag = loader.currentTag
-				loader.currentTag = map[string]string{}
+				//loader.parentTag = loader.CurrentTagValues
+				loader.CurrentTagValues = map[string]string{}
 				for {
 					key, val, more := z.TagAttr()
-					loader.currentTag[string(key)] = string(val)
+					loader.CurrentTagValues[string(key)] = string(val)
 					//logger.Debugf("Storing tag %s->%s\n", string(key), string(val))
 					if !more {
 						break
@@ -228,22 +238,24 @@ func (loader *ContentLoader) Send(method string, url string, timeoutSec int, num
 
 				arr, _ := z.TagName()
 				tagName := string(arr)
-				loader.currentTag["name"] = tagName
+				//loader.CurrentTagValues["name"] = tagName
 				_, err = loader.engine.jsMethods[START_TAG_METHOD].Call(otto.NullValue(), tagName, tt == html.SelfClosingTagToken)
 				if err != nil {
 					logger.Errorf("Failed to call js function %s: %s", jsMethodNames[START_TAG_METHOD], err.Error())
-					return
+					status = 5000
+					break
 				}
 
 			case html.EndTagToken:
 				arr, _ := z.TagName()
 				tagName := string(arr)
 				_, err = loader.engine.jsMethods[END_TAG_METHOD].Call(otto.NullValue(), tagName)
-				loader.currentTag = map[string]string{}
-				loader.parentTag = loader.currentTag
+				loader.CurrentTagValues = map[string]string{}
+				//loader.parentTag = loader.CurrentTagValues
 				if err != nil {
 					logger.Errorf("Failed to call js function %s: %s", jsMethodNames[END_TAG_METHOD], err.Error())
-					return
+					status = 5000
+					break
 				}
 				if tagName == "body" || tagName == "html" {
 					break
@@ -254,7 +266,8 @@ func (loader *ContentLoader) Send(method string, url string, timeoutSec int, num
 				_, err = loader.engine.jsMethods[TEXT_METHOD].Call(otto.NullValue(), text)
 				if err != nil {
 					logger.Errorf("Failed to call js function %s: %s", jsMethodNames[TEXT_METHOD], err.Error())
-					return
+					status = 5000
+					break
 				}
 			}
 		}
@@ -265,8 +278,9 @@ func (loader *ContentLoader) Send(method string, url string, timeoutSec int, num
 	_, err = loader.engine.jsMethods[END_METHOD].Call(otto.NullValue())
 	if err != nil {
 		logger.Errorf("Failed to call js function %s: %s", jsMethodNames[END_METHOD], err.Error())
-		return
+		return 5000
 	}
+	return status
 }
 
 /*
@@ -281,7 +295,7 @@ func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterNo int, ch
 	*chapterTitle = ""
 	*nextChapterURL = ""
 	var parentTag map[string]string
-	var currentTag map[string]string
+	var CurrentTagValues map[string]string
 
 	reader := strings.NewReader(rawHTML)
 	logger.Infof("rawHTML len: %d\n", reader.Len)
@@ -335,11 +349,11 @@ func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterNo int, ch
 		}
 		switch tt {
 		case html.StartTagToken, html.SelfClosingTagToken:
-			parentTag = currentTag
-			currentTag = map[string]string{}
+			parentTag = CurrentTagValues
+			CurrentTagValues = map[string]string{}
 			for {
 				key, val, more := z.TagAttr()
-				currentTag[string(key)] = string(val)
+				CurrentTagValues[string(key)] = string(val)
 				//logger.Debugf("Storing tag %s->%s\n", string(key), string(val))
 				if !more {
 					break
@@ -348,7 +362,7 @@ func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterNo int, ch
 
 			arr, _ := z.TagName()
 			tagName := string(arr)
-			currentTag["name"] = tagName
+			CurrentTagValues["name"] = tagName
 			_, err = startTagFn.Call(otto.NullValue(), tagName, tt == html.SelfClosingTagToken)
 			if err != nil {
 				return "", errors.New("Failed to call js function 'startTag': " + err.Error())
@@ -358,8 +372,8 @@ func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterNo int, ch
 			arr, _ := z.TagName()
 			tagName := string(arr)
 			_, err = endTagFn.Call(otto.NullValue(), tagName)
-			currentTag = map[string]string{}
-			parentTag = currentTag
+			CurrentTagValues = map[string]string{}
+			parentTag = CurrentTagValues
 			if err != nil {
 				return "", errors.New("Failed to call js function 'endTag': " + err.Error())
 			}
