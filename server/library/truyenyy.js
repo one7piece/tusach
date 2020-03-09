@@ -3,6 +3,7 @@ chapterPrefixes = ["Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "qu
 // loginGet loginPost download
 var parsingState = "";
 var csrfToken = "";
+var sessionId = "";
 
 fullPathPrefix = "";
 buffer = "";
@@ -21,14 +22,29 @@ logDebug("executing script...");
 function js_downloadChapter() {
   //var index = currentChapterURL.indexOf("/", "http://..".length)
   //settings.fullPathPrefix = currentChapterURL.substr(0, index)
-  var sessionId = goContext.Params["sessionId"];
   logDebug("js_downloadChapter() - " + goContext.Chapter.ChapterUrl + ", sessionId:" + sessionId + ", template: " + goContext.Template);
 
-  if (!sessionId) {
+  if (sessionId == "") {
     login();    
   }
-  if (sessionId && sessionId != "") {
-    sendHttpRequest(chapterData.currentChapterURL);
+  logInfo("js_downloadChapter() - after login, sessionId: " + sessionId);
+  if (sessionId != "") {
+    logInfo("first download " + goContext.Chapter.ChapterUrl);
+    parsingState = "download";
+    // set token & session id
+    var headers = {Origin: "https://truyenyy.com/login/", Referer: "https://truyenyy.com"};
+    headers["Content-Type"] = "application/x-www-form-urlencoded";
+    headers["X-CSRFToken"] = csrfToken;
+    var formdata = {sessionid: sessionId, next: "/"};      
+    var status = goContext.Send("GET", goContext.Chapter.ChapterUrl, false, 20, 1, headers, formdata);
+    parsingState = "";
+    if (status == 5000) {
+      logInfo("download chapter truyenyy.com failed: " + status);
+      return;
+    }  
+    logInfo("------------------------------------------------------------------")
+    logInfo("download chapter response: \n" + goContext.Params["lastResponseBody"]);
+    logInfo("------------------------------------------------------------------")
   }
 }
 
@@ -39,7 +55,7 @@ function login() {
   logInfo("first loginGet to truyenyy.com ...");
   csrfToken = "";
   parsingState = "loginGet"
-  var status = goContext.Send("GET", "https://truyenyy.com/login/", 10, 1, {}, {});
+  var status = goContext.Send("GET", "https://truyenyy.com/login/", false, 10, 1, {}, {});
   parsingState = "";
   if (status == 5000) {
     logInfo("loginGet to truyenyy.com failed: " + status);
@@ -49,7 +65,7 @@ function login() {
   logInfo("second loginGet to truyenyy.com ...");
   csrfToken = "";
   parsingState = "loginGet"
-  var status = goContext.Send("GET", "https://truyenyy.com/login/", 10, 1, {}, {});
+  var status = goContext.Send("GET", "https://truyenyy.com/login/", false, 10, 1, {}, {});
   parsingState = "";
   
   if (csrfToken == "") {
@@ -64,7 +80,7 @@ function login() {
   headers["Content-Type"] = "application/x-www-form-urlencoded";
   headers["X-CSRFToken"] = csrfToken;
   parsingState = "loginPost";
-  var status = goContext.Send("POST", "https://truyenyy.com/login/", 10, 1, headers, formdata);
+  var status = goContext.Send("POST", "https://truyenyy.com/login/", false, 10, 1, headers, formdata);
   parsingState = "";
   if (status == 5000) {
     logInfo("loginPost to truyenyy.com failed: " + status);
@@ -73,17 +89,14 @@ function login() {
 
   logInfo("second loginPost to truyenyy.com ...");
   parsingState = "loginPost";
-  var status = goContext.Send("GET", "https://truyenyy.com/login/", 10, 1, headers, formdata);
+  var status = goContext.Send("GET", "https://truyenyy.com/login/", false, 10, 1, headers, formdata);
   parsingState = "";
-
-  // read cookies
-  //goContext.Params["sessionId"] = goContext.Cookies["truyenyy_sessionid"]
-  //goContext.Params["csrfToken"] = goContext.Cookies["csrftoken"]
-    
-  if (goContext.Cookies["truyenyy_sessionid"] && goContext.Cookies["csrftoken"]) {
-    logInfo("loginPost to truyenyy.com succeeded, sessionId: " + goContext.Cookies["truyenyy_sessionid"] + ", crsfToken: " + goContext.Cookies["csrftoken"]);
+  sessionId = goContext.Cookies["truyenyy_sessionid"];
+  if (sessionId && goContext.Cookies["csrftoken"]) {
+    logInfo("loginPost to truyenyy.com succeeded, sessionId: " + sessionId + ", crsfToken: " + goContext.Cookies["csrftoken"]);
     return true;
   }
+  sessionId = "";
   logInfo("loginPost to truyenyy.com failed, status: " + status);
   return false;
 }

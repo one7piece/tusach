@@ -158,15 +158,10 @@ func (loader *ContentLoader) DownloadChapter(bookId int, chapterNo int, chapterU
 	loader.Params["lastResponseBody"] = ""
 
 	logger.Infof("start downloading chapter %d/%d: %s\n", bookId, chapterNo, chapterUrl)
-	if value, err := loader.engine.jsMethods[DOWNLOAD_CHAPTER_METHOD].Call(otto.NullValue()); err == nil {
-		s, err := value.ToString()
-		if err != nil {
-			return nil, fmt.Errorf("Error during otto ToString: %w\n", err)
-		}
-		if s != "" {
-			return nil, errors.New(s)
-		}
+	if _, err := loader.engine.jsMethods[DOWNLOAD_CHAPTER_METHOD].Call(otto.NullValue()); err == nil {
+		logger.Infof("call to js_downloadChapter return ok\n")
 	} else {
+		logger.Infof("call to js_downloadChapter return error: %v\n", err)
 		return nil, err
 	}
 
@@ -180,13 +175,13 @@ func (loader *ContentLoader) DownloadChapter(bookId int, chapterNo int, chapterU
 	return loader.Chapter, nil
 }
 
-func (loader *ContentLoader) Send(method string, url string, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) int {
+func (loader *ContentLoader) Send(method string, url string, followRedirect bool, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) int {
 	// ADD to javascript
 	//header["referer"] = chapterURL
 
 	request := Request{Method: method, Url: url, Header: header, Formdata: formdata, Cookies: loader.Cookies}
 	logger.Infof("Sending request: %v\n", request)
-	response, err := loader.transport.Send(request, timeoutSec, numTries)
+	response, err := loader.transport.Send(request, timeoutSec, numTries, followRedirect)
 
 	status := 0
 	if err != nil {

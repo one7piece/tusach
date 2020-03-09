@@ -34,7 +34,7 @@ type Response struct {
 	Cookies map[string]string
 }
 
-func (t *Transport) init(timeout time.Duration) (*http.Client, error) {
+func (t *Transport) init(timeout time.Duration, checkRedirect func(req *http.Request, via []*http.Request) error) (*http.Client, error) {
 	proxyURL := util.GetConfiguration().ProxyURL
 	if proxyURL == "" {
 		os.Setenv("HTTP_PROXY", "")
@@ -49,10 +49,10 @@ func (t *Transport) init(timeout time.Duration) (*http.Client, error) {
 		logger.Info("Using proxy URL: " + proxyURL)
 		os.Setenv("HTTP_PROXY", proxyURL)
 	}
-	return &http.Client{Timeout: timeout}, nil
+	return &http.Client{Timeout: timeout, CheckRedirect: checkRedirect}, nil
 }
 
-func (t *Transport) Send(request Request, timeoutSec int, numTries int) (Response, error) {
+func (t *Transport) Send(request Request, timeoutSec int, numTries int, followRedirect bool) (Response, error) {
 	response := Response{}
 	response.Url = request.Url
 
@@ -62,8 +62,14 @@ func (t *Transport) Send(request Request, timeoutSec int, numTries int) (Respons
 	} else {
 		timeout = time.Duration(10 * time.Second)
 	}
+	checkRedirect := func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+	if followRedirect {
+		checkRedirect = nil
+	}
 
-	client, err := t.init(timeout)
+	client, err := t.init(timeout, checkRedirect)
 	if err != nil {
 		return response, err
 	}
