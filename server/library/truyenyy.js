@@ -26,7 +26,7 @@ function js_downloadChapter() {
   }
   logInfo("js_downloadChapter() - after login, sessionId: " + sessionId);
   if (sessionId != "") {
-    logInfo("first download " + goContext.Chapter.ChapterUrl);
+    logDebug("first download " + goContext.Chapter.ChapterUrl);
     // set token & session id
     var headers = {Origin: "https://truyenyy.com/login/", Referer: "https://truyenyy.com"};
     headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -52,7 +52,7 @@ function js_downloadChapter() {
           if (!chapterParts[partNo]) {
             chapterParts[partNo] = "";
             var url = fullPathPrefix+str.substring(index, index3)
-            logInfo("found chapter part#" + partNo + ": " + partLink + ", url:" + url);
+            logDebug("found chapter part#" + partNo + ": " + partLink + ", url:" + url);
             formdata = {chapter_id: partLink, part: partNo};      
             parsingState = "downloadPart";
             if (!sendRequest("GET", url, 20, 1, headers, formdata, true)) {
@@ -108,7 +108,7 @@ function login() {
     return;
   }  
   if (csrfToken == "") {
-    logInfo("loginGet failed to get crsfToken from response");
+    logError("loginGet failed to get crsfToken from response");
     return false;
   }
   logInfo("loginGet crsfToken: " + csrfToken);
@@ -136,16 +136,16 @@ function login() {
     return true;
   }
   sessionId = "";
-  logInfo("loginPost to truyenyy.com failed, status: " + status);
+  logError("loginPost to truyenyy.com failed, status: " + status);
   return false;
 }
 
 function js_begin() {
-  logInfo("js_begin()");
+  logDebug("js_begin()");
 }
 
 function js_end() {
-  logInfo("js_end()")
+  logDebug("js_end()")
 }
 
 function js_startTag(tagName, isSelfClosingTag) {
@@ -342,17 +342,6 @@ function getChapterTitle(html) {
 		}
 	}
 	return title;
-}
-
-// site specific methods
-//------------------------------------------------------------------------------
-
-function isTruyenCuaTui(url) {
-  return url.indexOf("truyencuatui") != -1;
-}
-
-function isTruyenYY(url) {
-  return url.indexOf("truyenyy.com") != -1;
 }
 
 // common helper methods
