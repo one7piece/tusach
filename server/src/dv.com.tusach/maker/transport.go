@@ -79,7 +79,7 @@ func (t *Transport) Send(request Request, timeoutSec int, numTries int, followRe
 	if request.Formdata != nil {
 		form := url.Values{}
 		for key, value := range request.Formdata {
-			logger.Infof("add formdata %s=%s\n", key, value)
+			logger.Debugf("add formdata %s=%s\n", key, value)
 			form.Add(key, value)
 		}
 		bodyStr := form.Encode()

@@ -114,7 +114,7 @@ func (bookMaker *BookMaker) CreateBook(book model.Book) error {
 	bookId, err := bookMaker.saveBook(&current)
 	current.Id = int32(bookId)
 
-	loader, err := bookMaker.CreateContentLoader(current.CurrentPageUrl)
+	loader, err := bookMaker.CreateContentLoader(current.StartPageUrl)
 	if err != nil {
 		logger.Errorf("Error compiling parser.js: %s\n", err.Error())
 		return err

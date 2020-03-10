@@ -1,27 +1,24 @@
 chapterPrefixes = ["Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"];
 
-// loginGet loginPost download
-var parsingState = "";
-var csrfToken = "";
-var sessionId = "";
-
-fullPathPrefix = "";
+// loginGet loginPost download downloadPart
+parsingState = "";
+csrfToken = "";
+sessionId = "";
+fullPathPrefix = "https://truyenyy.com";
 buffer = "";
 titleBuffer = "";
 divDepth = 0;
 tagname = "";
 isHeaderTag = false;
 href = "";
-links = [];
-title = "";
+chapterData = "";
+nextTextIsValid = true;
 
 logDebug("executing script...");
 
 // methods from GO
 //------------------------------------------------------------------------------
 function js_downloadChapter() {
-  //var index = currentChapterURL.indexOf("/", "http://..".length)
-  //settings.fullPathPrefix = currentChapterURL.substr(0, index)
   logDebug("js_downloadChapter() - " + goContext.Chapter.ChapterUrl + ", sessionId:" + sessionId + ", template: " + goContext.Template);
 
   if (sessionId == "") {
@@ -30,44 +27,86 @@ function js_downloadChapter() {
   logInfo("js_downloadChapter() - after login, sessionId: " + sessionId);
   if (sessionId != "") {
     logInfo("first download " + goContext.Chapter.ChapterUrl);
-    parsingState = "download";
     // set token & session id
     var headers = {Origin: "https://truyenyy.com/login/", Referer: "https://truyenyy.com"};
     headers["Content-Type"] = "application/x-www-form-urlencoded";
     headers["X-CSRFToken"] = csrfToken;
     var formdata = {sessionid: sessionId, next: "/"};      
-    var status = goContext.Send("GET", goContext.Chapter.ChapterUrl, false, 20, 1, headers, formdata);
-    parsingState = "";
-    if (status == 5000) {
-      logInfo("download chapter truyenyy.com failed: " + status);
+    parsingState = "download";
+    if (!sendRequest("GET", goContext.Chapter.ChapterUrl, 20, 1, headers, formdata)) {
       return;
-    }  
-    logInfo("------------------------------------------------------------------")
-    logInfo("download chapter response: \n" + goContext.Params["lastResponseBody"]);
-    logInfo("------------------------------------------------------------------")
+    }
+    var prefix = "/web-api/novel/chapter-content-get/?chap_id=";
+    var str = goContext.Params["lastResponseBody"];
+    //logDebug("chapter response body:\n" + str);
+    if (str.indexOf(prefix, 0) != -1) {
+      var index = 0;
+      chapterParts = {};
+      while (index >= 0 && index < str.length)  {
+        index = str.indexOf(prefix, index);
+        if (index != -1) {
+          var index2 = str.indexOf("&part=", index+1);
+          var index3 = str.indexOf("\"", index+1);
+          var partNo = str.substring(index2+"&part=".length,index3);
+          var partLink = str.substring(index+prefix.length, index2);
+          if (!chapterParts[partNo]) {
+            chapterParts[partNo] = "";
+            var url = fullPathPrefix+str.substring(index, index3)
+            logInfo("found chapter part#" + partNo + ": " + partLink + ", url:" + url);
+            formdata = {chapter_id: partLink, part: partNo};      
+            parsingState = "downloadPart";
+            if (!sendRequest("GET", url, 20, 1, headers, formdata, true)) {
+              goContext.Chapter.ChapterHtml = "";
+              return;
+            }
+            chapterData = "";
+            if (goContext.Params["lastResponseBody"]) {
+              logDebug("---------------------------------------------------------------");
+              logDebug("loaded chapter part#" + partNo + ": \n" + goContext.Params["lastResponseBody"]);
+              logDebug("---------------------------------------------------------------");
+              var json = JSON.parse(goContext.Params["lastResponseBody"])
+              unmangleChapterData(json.content);
+            }
+            goContext.Chapter.ChapterHmtlRaw += goContext.Params["lastResponseBody"]; 
+            goContext.Chapter.ChapterHtml += chapterData;
+          }
+
+          index = index3;
+        }
+      }
+    } else {
+      goContext.Chapter.ChapterHmtlRaw = goContext.Params["lastResponseBody"];
+      goContext.Chapter.ChapterHtml = chapterData;
+    }
+
+    logInfo(">>>>>>>> chapter: " + goContext.Chapter.ChapterTitle + " <<<<<<<<<<<");
+    var index = goContext.Template.indexOf("</body>");  
+    if (goContext.Chapter.ChapterTitle == "") {
+      goContext.Chapter.ChapterTitle = "Chapter " + goContext.Chapter.ChapterNo;
+    }
+    goContext.Chapter.chapterHtml = "<h2>" + goContext.Chapter.ChapterTitle + "</h2>" + goContext.Chapter.ChapterHtml;
+    goContext.Chapter.ChapterHtml = goContext.Template.substr(0, index) + goContext.Chapter.ChapterHtml + "</body></html>"
+    logInfo(goContext.Chapter.ChapterHtml);
+    logInfo(">>>>>>>> Next chapter: " + goContext.Chapter.NextChapterUrl + " <<<<<<<<<<<");
   }
 }
-
-//func (loader *ContentLoader) Send(method string, url string, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) {
 
 function login() {
   //formdata = {}
   logInfo("first loginGet to truyenyy.com ...");
   csrfToken = "";
   parsingState = "loginGet"
-  var status = goContext.Send("GET", "https://truyenyy.com/login/", false, 10, 1, {}, {});
-  parsingState = "";
-  if (status == 5000) {
-    logInfo("loginGet to truyenyy.com failed: " + status);
-    return false;
+  if (!sendRequest("GET", "https://truyenyy.com/login/", 20, 1, {}, {})) {
+    return;
   }
+
   // send second loginGet to get cookie
   logInfo("second loginGet to truyenyy.com ...");
   csrfToken = "";
   parsingState = "loginGet"
-  var status = goContext.Send("GET", "https://truyenyy.com/login/", false, 10, 1, {}, {});
-  parsingState = "";
-  
+  if (!sendRequest("GET", "https://truyenyy.com/login/", 20, 1, {}, {})) {
+    return;
+  }  
   if (csrfToken == "") {
     logInfo("loginGet failed to get crsfToken from response");
     return false;
@@ -79,18 +118,18 @@ function login() {
   var headers = {Origin: "https://truyenyy.com/login/", Referer: "https://truyenyy.com"};
   headers["Content-Type"] = "application/x-www-form-urlencoded";
   headers["X-CSRFToken"] = csrfToken;
+  
   parsingState = "loginPost";
-  var status = goContext.Send("POST", "https://truyenyy.com/login/", false, 10, 1, headers, formdata);
-  parsingState = "";
-  if (status == 5000) {
-    logInfo("loginPost to truyenyy.com failed: " + status);
-    return false;
-  }
+  if (!sendRequest("POST", "https://truyenyy.com/login/", 20, 1, headers, formdata)) {
+    return;
+  }  
 
-  logInfo("second loginPost to truyenyy.com ...");
+  logInfo("second loginPost (GET) to truyenyy.com ...");
   parsingState = "loginPost";
-  var status = goContext.Send("GET", "https://truyenyy.com/login/", false, 10, 1, headers, formdata);
-  parsingState = "";
+  if (!sendRequest("GET", "https://truyenyy.com/login/", 20, 1, headers, formdata)) {
+    return;
+  }  
+
   sessionId = goContext.Cookies["truyenyy_sessionid"];
   if (sessionId && goContext.Cookies["csrftoken"]) {
     logInfo("loginPost to truyenyy.com succeeded, sessionId: " + sessionId + ", crsfToken: " + goContext.Cookies["csrftoken"]);
@@ -101,76 +140,76 @@ function login() {
   return false;
 }
 
-function js_begin(url, status) {
-  logInfo("js_begin() - status:" + status + ", url:" + url)
-  if (parsingState == "loginGet") {
-    // extract the crsf token
-  } else if (parsingState == "loginPost") {
-    // extract the session id
-  }
+function js_begin() {
+  logInfo("js_begin()");
 }
 
 function js_end() {
   logInfo("js_end()")
-  if (parsingState == "loginGet" || parsingState == "loginPost") {
-  } else {
-    logInfo(">>>>>>>> chapter: " + goContext.Chapter.chapterTitle + " <<<<<<<<<<<");
-    var index = goContext.Template.indexOf("</body>");
-  
-    if (goContext.Chapter.ChapterTitle == "") {
-      goContext.Chapter.ChapterTitle = "Chapter " + goContext.Chapter.ChapterNo;
-    }
-    goContext.Chapter.chapterHtml = "<h2>" + goContext.Chapter.ChapterTitle + "</h2>" + goContext.Chapter.ChapterHtml;
-    goContext.Chapter.ChapterHtml = goContext.Template.substr(0, index) + goContext.Chapter.ChapterHtml + "</body></html>"
-    logInfo(goContext.Chapter.ChapterHtml);
-    logInfo(">>>>>>>> Next chapter: " + goContext.Chapter.NextChapterUrl + " <<<<<<<<<<<");
-  }
 }
 
 function js_startTag(tagName, isSelfClosingTag) {
-  //logInfo("js_startTag() - tagName:" + tagName + ", isSelfClosingTag:" + isSelfClosingTag)
-  if (parsingState == "loginGet") {
-    if (csrfToken != "") {
-      return;
-    }
-    // reading the csrfmiddlewaretoken value from then input tag
-    if (tagName == "input") {
-      //logInfo("js_startTag() - input element, name:" + goContext.CurrentTagValues["name"] + ", value:" + goContext.CurrentTagValues["name"])
-      if (goContext.CurrentTagValues["name"] == "csrfmiddlewaretoken") {
-        csrfToken = goContext.CurrentTagValues["value"];
+  try {
+    //logInfo("js_startTag() - tagName:" + tagName + ", isSelfClosingTag:" + isSelfClosingTag)
+    if (parsingState == "loginGet") {
+      if (csrfToken != "") {
+        return;
       }
-    }
-  } else if (parsingState == "loginPost") {
-  } else {
-    //logDebug("startTag: " + tagName + ", isSelfClosingTag=" + isSelfClosingTag)
-    if (tagName == "h1" || tagName == "h2" || tagName == "h3") {
-      isHeaderTag = true;
-      titleBuffer = "";
-    }
+      // reading the csrfmiddlewaretoken value from then input tag
+      if (tagName == "input") {
+        //logInfo("js_startTag() - input element, name:" + goContext.CurrentTagValues["name"] + ", value:" + goContext.CurrentTagValues["name"])
+        if (goContext.CurrentTagValues["name"] == "csrfmiddlewaretoken") {
+          csrfToken = goContext.CurrentTagValues["value"];
+        }
+      }
+    } else if (parsingState == "loginPost") {
+    } else if (parsingState == "download") {
+      //logDebug("startTag: " + tagName + ", isSelfClosingTag=" + isSelfClosingTag)
+      if (tagName == "h1" || tagName == "h2" || tagName == "h3") {
+        isHeaderTag = true;
+        titleBuffer = "";
+      }
 
-    if (tagName == "div") {
-      divDepth++;
-      updateChapterHTML();
-      //logDebug("startTag <div>, divDepth:" + divDepth);
-    } else {
+      if (tagName == "div") {
+        divDepth++;
+        updateChapterHTML();
+        //logDebug("startTag <div>, divDepth:" + divDepth);
+      } else {
+        if (tagName == "br") {
+          buffer += "<br/>";
+        } else if (tagName == "p") {
+          buffer += "<p>";
+        }
+      }
+      if (tagName == "a") {
+        href = goContext.CurrentTagValues["href"];
+        if (goContext.Chapter.NextChapterUrl == "") {
+          goContext.Chapter.NextChapterUrl = getNextChapterURL(href);
+        }
+      }
+    } else if (parsingState == "downloadPart") {
       if (tagName == "br") {
         buffer += "<br/>";
       } else if (tagName == "p") {
         buffer += "<p>";
       }
-    }
-    if (tagName == "a") {
-      href = goContext.CurrentTagValues["href"];
-      if (goContext.Chapter.NextChapterUrl == "") {
-        goContext.Chapter.NextChapterUrl = getNextChapterURL(href);
+    } else if (parsingState == "unmangle") {
+      if (tagName == "br") {
+        buffer += "<br/>";
+      } else if (tagName == "p") {
+        buffer += "<p>";
+        nextTextIsValid = false;
       }
     }
+  } catch (ex) {
+    logError(ex);
+    throw ex;
   }
 }
 
 function js_endTag(tagName) {
   if (parsingState == "loginGet" || parsingState == "loginPost") {
-  } else {
+  } else if (parsingState == "download") {
     //logDebug("endTag: " + tagName + ", divDepth:" + divDepth);
     if (tagName == "h1" || tagName == "h2" || tagName == "h3") {
       isHeaderTag = false;
@@ -190,12 +229,20 @@ function js_endTag(tagName) {
     if (tagName == "a") {
       href = "";
     }
+  } else if (parsingState == "downloadPart") {
+    if (tagName == "p") {
+      buffer += "</p>";
+    }
+  } else if (parsingState == "unmangle") {
+    if (tagName == "p") {
+      buffer += "</p>";
+    }
   }
 }
 
 function js_text(text) {
   if (parsingState == "loginGet" || parsingState == "loginPost") {
-  } else {
+  } else if (parsingState == "download") {
     if (divDepth > 0) {
       //logDebug("found text node: " + text + "");
       buffer += text;
@@ -208,10 +255,41 @@ function js_text(text) {
     if (href != "" && text.toLowerCase() == "next" && goContext.Chapter.NextChapterUrl == "") {
       goContext.Chapter.NextChapterUrl = getFullPath(href);
     }
+  } else if (parsingState == "unmangle") {
+    logDebug("js_text [" + text + "] " + nextTextIsValid);
+    if (nextTextIsValid || text.trim().length == 0) {
+      buffer += text;
+      nextTextIsValid = false;
+    } else {
+      nextTextIsValid = true;
+    }
   }
 }
 // 
 //------------------------------------------------------------------------------
+
+function sendRequest(method, url, timeoutSec, numTries, headers, formdata, skipParse) {
+  var status = goContext.Send(method, url, false, timeoutSec, numTries, headers, formdata);
+  if (status != 200 && status != 301 && status != 302) {
+    logError("Failed to send request: " + url + ", response status:" + status);
+    return false;
+  }
+  if (skipParse !== true) {
+    if (goContext.Parse(goContext.Params["lastResponseBody"]) != 0) {
+      logError("Failed to parse response, status:" + status);
+      return false;
+    }
+  }
+  return true;
+}
+
+function unmangleChapterData(data) {
+  parsingState = "unmangle";
+  nextTextIsValid = false;
+  buffer = "";
+  goContext.Parse(data);
+  chapterData = buffer
+}
 
 function updateChapterHTML() {
   if (buffer.indexOf("function") == -1 && buffer.indexOf("return") == -1) {
@@ -219,7 +297,7 @@ function updateChapterHTML() {
     //logDebug(buffer);
     //logDebug(">>>>>>>> --------------- <<<<<<<<<<<");
     if (buffer.length > 2000) {
-      chapterHTML += buffer
+      chapterData += buffer
       //logDebug(">>>>>>>> chapter segment <<<<<<<<<<<");
       //logDebug(buffer);
       //logDebug(">>>>>>>> --------------- <<<<<<<<<<<");
@@ -230,32 +308,24 @@ function updateChapterHTML() {
 }
 
 function getNextChapterURL(url) {  
+  if (!url) {
+    return "";
+  }
   fullURL = getFullPath(url);
-  logDebug("getNextChapterURL - " + url + " [" + fullURL + "]");
+  //logDebug("getNextChapterURL - " + url + " [" + fullURL + "]");
   if (fullURL == "") {
     return "";
   }
 
   result = "";
-  if (isTruyenCuaTui()) {
-    logDebug("name=" + getParentTagAttribute("name") + ", class=" + getParentTagAttribute("class"));
-    if (getParentTagAttribute("name") == "li" && getParentTagAttribute("class") == "next") {
-      result = fullURL;
-      logInfo("nextChapterURL - " + result);
-    }
-  } else {
-    parent1 = getParentPath(currentChapterURL);
-    parent2 = getParentPath(fullURL);          
-    currentChapterNo = extractChapterNumber(currentChapterURL);
-    nextChapterNo = extractChapterNumber(fullURL);
-    //logDebug("getNextChapterURL - currentChapterNo=" + currentChapterNo + ", nextChapterNo=" + nextChapterNo)
-    if (parent1 == parent2 && currentChapterNo != -1 && (nextChapterNo == currentChapterNo+1 || nextChapterNo == currentChapterNo+2)) {
-      result = fullURL;
-      logInfo("nextChapterURL - " + result 
-        + ", currentChapterNo:" + currentChapterNo + ", nextChapterNo:" + nextChapterNo);
-    }
+  parent1 = getParentPath(goContext.Chapter.ChapterUrl);
+  parent2 = getParentPath(fullURL);          
+  currentChapterNo = extractChapterNumber(goContext.Chapter.ChapterUrl);
+  nextChapterNo = extractChapterNumber(fullURL);
+  if (parent1 == parent2 && currentChapterNo != -1 && (nextChapterNo == currentChapterNo+1 || nextChapterNo == currentChapterNo+2)) {
+    result = fullURL;
   }
-  
+  //logInfo("nextChapterURL - " + result + ", currentChapterNo:" + currentChapterNo + ", nextChapterNo:" + nextChapterNo);
 	return result
 }
 
@@ -335,7 +405,7 @@ function getParentPath(url) {
 }
 
 function startsWidth(source, str) {
-  if (source.length >= str.length) {
+  if (source && str && source.length >= str.length) {
     return (source.substr(0, str.length) == str);
   }
   return false;

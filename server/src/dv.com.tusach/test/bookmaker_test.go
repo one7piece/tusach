@@ -33,9 +33,12 @@ func TestBookmaker(t *testing.T) {
 	newBook.CreatedBy = "Dung Van"
 	//newBook.Title = "Trach Thien Ky"
 	//newBook.StartPageUrl = "http://truyencuatui.net/truyen/trach-thien-ky/quyen-i-dong-hoc-thieu-nien-chuong-1-ta-doi-y/317713.html"
-	newBook.Title = "Thien Tinh Chi Lo"
-	newBook.StartPageUrl = "https://truyencv.com/thien-tinh-chi-lo/chuong-956/"
-	newBook.MaxNumPages = 0
+	//newBook.Title = "Thien Tinh Chi Lo"
+	//newBook.StartPageUrl = "https://truyencv.com/thien-tinh-chi-lo/chuong-956/"
+	newBook.Title = "Kiem Lai"
+	newBook.StartPageUrl = "https://truyenyy.com/truyen/kiem-lai-phong-hoa-hi-chu-hau-ban-dich/chuong-1.html"
+	//newBook.CurrentPageUrl = "https://truyenyy.com/truyen/kiem-lai-phong-hoa-hi-chu-hau-ban-dich/chuong-1.html"
+	newBook.MaxNumPages = 10
 	newBook.Status = model.BookStatusType_IN_PROGRESS
 	newBook.CreatedTime = util.TimestampNow()
 	err := bookMaker.CreateBook(newBook)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -144,7 +143,7 @@ func (loader *ContentLoader) Init() error {
 		return fmt.Errorf("Failed to read template file: %s. %w", templateFilename, err)
 	}
 	loader.Template = string(template)
-	logger.Infof("content loader initialised, template: %s\n", loader.Template)
+	//logger.Infof("content loader initialised, template: %s\n", loader.Template)
 	return nil
 }
 
@@ -161,7 +160,7 @@ func (loader *ContentLoader) DownloadChapter(bookId int, chapterNo int, chapterU
 	if _, err := loader.engine.jsMethods[DOWNLOAD_CHAPTER_METHOD].Call(otto.NullValue()); err == nil {
 		logger.Infof("call to js_downloadChapter return ok\n")
 	} else {
-		logger.Infof("call to js_downloadChapter return error: %v\n", err)
+		logger.Errorf("call to js_downloadChapter return error: %v\n", err)
 		return nil, err
 	}
 
@@ -175,44 +174,20 @@ func (loader *ContentLoader) DownloadChapter(bookId int, chapterNo int, chapterU
 	return loader.Chapter, nil
 }
 
-func (loader *ContentLoader) Send(method string, url string, followRedirect bool, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) int {
-	// ADD to javascript
-	//header["referer"] = chapterURL
-
-	request := Request{Method: method, Url: url, Header: header, Formdata: formdata, Cookies: loader.Cookies}
-	logger.Infof("Sending request: %v\n", request)
-	response, err := loader.transport.Send(request, timeoutSec, numTries, followRedirect)
-
-	status := 0
-	if err != nil {
-		logger.Errorf("Failed to send request: %s\n", err)
-		return 5000
-	} else {
-		status = response.Status
-		logger.Infof("Received response status: %d, header: %v\n", response.Status, response.Header)
-	}
-
-	for name, value := range response.Cookies {
-		loader.Cookies[name] = value
-		logger.Infof("found cookie: &s=%s\n", name, value)
-	}
-
+func (loader *ContentLoader) Parse(data string) int {
 	// start the parsing process
-	_, err = loader.engine.jsMethods[BEGIN_METHOD].Call(otto.NullValue(), url, status)
+	_, err := loader.engine.jsMethods[BEGIN_METHOD].Call(otto.NullValue())
 	if err != nil {
 		logger.Errorf("Failed to call js function %s: %s", jsMethodNames[BEGIN_METHOD], err.Error())
 		return 5000
 	}
-	loader.Params["lastResponseBody"] = string(response.Body)
-	if len(loader.Params["lastResponseBody"]) > 0 {
-		reader := strings.NewReader(loader.Params["lastResponseBody"])
-		logger.Infof("rawHTML len: %d\n", reader.Len)
+
+	if len(data) > 0 {
+		reader := strings.NewReader(data)
 		z := html.NewTokenizer(reader)
 
 		logger.Debug("parsing loop begin")
 		loader.CurrentTagValues = map[string]string{}
-		//loader.parentTag = map[string]string{}
-
 		for {
 			tt := z.Next()
 			if tt == html.ErrorToken {
@@ -220,7 +195,6 @@ func (loader *ContentLoader) Send(method string, url string, followRedirect bool
 			}
 			switch tt {
 			case html.StartTagToken, html.SelfClosingTagToken:
-				//loader.parentTag = loader.CurrentTagValues
 				loader.CurrentTagValues = map[string]string{}
 				for {
 					key, val, more := z.TagAttr()
@@ -237,8 +211,7 @@ func (loader *ContentLoader) Send(method string, url string, followRedirect bool
 				_, err = loader.engine.jsMethods[START_TAG_METHOD].Call(otto.NullValue(), tagName, tt == html.SelfClosingTagToken)
 				if err != nil {
 					logger.Errorf("Failed to call js function %s: %s", jsMethodNames[START_TAG_METHOD], err.Error())
-					status = 5000
-					break
+					return 5000
 				}
 
 			case html.EndTagToken:
@@ -249,8 +222,7 @@ func (loader *ContentLoader) Send(method string, url string, followRedirect bool
 				//loader.parentTag = loader.CurrentTagValues
 				if err != nil {
 					logger.Errorf("Failed to call js function %s: %s", jsMethodNames[END_TAG_METHOD], err.Error())
-					status = 5000
-					break
+					return 5000
 				}
 				if tagName == "body" || tagName == "html" {
 					break
@@ -261,209 +233,48 @@ func (loader *ContentLoader) Send(method string, url string, followRedirect bool
 				_, err = loader.engine.jsMethods[TEXT_METHOD].Call(otto.NullValue(), text)
 				if err != nil {
 					logger.Errorf("Failed to call js function %s: %s", jsMethodNames[TEXT_METHOD], err.Error())
-					status = 5000
-					break
+					return 5000
 				}
 			}
 		}
-
-		logger.Debug("parsing loop ends")
 	}
-
 	_, err = loader.engine.jsMethods[END_METHOD].Call(otto.NullValue())
 	if err != nil {
 		logger.Errorf("Failed to call js function %s: %s", jsMethodNames[END_METHOD], err.Error())
 		return 5000
 	}
-	return status
-}
-
-/*
-func (maker *BookMaker) parseChapterHTML(engine *ScriptEngine, chapterNo int, chapterURL string, rawHTML string, chapterTitle *string,
-	nextChapterURL *string) (string, error) {
-
-	template, err := ioutil.ReadFile(util.GetConfiguration().LibraryPath + "/template.html")
-	if err != nil {
-		return "", err
-	}
-	chapterHTML := ""
-	*chapterTitle = ""
-	*nextChapterURL = ""
-	var parentTag map[string]string
-	var CurrentTagValues map[string]string
-
-	reader := strings.NewReader(rawHTML)
-	logger.Infof("rawHTML len: %d\n", reader.Len)
-	z := html.NewTokenizer(reader)
-
-	_, err = engine.jsVM.Run(engine.script)
-	if err != nil {
-		logger.Errorf("failed to run javascript: %s\n", err.Error())
-		return "", errors.New("Failed to run javascript: " + err.Error())
-	}
-	//if _, err = engine.jsVM.Call(`begin`, nil, template, chapterURL); err != nil {
-	//	logger.Errorf("Failed to call js function 'begin': %s\n", err.Error())
-	//	return "", errors.New("Failed to call js function 'begin': " + err.Error())
-	//}
-
-	beginFn, err := engine.jsVM.Get("begin")
-	if err != nil {
-		logger.Errorf("Error getting function 'begin': %s", err)
-		return "", err
-	}
-	endFn, err := engine.jsVM.Get("end")
-	if err != nil {
-		logger.Errorf("Error getting function 'end': %s", err)
-		return "", err
-	}
-	startTagFn, err := engine.jsVM.Get("startTag")
-	if err != nil {
-		logger.Errorf("Error getting function 'startTag': %s", err)
-		return "", err
-	}
-	endTagFn, err := engine.jsVM.Get("endTag")
-	if err != nil {
-		logger.Errorf("Error getting function 'endTag': %s", err)
-		return "", err
-	}
-	textFn, err := engine.jsVM.Get("text")
-	if err != nil {
-		logger.Errorf("Error getting function 'text': %s", err)
-		return "", err
-	}
-	_, err = beginFn.Call(otto.NullValue(), string(template), chapterNo, chapterURL)
-	if err != nil {
-		return "", errors.New("Failed to call js function 'begin': " + err.Error())
-	}
-
-	logger.Debug("parsing loop begin")
-	for {
-		tt := z.Next()
-		if tt == html.ErrorToken {
-			break
-		}
-		switch tt {
-		case html.StartTagToken, html.SelfClosingTagToken:
-			parentTag = CurrentTagValues
-			CurrentTagValues = map[string]string{}
-			for {
-				key, val, more := z.TagAttr()
-				CurrentTagValues[string(key)] = string(val)
-				//logger.Debugf("Storing tag %s->%s\n", string(key), string(val))
-				if !more {
-					break
-				}
-			}
-
-			arr, _ := z.TagName()
-			tagName := string(arr)
-			CurrentTagValues["name"] = tagName
-			_, err = startTagFn.Call(otto.NullValue(), tagName, tt == html.SelfClosingTagToken)
-			if err != nil {
-				return "", errors.New("Failed to call js function 'startTag': " + err.Error())
-			}
-
-		case html.EndTagToken:
-			arr, _ := z.TagName()
-			tagName := string(arr)
-			_, err = endTagFn.Call(otto.NullValue(), tagName)
-			CurrentTagValues = map[string]string{}
-			parentTag = CurrentTagValues
-			if err != nil {
-				return "", errors.New("Failed to call js function 'endTag': " + err.Error())
-			}
-			if tagName == "body" || tagName == "html" {
-				break
-			}
-
-		case html.TextToken:
-			text := string(z.Text())
-			_, err = textFn.Call(otto.NullValue(), text)
-			if err != nil {
-				return "", errors.New("Failed to call js function 'text': " + err.Error())
-			}
-		}
-	}
-
 	logger.Debug("parsing loop ends")
-	_, err = endFn.Call(otto.NullValue())
-	if err != nil {
-		return "", errors.New("Failed to call js function 'end': " + err.Error())
-	}
-	var value otto.Value
-	if value, err = engine.jsVM.Get("chapterHTML"); err == nil {
-		chapterHTML, err = value.ToString()
-	}
-	if err != nil {
-		return "", errors.New("Failed to get chapterHTML: " + err.Error())
-	}
-
-	if value, err = engine.jsVM.Get("chapterTitle"); err == nil {
-		*chapterTitle, err = value.ToString()
-	}
-	if err != nil {
-		return "", errors.New("Failed to get chapterTitle: " + err.Error())
-	}
-
-	if value, err = engine.jsVM.Get("nextChapterURL"); err == nil {
-		*nextChapterURL, err = value.ToString()
-	}
-	if err != nil {
-		return "", errors.New("Failed to get nextChapterURL: " + err.Error())
-	}
-	//logger.Infof("chapterTitle=%s, nextChapterURL=%s\n, #chapterBytes=%d", *chapterTitle, *nextChapterURL, len(chapterHTML))
-	return chapterHTML, nil
-}
-*/
-
-func isNextOrPrevChapterURL(currentChapterURL string, url string) bool {
-	result := false
-	index0 := strings.LastIndex(currentChapterURL, "/")
-	currentChapterNo := -1
-	if index0 != -1 {
-		currentChapterNo = extractChapterNumber(currentChapterURL[index0:])
-	}
-	index1 := strings.LastIndex(url, "/")
-	nextChapterNo := -1
-	if index1 != -1 {
-		nextChapterNo = extractChapterNumber(url[index1:])
-	}
-	if currentChapterNo != -1 && nextChapterNo == currentChapterNo+1 {
-		result = true
-	}
-	if result {
-		logger.Infof("isNextOrPrevChapterURL - %d/%d -> %s=%v", currentChapterNo, nextChapterNo, url, result)
-	}
-	return result
+	return 0
 }
 
-func getChapterTitle(html string) string {
-	title := ""
-	for _, prefix := range chapterPrefixes {
-		restr := "\\s*" + prefix + "\\s*\\d+"
-		r, _ := regexp.Compile(restr)
-		arr := r.FindStringIndex(html)
-		if len(arr) >= 2 {
-			title = html
-			logger.Infof("getchaptertitle: found title [%s]\n", html)
-			break
+func (loader *ContentLoader) Send(method string, url string, followRedirect bool, timeoutSec int, numTries int, header map[string]string, formdata map[string]string) int {
+	// ADD to javascript
+	//header["referer"] = chapterURL
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Errorf("Recover from panic! %v\n", r)
 		}
-	}
-	logger.Infof("getchaptertitle: not a title [%s]\n", html)
-	return title
-}
+	}()
 
-func getTagAttribute(z *html.Tokenizer, name string) string {
-	for {
-		key, val, more := z.TagAttr()
-		if string(key) == name {
-			return string(val)
-		}
-		if !more {
-			break
-		}
+	request := Request{Method: method, Url: url, Header: header, Formdata: formdata, Cookies: loader.Cookies}
+	logger.Infof("Sending request: %v\n", request)
+	response, err := loader.transport.Send(request, timeoutSec, numTries, followRedirect)
+
+	status := 0
+	if err != nil {
+		logger.Errorf("Failed to send request: %s\n", err)
+		return 5000
+	} else {
+		status = response.Status
+		logger.Infof("Received response status: %d, header: %v\n", response.Status, response.Header)
 	}
-	return ""
+
+	for name, value := range response.Cookies {
+		loader.Cookies[name] = value
+		//logger.Debugf("found cookie: &s=%s\n", name, value)
+	}
+	loader.Params["lastResponseBody"] = string(response.Body)
+	return status
 }
 
 func extractChapterNumber(s string) int {
@@ -480,20 +291,4 @@ func extractChapterNumber(s string) int {
 		x, _ = strconv.Atoi(string(buf))
 	}
 	return x
-}
-
-func getURL(target string, request string) string {
-	url := strings.TrimRight(target, "/") + "/" + strings.TrimLeft(request, "/")
-	if !strings.HasPrefix(url, "http://") {
-		url = "http://" + url
-	}
-	return url
-}
-
-func getIndexOf(source string, search string, offset int) int {
-	index := strings.Index(source[offset:], search)
-	if index != -1 {
-		index = index + offset
-	}
-	return index
 }

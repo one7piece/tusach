@@ -2,7 +2,7 @@
 	"serverPath" : 	"../../../test",
 	"libraryPath" : "../../../test/library",
 	"dbFilename" :  "../../../test/library/test.ql",
-	"logLevel" : "debug",
+	"logLevel" : "info",
 	"logFile" : "../../../test/test.log",
 	"ServerBindPort" : 8888,
 	"GrpcBindPort" : 9999,
