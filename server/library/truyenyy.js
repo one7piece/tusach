@@ -26,6 +26,7 @@ function js_downloadChapter() {
   }
   logInfo("js_downloadChapter() - after login, sessionId: " + sessionId);
   if (sessionId != "") {
+    chapterData = "";
     logDebug("first download " + goContext.Chapter.ChapterUrl);
     // set token & session id
     var headers = {Origin: "https://truyenyy.com/login/", Referer: "https://truyenyy.com"};
@@ -38,7 +39,7 @@ function js_downloadChapter() {
     }
     var prefix = "/web-api/novel/chapter-content-get/?chap_id=";
     var str = goContext.Params["lastResponseBody"];
-    //logDebug("chapter response body:\n" + str);
+    //logDebug("raw chapter response body:\n" + str);
     if (str.indexOf(prefix, 0) != -1) {
       var index = 0;
       chapterParts = {};
@@ -79,12 +80,12 @@ function js_downloadChapter() {
       goContext.Chapter.ChapterHtml = chapterData;
     }
 
-    logInfo(">>>>>>>> chapter: " + goContext.Chapter.ChapterTitle + " <<<<<<<<<<<");
     var index = goContext.Template.indexOf("</body>");  
     if (goContext.Chapter.ChapterTitle == "") {
       goContext.Chapter.ChapterTitle = "Chapter " + goContext.Chapter.ChapterNo;
     }
-    goContext.Chapter.chapterHtml = "<h2>" + goContext.Chapter.ChapterTitle + "</h2>" + goContext.Chapter.ChapterHtml;
+    logInfo(">>>>>>>> chapter: " + goContext.Chapter.ChapterTitle + " <<<<<<<<<<<");
+    goContext.Chapter.ChapterHtml = "<h2>" + goContext.Chapter.ChapterTitle + "</h2>" + goContext.Chapter.ChapterHtml;
     goContext.Chapter.ChapterHtml = goContext.Template.substr(0, index) + goContext.Chapter.ChapterHtml + "</body></html>"
     logInfo(goContext.Chapter.ChapterHtml);
     logInfo(">>>>>>>> Next chapter: " + goContext.Chapter.NextChapterUrl + " <<<<<<<<<<<");
@@ -256,6 +257,11 @@ function js_text(text) {
       goContext.Chapter.NextChapterUrl = getFullPath(href);
     }
   } else if (parsingState == "unmangle") {
+    if (text.indexOf("display") != -1) {
+      nextTextIsValid = false;
+    } else if (text.length > 50) {
+      nextTextIsValid = true;
+    }
     logDebug("js_text [" + text + "] " + nextTextIsValid);
     if (nextTextIsValid || text.trim().length == 0) {
       buffer += text;
@@ -284,8 +290,8 @@ function sendRequest(method, url, timeoutSec, numTries, headers, formdata, skipP
 }
 
 function unmangleChapterData(data) {
-  parsingState = "unmangle";
   nextTextIsValid = false;
+  parsingState = "unmangle";
   buffer = "";
   goContext.Parse(data);
   chapterData = buffer

@@ -19,13 +19,15 @@ export function getBookStatusAsString(status: model.BookStatusType) {
 }
 
 export function getBookStatusFromString(str: String) {
-  var status = model.BookStatusType.ERROR;
+  var status = null;
   if (str == "ABORTED") {
     status = model.BookStatusType.ABORTED;
   } else if (str == "COMPLETED") {
     status = model.BookStatusType.COMPLETED;
   } else if (str == "IN_PROGRESS") {
     status = model.BookStatusType.IN_PROGRESS;
+  } else if (str == "ERROR") {
+    status = model.BookStatusType.ERROR;
   }
   return status;
 }
@@ -44,8 +46,10 @@ export function toGoogleTime(obj: any) : google_protobuf_timestamp_pb.Timestamp 
 }
 
 export function toJsonTime(t: google_protobuf_timestamp_pb.Timestamp) : String {
-  var str = new Date(t.seconds*1000 + t.nanos/1000000).toJSON();        
-  return str;
+  if (t) {
+    return new Date(t.seconds*1000 + t.nanos/1000000).toJSON();        
+  }
+  return "";
 }
 
 export function toJsonBook(book: model.Book) : Object {

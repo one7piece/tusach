@@ -164,12 +164,12 @@ func (loader *ContentLoader) DownloadChapter(bookId int, chapterNo int, chapterU
 		return nil, err
 	}
 
-	if loader.Params["chapterHtml"] == "" {
+	if loader.Chapter.ChapterHtml == "" {
 		return nil, errors.New("No chapter data!")
 	}
 
 	logger.Infof("successfully downloaded chapter %d/%d: %s\n", bookId, chapterNo, chapterUrl)
-	logger.Infof("chapterTitle: '%s', nextChapterUrl: '%s', chapterHtml:\n", loader.Chapter.ChapterTitle, loader.Params["nextChapterUrl"])
+	logger.Infof("chapterTitle: '%s', nextChapterUrl: '%s', chapterHtml:\n", loader.Chapter.ChapterTitle, loader.Chapter.NextChapterUrl)
 	//
 	return loader.Chapter, nil
 }

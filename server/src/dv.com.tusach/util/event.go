@@ -38,7 +38,7 @@ func GetEventManager() *EventManager {
 
 // push the event to the channel
 func (em *EventManager) Push(event EventData) {
-	logger.Infof("pushing: %s[%v]\n", event.Channel, event.Data)
+	logger.Debugf("pushing: %s[%v]\n", event.Channel, event.Data)
 	em.eventQueue <- event
 }
 

@@ -91,14 +91,13 @@ func (bookMaker *BookMaker) UpdateBook(book model.Book) error {
 	if current.Status == model.BookStatusType_IN_PROGRESS {
 		return errors.New("Book " + strconv.Itoa(int(book.Id)) + " is currently in progress")
 	}
-	if current.Status != book.Status {
-		return errors.New("Cannot update book to different status!")
-	}
+
 	// allow updating fields: title, author, currentPageUrl
 	current.Title = book.Title
 	current.Author = book.Author
 	current.CurrentPageUrl = book.CurrentPageUrl
 	current.CurrentPageNo = book.CurrentPageNo
+	current.MaxNumPages = book.MaxNumPages
 
 	_, err := bookMaker.saveBook(&current)
 	return err
@@ -112,6 +111,9 @@ func (bookMaker *BookMaker) CreateBook(book model.Book) error {
 	current.Status = model.BookStatusType_IN_PROGRESS
 	current.CreatedTime = util.TimestampNow()
 	bookId, err := bookMaker.saveBook(&current)
+	if err != nil {
+		return err
+	}
 	current.Id = int32(bookId)
 
 	loader, err := bookMaker.CreateContentLoader(current.StartPageUrl)
@@ -208,6 +210,7 @@ func (bookMaker *BookMaker) MakeBook(loader *ContentLoader, book *model.Book) (e
 		}
 		downloadedChapter, err2 := loader.DownloadChapter(int(book.Id), int(newChapterNo), url)
 		if err2 != nil {
+			err = err2
 			logger.Errorf("%s\n", err.Error)
 			break
 		}
@@ -287,9 +290,9 @@ func (bookMaker *BookMaker) saveBook(book *model.Book) (retId int, retErr error)
 	if err == nil {
 		if book.Id <= 0 {
 			book.Id = int32(id)
-			logger.Infof("created book - %v", book)
+			logger.Debugf("created book - %v", book)
 		} else {
-			logger.Infof("updated book - %v", book)
+			logger.Debugf("updated book - %v", book)
 		}
 		util.GetEventManager().Push(util.EventData{Channel: "BOOK-CHANNEL", Type: "update", Data: *book})
 	} else {
