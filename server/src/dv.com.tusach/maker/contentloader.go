@@ -50,6 +50,7 @@ type ContentLoader struct {
 	engine           *ScriptEngine
 	transport        *Transport
 	CurrentTagValues map[string]string
+	ParentTagValues  map[string]string
 	Cookies          map[string]string
 }
 
@@ -58,7 +59,7 @@ func (loader *ContentLoader) Init() error {
 	loader.Params = make(map[string]string)
 	loader.CurrentTagValues = make(map[string]string)
 	loader.Cookies = make(map[string]string)
-
+	logger.Infof("init content loader, hostname: %s\n", loader.Hostname)
 	domain := ""
 	parts := strings.Split(loader.Hostname, ".")
 	if len(parts) > 0 {
@@ -195,6 +196,7 @@ func (loader *ContentLoader) Parse(data string) int {
 			}
 			switch tt {
 			case html.StartTagToken, html.SelfClosingTagToken:
+				loader.ParentTagValues = loader.CurrentTagValues
 				loader.CurrentTagValues = map[string]string{}
 				for {
 					key, val, more := z.TagAttr()
@@ -207,7 +209,6 @@ func (loader *ContentLoader) Parse(data string) int {
 
 				arr, _ := z.TagName()
 				tagName := string(arr)
-				//loader.CurrentTagValues["name"] = tagName
 				_, err = loader.engine.jsMethods[START_TAG_METHOD].Call(otto.NullValue(), tagName, tt == html.SelfClosingTagToken)
 				if err != nil {
 					logger.Errorf("Failed to call js function %s: %s", jsMethodNames[START_TAG_METHOD], err.Error())
@@ -218,8 +219,6 @@ func (loader *ContentLoader) Parse(data string) int {
 				arr, _ := z.TagName()
 				tagName := string(arr)
 				_, err = loader.engine.jsMethods[END_TAG_METHOD].Call(otto.NullValue(), tagName)
-				loader.CurrentTagValues = map[string]string{}
-				//loader.parentTag = loader.CurrentTagValues
 				if err != nil {
 					logger.Errorf("Failed to call js function %s: %s", jsMethodNames[END_TAG_METHOD], err.Error())
 					return 5000

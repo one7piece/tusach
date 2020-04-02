@@ -29,11 +29,18 @@ cp ./*.json $output_path/
 cp ./*.sh $output_path/
 cp ./*.cmd $output_path/
 
-if ! [ -d $output_path/envoy ]; then
-mkdir $output_path/envoy
-fi
 if ! [ -d $output_path/library/books ]; then
 mkdir $output_path/library/books
 fi
+
+if ! [ -d $output_path/certs ]; then
+mkdir $output_path/certs
+fi
+cp ./certs/* $output_path/certs/
+
+if ! [ -d $output_path/envoy ]; then
+mkdir $output_path/envoy
+fi
 cd ..
 cp ./envoy/* $output_path/envoy/
+

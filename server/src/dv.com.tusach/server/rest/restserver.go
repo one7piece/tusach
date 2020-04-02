@@ -12,8 +12,19 @@ import (
 	"dv.com.tusach/model"
 	"dv.com.tusach/persistence"
 	"dv.com.tusach/util"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/husobee/vestigo"
 )
+
+type IAuthHandler interface {
+	Auth(w http.ResponseWriter, r *http.Request) bool
+}
+
+type JWTTokenClaims struct {
+	UserId string
+	Roles  []string
+	jwt.StandardClaims
+}
 
 type RestServer struct {
 	bookMaker *maker.BookMaker
@@ -32,6 +43,13 @@ func (app *RestServer) ProcessEvent(event util.EventData) {
 func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	app.bookMaker = bookMaker
 	app.marshaler = JsonPbMarshaler{}
+
+	var authWrap HandlerFuncEx
+	oauthResource := util.GetOAuthResource("google.drive")
+	if oauthResource != nil {
+		authImpl := &OAuth2Impl{resource: oauthResource}
+		authWrap = authImpl.Auth
+	}
 	logger.Infof("Register event listening on channel %s", "BOOK-CHANNEL")
 	util.GetEventManager().StartListening("BOOK-CHANNEL", app)
 
@@ -39,12 +57,15 @@ func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	// you can enable trace by setting this to true
 	vestigo.AllowTrace = true
 
-	mware := chain(recoverWrap, traceWrap)
+	mware := chain(recoverWrap, traceWrap, authWrap)
 	router.Get("/tusach/book/get/:id", mware(app.GetBook))
 	router.Get("/tusach/book/list/:timestamp", mware(app.GetBooks))
 	router.Post("/tusach/book/command/:cmd", mware(app.UpdateBook))
 
 	// TODO handle CORS
+
+	// oauth redirect handler
+	//http.HandleFunc("/oauth/drive/redirect", app.oauthDriveRedirect)
 
 	// api handler
 	http.Handle("/api/", http.StripPrefix("/api", router))
@@ -53,12 +74,22 @@ func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	// static file handler
 	http.Handle("/", http.FileServer(http.Dir(util.GetConfiguration().ServerPath)))
 
-	logger.Infof("Starting REST server on port: " + strconv.Itoa(util.GetConfiguration().ServerBindPort))
-
-	if err := http.ListenAndServe(util.GetConfiguration().ServerBindAddress+":"+
-		strconv.Itoa(util.GetConfiguration().ServerBindPort), nil); err != nil {
-		logger.Errorf("!!!ERROR!!! %s", err)
-		return err
+	sslCert := util.GetConfiguration().SslCert
+	sslKey := util.GetConfiguration().SslKey
+	if sslCert != "" && sslKey != "" {
+		logger.Infof("Starting HTTPS rest server on port: " + strconv.Itoa(util.GetConfiguration().ServerBindPort))
+		if err := http.ListenAndServeTLS(util.GetConfiguration().ServerBindAddress+":"+
+			strconv.Itoa(util.GetConfiguration().ServerBindPort), sslCert, sslKey, nil); err != nil {
+			logger.Errorf("!!!ERROR!!! %s", err)
+			return err
+		}
+	} else {
+		logger.Infof("Starting HTTP rest server on port: " + strconv.Itoa(util.GetConfiguration().ServerBindPort))
+		if err := http.ListenAndServe(util.GetConfiguration().ServerBindAddress+":"+
+			strconv.Itoa(util.GetConfiguration().ServerBindPort), nil); err != nil {
+			logger.Errorf("!!!ERROR!!! %s", err)
+			return err
+		}
 	}
 	return nil
 }

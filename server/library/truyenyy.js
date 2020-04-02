@@ -1,4 +1,5 @@
 chapterPrefixes = ["Chương", "CHƯƠNG", "chương", "Quyển", "QUYỂN", "quyển", "Hồi"];
+chapContentPrefix = "/web-api/novel/chapter-content-get/?chap_id=";
 
 // loginGet loginPost download downloadPart
 parsingState = "";
@@ -37,42 +38,38 @@ function js_downloadChapter() {
     if (!sendRequest("GET", goContext.Chapter.ChapterUrl, 20, 1, headers, formdata)) {
       return;
     }
-    var prefix = "/web-api/novel/chapter-content-get/?chap_id=";
     var str = goContext.Params["lastResponseBody"];
     //logDebug("raw chapter response body:\n" + str);
-    if (str.indexOf(prefix, 0) != -1) {
-      var index = 0;
-      chapterParts = {};
-      while (index >= 0 && index < str.length)  {
-        index = str.indexOf(prefix, index);
-        if (index != -1) {
-          var index2 = str.indexOf("&part=", index+1);
-          var index3 = str.indexOf("\"", index+1);
-          var partNo = str.substring(index2+"&part=".length,index3);
-          var partLink = str.substring(index+prefix.length, index2);
-          if (!chapterParts[partNo]) {
-            chapterParts[partNo] = "";
-            var url = fullPathPrefix+str.substring(index, index3)
-            logDebug("found chapter part#" + partNo + ": " + partLink + ", url:" + url);
-            formdata = {chapter_id: partLink, part: partNo};      
-            parsingState = "downloadPart";
-            if (!sendRequest("GET", url, 20, 1, headers, formdata, true)) {
-              goContext.Chapter.ChapterHtml = "";
-              return;
-            }
-            chapterData = "";
-            if (goContext.Params["lastResponseBody"]) {
-              logDebug("---------------------------------------------------------------");
-              logDebug("loaded chapter part#" + partNo + ": \n" + goContext.Params["lastResponseBody"]);
-              logDebug("---------------------------------------------------------------");
-              var json = JSON.parse(goContext.Params["lastResponseBody"])
-              unmangleChapterData(json.content);
-            }
-            goContext.Chapter.ChapterHmtlRaw += goContext.Params["lastResponseBody"]; 
-            goContext.Chapter.ChapterHtml += chapterData;
-          }
-
-          index = index3;
+    if (str.indexOf(chapContentPrefix, 0) != -1) {
+      downloadParts(headers, formdata);
+    } else if (str.indexOf("Mua Chương Này") != -1 && str.indexOf("id=\"btn_buy\"") != -1) {
+      var pattern = "/account/vip/chapter/buy/api/\",{chap_id:'";
+      var index = str.indexOf(pattern);
+      var index2 = str.indexOf("'}", index+pattern.length);
+      if (index != -1 && index2 != -1) {
+        var chapterId = str.substring(index+pattern.length, index2);
+        logInfo("Need to buy chuong " + goContext.Chapter.ChapterNo + ", chap_id:'" + chapterId + "'");
+        formdata = {chap_id: chapterId}
+        headers = {Referer: goContext.Chapter.ChapterUrl};
+        headers["Content-Type"] = "application/x-www-form-urlencoded";
+        headers["X-CSRFToken"] = goContext.Cookies["csrftoken"];    
+        //parsingState = "buy";
+        if (!sendRequest("POST", getFullPath("/account/vip/chapter/buy/api/"), 20, 1, headers, formdata)) {
+          return;
+        }    
+        formdata = {sessionid: sessionId, next: "/"};      
+        headers["X-CSRFToken"] = csrfToken;
+        headers["Referer"] = "https://truyenyy.com"
+        parsingState = "download";
+        if (!sendRequest("GET", goContext.Chapter.ChapterUrl, 20, 1, headers, formdata)) {
+          return;
+        }
+        str = goContext.Params["lastResponseBody"];
+        if (str.indexOf(chapContentPrefix, 0) != -1) {
+          downloadParts(headers, formdata);
+        } else {
+          logError("Failed to buy chapter " + goContext.Chapter.ChapterNo);
+          return;
         }
       }
     } else {
@@ -80,15 +77,60 @@ function js_downloadChapter() {
       goContext.Chapter.ChapterHtml = chapterData;
     }
 
-    var index = goContext.Template.indexOf("</body>");  
-    if (goContext.Chapter.ChapterTitle == "") {
-      goContext.Chapter.ChapterTitle = "Chapter " + goContext.Chapter.ChapterNo;
+    if (goContext.Chapter.ChapterHtml.length > 1000) {
+      var index = goContext.Template.indexOf("</body>");  
+      if (goContext.Chapter.ChapterTitle == "") {
+        goContext.Chapter.ChapterTitle = "Chapter " + goContext.Chapter.ChapterNo;
+      }
+      logInfo(">>>>>>>> chapter: " + goContext.Chapter.ChapterTitle + " <<<<<<<<<<<");
+      goContext.Chapter.ChapterHtml = "<h2>" + goContext.Chapter.ChapterTitle + "</h2>" + goContext.Chapter.ChapterHtml;
+      goContext.Chapter.ChapterHtml = goContext.Template.substr(0, index) + goContext.Chapter.ChapterHtml + "</body></html>"
+      logInfo(goContext.Chapter.ChapterHtml);
+      logInfo(">>>>>>>> Next chapter: " + goContext.Chapter.NextChapterUrl + " <<<<<<<<<<<");
+    } else {
+      logInfo(">>>>>>>> chapter: " + goContext.Chapter.ChapterTitle + " <<<<<<<<<<<");
+      logInfo("Discard invalid chapter data: " + goContext.Chapter.ChapterHtml);
+      goContext.Chapter.ChapterHtml = "";
+      goContext.Chapter.NextChapterUrl = "";
     }
-    logInfo(">>>>>>>> chapter: " + goContext.Chapter.ChapterTitle + " <<<<<<<<<<<");
-    goContext.Chapter.ChapterHtml = "<h2>" + goContext.Chapter.ChapterTitle + "</h2>" + goContext.Chapter.ChapterHtml;
-    goContext.Chapter.ChapterHtml = goContext.Template.substr(0, index) + goContext.Chapter.ChapterHtml + "</body></html>"
-    logInfo(goContext.Chapter.ChapterHtml);
-    logInfo(">>>>>>>> Next chapter: " + goContext.Chapter.NextChapterUrl + " <<<<<<<<<<<");
+  }
+}
+
+function downloadParts(headers, formdata) {
+  var index = 0;
+  chapterParts = {};
+  var str = goContext.Params["lastResponseBody"];
+  while (index >= 0 && index < str.length)  {
+    index = str.indexOf(chapContentPrefix, index);
+    if (index != -1) {
+      var index2 = str.indexOf("&part=", index+1);
+      var index3 = str.indexOf("\"", index+1);
+      var partNo = str.substring(index2+"&part=".length,index3);
+      var partLink = str.substring(index+chapContentPrefix.length, index2);
+      if (!chapterParts[partNo]) {
+        chapterParts[partNo] = "";
+        var url = fullPathPrefix+str.substring(index, index3)
+        logDebug("found chapter part#" + partNo + ": " + partLink + ", url:" + url);
+        formdata = {chapter_id: partLink, part: partNo};      
+        parsingState = "downloadPart";
+        if (!sendRequest("GET", url, 20, 1, headers, formdata, true)) {
+          goContext.Chapter.ChapterHtml = "";
+          return;
+        }
+        chapterData = "";
+        if (goContext.Params["lastResponseBody"]) {
+          logDebug("---------------------------------------------------------------");
+          logDebug("loaded chapter part#" + partNo + ": \n" + goContext.Params["lastResponseBody"]);
+          logDebug("---------------------------------------------------------------");
+          var json = JSON.parse(goContext.Params["lastResponseBody"])
+          unmangleChapterData(json.content);
+        }
+        goContext.Chapter.ChapterHmtlRaw += goContext.Params["lastResponseBody"]; 
+        goContext.Chapter.ChapterHtml += chapterData;
+      }
+
+      index = index3;
+    }
   }
 }
 
@@ -376,11 +418,11 @@ function extractChapterNumber(url) {
 
 // convert relative URL to full one
 function getFullPath(url) {
-  if (startsWidth(url, "http")) {
+  if (startsWith(url, "http")) {
     return url;
   }
 
-  if (startsWidth(url, "/")) {
+  if (startsWith(url, "/")) {
     return fullPathPrefix + url; 
   }
   return fullPathPrefix + "/" + url;
@@ -399,7 +441,7 @@ function getParentPath(url) {
   return "";
 }
 
-function startsWidth(source, str) {
+function startsWith(source, str) {
   if (source && str && source.length >= str.length) {
     return (source.substr(0, str.length) == str);
   }

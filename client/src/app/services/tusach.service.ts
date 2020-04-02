@@ -35,13 +35,13 @@ export class TusachService {
     this.host = url.substr(0, url.indexOf(":", "http://".length))
     console.log("current url:" + url + ", host:" + this.host);
 
-    var serviceType = ServiceType.GRPC;
+    var serviceType = ServiceType.REST;
     const search = window.location.search;
     if (search.length > 1 && search.substring(1).startsWith("serviceType=") == true) {
       var value = search.substring(1 + "serviceType=".length);
       console.log("using service type: " + value);
-      if (value == "rest") {
-        serviceType = ServiceType.REST;
+      if (value == "grpc") {
+        serviceType = ServiceType.GRPC;
       }
     }
     this.setServiceType(serviceType);

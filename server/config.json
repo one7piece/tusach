@@ -5,6 +5,8 @@
 	"logLevel" : "info",
 	"logFile" : "./tusach.log",
 	"ServerBindPort" : 8888,
-	"GrpcBindPort" : 9999
+	"GrpcBindPort" : 9999,
+	"SslKey" : "./certs/tusach.key",
+	"SslCert" : "./certs/tusach.crt"
 }
 	

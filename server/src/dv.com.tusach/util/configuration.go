@@ -11,24 +11,35 @@ import (
 	"dv.com.tusach/logger"
 )
 
+type OAuthResource struct {
+	Name         string `json:name`
+	ClientID     string `json:clientID`
+	ClientSecret string `json:clientSecret`
+	Endpoint     string `json:endpoint`
+	Redirect     string `json:redirect`
+}
+
 type Configuration struct {
-	ServerPath        string `json:serverPath`
-	LibraryPath       string `json:libraryPath`
-	DBFilename        string `json:dbFilename`
-	ServerBindAddress string `json:serverBindAddress`
-	ServerBindPort    int    `json:serverBindPort`
-	GrpcBindPort    	int    `json:grpcBindPort`
-	MaxActionBooks    int    `json:maxActiveBooks`
-	ProxyURL          string `json:proxyURL`
-	ProxyUsername     string `json:proxyUsername`
-	ProxyPassword     string `json:proxyPassword`
-	LogLevel          string `json:logLevel`
-	LogFile           string `json:logFile`
-	LogMaxSizeMB      int    `json:logMaxSizeMB`
-	LogMaxBackups     int    `json:logMaxBackups`
-	CreateEpubCmd     string `json:createEpubCmd`
-	UpdateEpubCmd     string `json:updateEpubCmd`
-	ExtractEpubCmd    string `json:extractEpubCmd`
+	ServerPath        string          `json:serverPath`
+	LibraryPath       string          `json:libraryPath`
+	DBFilename        string          `json:dbFilename`
+	ServerBindAddress string          `json:serverBindAddress`
+	ServerBindPort    int             `json:serverBindPort`
+	GrpcBindPort      int             `json:grpcBindPort`
+	MaxActionBooks    int             `json:maxActiveBooks`
+	ProxyURL          string          `json:proxyURL`
+	ProxyUsername     string          `json:proxyUsername`
+	ProxyPassword     string          `json:proxyPassword`
+	LogLevel          string          `json:logLevel`
+	LogFile           string          `json:logFile`
+	LogMaxSizeMB      int             `json:logMaxSizeMB`
+	LogMaxBackups     int             `json:logMaxBackups`
+	CreateEpubCmd     string          `json:createEpubCmd`
+	UpdateEpubCmd     string          `json:updateEpubCmd`
+	ExtractEpubCmd    string          `json:extractEpubCmd`
+	SslKey            string          `json:sslKey`
+	SslCert           string          `json:sslCert`
+	OAuthResources    []OAuthResource `json:oauthResources`
 }
 
 var configFile string
@@ -48,6 +59,15 @@ func GetEpubPath() string {
 
 func GetParserFile() string {
 	return filepath.Join(configuration.LibraryPath, "parser.js")
+}
+
+func GetOAuthResource(name string) *OAuthResource {
+	for _, r := range configuration.OAuthResources {
+		if name == r.Name {
+			return &r
+		}
+	}
+	return nil
 }
 
 func LoadConfig(filename string) {
@@ -101,7 +121,6 @@ func LoadConfig(filename string) {
 		panic("Parser file " + GetParserFile() + " does not exists")
 	}
 
-	fmt.Printf("epub command paths: %s, %s, %s\n", configuration.CreateEpubCmd, configuration.UpdateEpubCmd, configuration.ExtractEpubCmd)
 	if configuration.CreateEpubCmd == "" {
 		if runtime.GOOS == "windows" {
 			configuration.CreateEpubCmd = filepath.Join(configuration.LibraryPath, "create-epub.cmd")
@@ -173,12 +192,7 @@ func LoadConfig(filename string) {
 		configuration.LogMaxBackups = 10
 	}
 
-	fmt.Printf("ServerPath: %s\n", configuration.ServerPath)
-	fmt.Printf("LibraryPath: %s\n", configuration.LibraryPath)
-	fmt.Printf("CreateEpubCmd: %s, UpdateEpubCmd: %s, ExtractEpubCmd: %s\n",
-		configuration.CreateEpubCmd, configuration.UpdateEpubCmd, configuration.ExtractEpubCmd)
-	fmt.Printf("DBFilename: %s\n", configuration.DBFilename)
-	fmt.Printf("LogFile: %s\n", configuration.LogFile)
+	fmt.Printf("loaded configuration file: %v\n", configuration)
 
 	logger.Init(level, configuration.LogFile, configuration.LogMaxSizeMB, configuration.LogMaxBackups, 30)
 }

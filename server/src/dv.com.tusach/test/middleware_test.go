@@ -5,14 +5,27 @@ import (
 	"testing"
 )
 
+type MyHandlerFunc func(http.ResponseWriter, *http.Request) bool
+
+// ServeHTTP calls f(w, r).
+//func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *Request) {
+//	f(w, r)
+//}
+
+//type Handler interface {
+//	ServeHTTP(ResponseWriter, *Request)
+//}
+
 type middleware func(next http.HandlerFunc) http.HandlerFunc
 
-func f1(w http.ResponseWriter, r *http.Request) {
+func f1(w http.ResponseWriter, r *http.Request) bool {
 	println("f1 called")
+	return false
 }
 
-func f2(w http.ResponseWriter, r *http.Request) {
+func f2(w http.ResponseWriter, r *http.Request) bool {
 	println("f2 called")
+	return true
 }
 
 func f3(w http.ResponseWriter, r *http.Request) {
@@ -24,58 +37,28 @@ func process(s string, f http.HandlerFunc) {
 	f(nil, nil)
 }
 
-func chain(arr ...http.HandlerFunc) middleware {
+func chain(arr ...MyHandlerFunc) middleware {
 	return func(final http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
+			aborted := false
 			for _, mw := range arr {
-				mw(w, r)
+				if mw != nil {
+					if !mw(w, r) {
+						aborted = true
+						break
+					}
+				}
 			}
-			final(w, r)
+			if !aborted {
+				final(w, r)
+			}
 		}
 	}
 }
 
 func Test(t *testing.T) {
-	a := chain(f1, f2)
+	a := chain(f1, f2, nil)
+	//var h http.Handler
 	process("/tusach", a(f3))
+	//process("", h.ServeHTTP)
 }
-
-func mw1() middleware {
-	return func(f http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			// do the work
-			println("calling mw1")
-			// call the next in chain
-			f(w, r)
-		}
-	}
-}
-
-func mw2() middleware {
-	return func(f http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			// do the work
-			println("calling mw1")
-			// call the next in chain
-			f(w, r)
-		}
-	}
-}
-
-/*
-func chainMiddleware(list ...middleware) middleware {
-	var last := nil
-	for mw := range list {
-		last =
-	}
-	return func(final http.HandleFunc) http.HandlerFunc {
-		return func(w http.Response, r *http.Request) {
-			last := final
-			for i:=len(mw)-1; i>=0; i-- {
-				last = mw[i](last)
-			}
-			last(w, r)
-		}
-	}
-}
-*/

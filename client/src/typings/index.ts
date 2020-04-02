@@ -19,7 +19,7 @@ export function getBookStatusAsString(status: model.BookStatusType) {
 }
 
 export function getBookStatusFromString(str: String) {
-  var status = null;
+  var status = model.BookStatusType.NONE;
   if (str == "ABORTED") {
     status = model.BookStatusType.ABORTED;
   } else if (str == "COMPLETED") {
@@ -66,11 +66,13 @@ export function toJsonBook(book: model.Book) : Object {
     epubCreated: book.getEpubCreated(),
     maxNumPages: book.getMaxNumPages(),
     startPageUrl: book.getStartPageUrl(),
-    status: getBookStatusAsString(book.getStatus()),
     createdTime: toJsonTime(book.getCreatedTime()),
     lastUpdatedTime: toJsonTime(book.getLastUpdatedTime())
    };
-
+  let status = getBookStatusAsString(book.getStatus());
+  if (status != "") {
+    obj["status"] = status;
+  }
   return obj;
 }
 
