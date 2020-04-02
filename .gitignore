@@ -7,6 +7,7 @@
 BAK/*
 server/pkg/*
 server/test/*
+server/library.bak/*
 dist/*
 tusach*.tar.gz
 backup*/*
