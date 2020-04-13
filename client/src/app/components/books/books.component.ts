@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import * as model from '../../../typings';
 import { TusachService } from '../../services';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-books',
@@ -10,8 +11,12 @@ import { TusachService } from '../../services';
 export class BooksComponent implements OnInit {
   books: model.Book[];
 
-  constructor(private tusachService: TusachService,
+  constructor(
+    private http: HttpClient,
+    private tusachService: TusachService,
     private ref: ChangeDetectorRef) {
+    console.log("books.component constructor...");
+    //http.request.
   }
 
   ngOnInit() {

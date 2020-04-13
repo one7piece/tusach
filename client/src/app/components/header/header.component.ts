@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { TusachService } from '../../services';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -6,7 +8,21 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit {
-  constructor() {}
+  constructor(private tusachService: TusachService,
+    private router: Router) {
+
+  }
+    
   ngOnInit() {
+  }
+
+  account() {
+    let logonUser = this.tusachService.getLogonUser()
+    if (logonUser != null) {
+      // display profile 
+      this.router.navigate(['account']);
+    } else {
+      this.tusachService.login("google");
+    }
   }
 }

@@ -39,6 +39,10 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+func Test_Login(t *testing.T) {
+	fmt.Println("Test_Login...")
+}
+
 func Test_GetBook(t *testing.T) {
 	fmt.Println("Test_GetBook...")
 	book := LoadBook(t, 1)

@@ -16,6 +16,8 @@ import {
   Book,
   BookID,
   BookList,
+  LoginReply,
+  LoginRequest,
   NewBookRequest} from './tusach_pb';
 
 export class TusachClient {
@@ -229,6 +231,28 @@ export class TusachClient {
       request,
       metadata || {},
       this.methodInfoResumeBook,
+      callback);
+  }
+
+  methodInfoLogin = new grpcWeb.AbstractClientBase.MethodInfo(
+    LoginReply,
+    (request: LoginRequest) => {
+      return request.serializeBinary();
+    },
+    LoginReply.deserializeBinary
+  );
+
+  login(
+    request: LoginRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.Error,
+               response: LoginReply) => void) {
+    return this.client_.rpcCall(
+      this.hostname_ +
+        '/model.Tusach/Login',
+      request,
+      metadata || {},
+      this.methodInfoLogin,
       callback);
   }
 

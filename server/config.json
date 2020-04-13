@@ -4,9 +4,11 @@
 	"dbFilename" : "./library/tusach.ql",
 	"logLevel" : "info",
 	"logFile" : "./tusach.log",
-	"ServerBindPort" : 8888,
-	"GrpcBindPort" : 9999,
-	"SslKey" : "./certs/tusach.key",
-	"SslCert" : "./certs/tusach.crt"
+	"serverBindPort" : 8888,
+	"grpcBindPort" : 9999,
+	"sslKey" : "./oauth2/tusach.key",
+	"sslCert" : "./oauth2/tusach.crt",
+	"oAuthServiceFile": "./oauth2/google.service.account.json",
+	"oAuthUserFiles": ["./oauth2/google.oauth.id.json"]
 }
 	

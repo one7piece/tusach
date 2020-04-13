@@ -6,3 +6,4 @@ golang.org/x/net/proxy
 github.com/cznic/ql/driver
 gopkg.in/natefinch/lumberjack.v2
 github.com/one7piece/httprest
+google.golang.org/api/drive/v3

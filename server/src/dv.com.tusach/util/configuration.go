@@ -11,35 +11,44 @@ import (
 	"dv.com.tusach/logger"
 )
 
-type OAuthResource struct {
+type OAuthUserResource struct {
 	Name         string `json:name`
 	ClientID     string `json:clientID`
 	ClientSecret string `json:clientSecret`
 	Endpoint     string `json:endpoint`
 	Redirect     string `json:redirect`
+	Scope        string `json:scope`
+}
+
+type OAuthServiceResource struct {
+	Email      string   `json:client_email`
+	PrivateKey string   `json:private_key`
+	Scopes     []string `json:scopes`
 }
 
 type Configuration struct {
-	ServerPath        string          `json:serverPath`
-	LibraryPath       string          `json:libraryPath`
-	DBFilename        string          `json:dbFilename`
-	ServerBindAddress string          `json:serverBindAddress`
-	ServerBindPort    int             `json:serverBindPort`
-	GrpcBindPort      int             `json:grpcBindPort`
-	MaxActionBooks    int             `json:maxActiveBooks`
-	ProxyURL          string          `json:proxyURL`
-	ProxyUsername     string          `json:proxyUsername`
-	ProxyPassword     string          `json:proxyPassword`
-	LogLevel          string          `json:logLevel`
-	LogFile           string          `json:logFile`
-	LogMaxSizeMB      int             `json:logMaxSizeMB`
-	LogMaxBackups     int             `json:logMaxBackups`
-	CreateEpubCmd     string          `json:createEpubCmd`
-	UpdateEpubCmd     string          `json:updateEpubCmd`
-	ExtractEpubCmd    string          `json:extractEpubCmd`
-	SslKey            string          `json:sslKey`
-	SslCert           string          `json:sslCert`
-	OAuthResources    []OAuthResource `json:oauthResources`
+	ServerPath        string   `json:serverPath`
+	LibraryPath       string   `json:libraryPath`
+	DBFilename        string   `json:dbFilename`
+	ServerBindAddress string   `json:serverBindAddress`
+	ServerBindPort    int      `json:serverBindPort`
+	GrpcBindPort      int      `json:grpcBindPort`
+	MaxActionBooks    int      `json:maxActiveBooks`
+	ProxyURL          string   `json:proxyURL`
+	ProxyUsername     string   `json:proxyUsername`
+	ProxyPassword     string   `json:proxyPassword`
+	LogLevel          string   `json:logLevel`
+	LogFile           string   `json:logFile`
+	LogMaxSizeMB      int      `json:logMaxSizeMB`
+	LogMaxBackups     int      `json:logMaxBackups`
+	CreateEpubCmd     string   `json:createEpubCmd`
+	UpdateEpubCmd     string   `json:updateEpubCmd`
+	ExtractEpubCmd    string   `json:extractEpubCmd`
+	SslKey            string   `json:sslKey`
+	SslCert           string   `json:sslCert`
+	CheckPermission   string   `json:checkPermission`
+	OAuthServiceFile  string   `json:oAuthServiceFile`
+	OAuthUserFiles    []string `json:oAuthUserFiles`
 }
 
 var configFile string
@@ -61,13 +70,33 @@ func GetParserFile() string {
 	return filepath.Join(configuration.LibraryPath, "parser.js")
 }
 
-func GetOAuthResource(name string) *OAuthResource {
-	for _, r := range configuration.OAuthResources {
-		if name == r.Name {
-			return &r
+func GetOAuthUserResource(provider string) *OAuthUserResource {
+	for _, f := range configuration.OAuthUserFiles {
+		oauthRes := OAuthUserResource{}
+		if err := ReadJsonFile(f, &oauthRes); err != nil {
+			logger.Errorf("Error reading oauth file: %s. %s\n", f, err)
+		} else {
+			if oauthRes.Name == provider {
+				return &oauthRes
+			}
 		}
 	}
+
 	return nil
+}
+
+func GetOAuthUserResources() []*OAuthUserResource {
+	arr := []*OAuthUserResource{}
+	for _, f := range configuration.OAuthUserFiles {
+		oauthRes := OAuthUserResource{}
+		if err := ReadJsonFile(f, &oauthRes); err != nil {
+			logger.Errorf("Error reading oauth file: %s. %s\n", f, err)
+		} else {
+			arr = append(arr, &oauthRes)
+		}
+	}
+
+	return arr
 }
 
 func LoadConfig(filename string) {

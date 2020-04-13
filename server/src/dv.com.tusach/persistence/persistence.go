@@ -38,6 +38,7 @@ type Persistence interface {
 	DeleteBook(bookId int32) error
 	SaveChapter(chapter model.Chapter) error
 	GetChapters(bookId int32) ([]model.Chapter, error)
+	ReplaceBook(book *model.Book) error
 }
 
 // remove the book file, called when book is deleted
@@ -262,28 +263,32 @@ func UpdateTOCFile(book model.Book, chapter model.Chapter) error {
 	return nil
 }
 
+func GetLibraryBookPath() string {
+	return filepath.Join(util.GetConfiguration().LibraryPath, "books")
+}
+
 func GetBookPath(bookId int) string {
-	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", bookId)
+	path := GetLibraryBookPath() + "/" + fmt.Sprintf("%08d", bookId)
 	return filepath.FromSlash(path)
 }
 
 func GetBookEpubFilename(book model.Book) string {
-	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.Id) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
+	path := GetLibraryBookPath() + "/" + fmt.Sprintf("%08d", book.Id) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".epub"
 	return filepath.FromSlash(path)
 }
 
 func GetBookMetaFilename(book model.Book) string {
-	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d", book.Id) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".json"
+	path := GetLibraryBookPath() + "/" + fmt.Sprintf("%08d", book.Id) + "-" + strings.Replace(book.Title, " ", "-", -1) + ".json"
 	return filepath.FromSlash(path)
 }
 
 func GetChapterFilename(chapter model.Chapter) string {
-	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d.html", chapter.BookId, chapter.ChapterNo)
+	path := GetLibraryBookPath() + "/" + fmt.Sprintf("%08d/OEBPS/chapter%04d.html", chapter.BookId, chapter.ChapterNo)
 	return filepath.FromSlash(path)
 }
 
 func GetRawChapterFilename(chapter model.Chapter) string {
-	path := util.GetConfiguration().LibraryPath + "/books/" + fmt.Sprintf("%08d/OEBPS/chapter%04d-raw.html", chapter.BookId, chapter.ChapterNo)
+	path := GetLibraryBookPath() + "/" + fmt.Sprintf("%08d/OEBPS/chapter%04d-raw.html", chapter.BookId, chapter.ChapterNo)
 	return filepath.FromSlash(path)
 }
 
@@ -324,7 +329,7 @@ func field2db(fieldName string, fieldType reflect.Type, fieldValue interface{}) 
 	var result interface{}
 	var err error
 	if fieldType == reflect.TypeOf(time.Time{}) {
-		result, _ = util.Time2String(fieldValue.(time.Time))
+		result = util.Time2String(fieldValue.(time.Time))
 	} else if fieldType == reflect.TypeOf(&tspb.Timestamp{}) {
 		result = util.Timestamp2String(fieldValue.(*tspb.Timestamp))
 	} else if fieldType == reflect.TypeOf(model.BookStatusType_NONE) {

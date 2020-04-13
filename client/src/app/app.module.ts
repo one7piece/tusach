@@ -17,7 +17,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { httpInterceptorProviders } from './interceptors';
 import { AppRoutingModule } from './routing/app-routing.module';
-import { AppComponent, HeaderComponent, MessagesComponent, BooksComponent, BookDetailComponent } from './components';
+import { AppComponent, LoginComponent, HeaderComponent, MessagesComponent, BooksComponent, BookDetailComponent, AccountComponent } from './components';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
@@ -26,7 +26,9 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     HeaderComponent,
     MessagesComponent,
     BooksComponent,
-    BookDetailComponent
+    BookDetailComponent,
+    LoginComponent,
+    AccountComponent
   ],
   imports: [
     MatToolbarModule, MatFormFieldModule, MatButtonModule, MatMenuModule, MatInputModule,

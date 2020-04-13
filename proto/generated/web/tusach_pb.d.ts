@@ -3,6 +3,42 @@ import * as jspb from "google-protobuf"
 import * as google_protobuf_empty_pb from 'google-protobuf/google/protobuf/empty_pb';
 import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
 
+export class LoginRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LoginRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: LoginRequest): LoginRequest.AsObject;
+  static serializeBinaryToWriter(message: LoginRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LoginRequest;
+  static deserializeBinaryFromReader(message: LoginRequest, reader: jspb.BinaryReader): LoginRequest;
+}
+
+export namespace LoginRequest {
+  export type AsObject = {
+    provider: string,
+  }
+}
+
+export class LoginReply extends jspb.Message {
+  getJwt(): string;
+  setJwt(value: string): void;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LoginReply.AsObject;
+  static toObject(includeInstance: boolean, msg: LoginReply): LoginReply.AsObject;
+  static serializeBinaryToWriter(message: LoginReply, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LoginReply;
+  static deserializeBinaryFromReader(message: LoginReply, reader: jspb.BinaryReader): LoginReply;
+}
+
+export namespace LoginReply {
+  export type AsObject = {
+    jwt: string,
+  }
+}
+
 export class User extends jspb.Message {
   getName(): string;
   setName(value: string): void;

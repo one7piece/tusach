@@ -7,7 +7,7 @@ source ./setenv.sh
 echo "GOPATH: $GOPATH"
 echo "compile server, output_path: $output_path"
 
-cd server
+cd $base_dir/server/src/dv.com.tusach
 echo go compile for $1, output: $output_path/tusach
 if [ "$1" == "arm" ]; then
 env GOOS=linux GOARM=7 GOARCH=$1 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
@@ -20,6 +20,7 @@ echo 'Usage: build-server.sh [arm|amd64|386|win]'
 exit 1
 fi
 
+cd $base_dir/server
 echo "copying library and configuration files..."
 #if [ -d $output_path/library ]; then
 #rm -rf $output_path/library
@@ -33,10 +34,10 @@ if ! [ -d $output_path/library/books ]; then
 mkdir $output_path/library/books
 fi
 
-if ! [ -d $output_path/certs ]; then
-mkdir $output_path/certs
+if ! [ -d $output_path/oauth2 ]; then
+mkdir $output_path/oauth2
 fi
-cp ./certs/* $output_path/certs/
+cp ./oauth2/* $output_path/oauth2/
 
 if ! [ -d $output_path/envoy ]; then
 mkdir $output_path/envoy

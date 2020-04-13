@@ -16,6 +16,15 @@ service Tusach {
   rpc DeleteBook(BookID) returns (google.protobuf.Empty);  
   rpc AbortBook(BookID) returns (google.protobuf.Empty);  
   rpc ResumeBook(BookID) returns (google.protobuf.Empty);  
+  rpc Login(LoginRequest) returns (LoginReply);  
+}
+
+message LoginRequest {
+  string provider = 1;
+}
+
+message LoginReply {
+  string jwt = 1;
 }
 
 message User {

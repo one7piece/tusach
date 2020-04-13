@@ -218,3 +218,9 @@ func (app *GrpcServer) ResumeBook(ctx context.Context, id *model.BookID) (*empty
 	val := empty.Empty{}
 	return &val, err
 }
+
+func (app *GrpcServer) Login(ctx context.Context, request *model.LoginRequest) (*model.LoginReply, error) {
+	logger.Infof("Login - %v", request)
+	reply := model.LoginReply{Jwt: "dummy-jwt-token"}
+	return &reply, nil
+}

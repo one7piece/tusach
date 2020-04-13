@@ -1,7 +1,6 @@
 package persistence
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -22,6 +21,7 @@ type FileDB struct {
 	users        []model.User
 	books        []model.Book
 	deletedBooks []model.Book
+	drive        *GoogleDriveStore
 }
 
 var chapterNoPattern = regexp.MustCompile(`(?P<first>playOrder=")\d*(?P<second>")`)
@@ -30,21 +30,77 @@ var chapterTitlePattern = regexp.MustCompile(`(?P<a>\Q<navLabel><text>\E)[^<]+(?
 func (f *FileDB) InitDB() {
 	f.info.SystemUpTime = util.TimestampNow()
 	f.initUsers()
-	f.initBooks()
+	f.books = []model.Book{}
+	f.drive = &GoogleDriveStore{}
+	f.loadLocalBooks()
+	f.drive.Init()
+	if f.drive.tusachFolderId != "" {
+		f.loadDriveBooks()
+	}
 }
 
 func (f *FileDB) CloseDB() {
 }
 
-func (f *FileDB) initBooks() {
-	logger.Info("initialise books...")
+func (f *FileDB) loadDriveBooks() {
+	// load books from google drive
+	driveBooks, err := f.drive.LoadBooks()
+	if err != nil {
+		return
+	}
+
+	for _, driveBook := range driveBooks {
+		// check timestamp
+		index := -1
+		for i, localBook := range f.books {
+			if localBook.Id == driveBook.Book.Id {
+				index = i
+				break
+			}
+		}
+		if index == -1 || util.Timestamp2UnixTime(driveBook.Book.LastUpdatedTime) > util.Timestamp2UnixTime(f.books[index].LastUpdatedTime) {
+			// download epub file
+			logger.Infof("downloading google drive book: %v\n", *driveBook.EpubFile)
+			epubData, err := f.drive.DownloadFile(driveBook.EpubFile)
+			if err == nil {
+				// save the json/epub file
+				filename := GetBookEpubFilename(*driveBook.Book)
+				logger.Infof("writing file %s\n", filename)
+				if err := ioutil.WriteFile(filename, epubData, 0644); err != nil {
+					errMsg := fmt.Sprintf("failed to write book %s: %s", filename, err.Error())
+					logger.Error(errMsg)
+					panic(errMsg)
+				}
+
+				filename = GetBookMetaFilename(*driveBook.Book)
+				logger.Infof("writing file %s\n", filename)
+				if err := util.WriteJsonFile(filename, driveBook.Book); err != nil {
+					errMsg := fmt.Sprintf("failed to write book %s: %s", filename, err.Error())
+					logger.Error(errMsg)
+					panic(errMsg)
+				}
+				if index != -1 {
+					logger.Infof("replace with google drive book: %v\n", *driveBook.Book)
+					f.books[index] = *driveBook.Book
+				} else {
+					logger.Infof("added google drive book: %v\n", *driveBook.Book)
+					f.books = append(f.books, *driveBook.Book)
+				}
+			} else {
+				logger.Errorf("failed to download epub media: %s(%s). %v\n", driveBook.EpubFile.FileId, driveBook.EpubFile.FileName, err)
+			}
+		}
+	}
+}
+
+func (f *FileDB) loadLocalBooks() {
+	logger.Info("reading books from local file system...")
 	// load books
 	booksPath := filepath.Join(util.GetConfiguration().LibraryPath, "books")
 	list, err := util.ReadDir(booksPath, true)
 	if err != nil {
 		panic(fmt.Sprintf("failed to read book directory %s: %s", booksPath, err.Error()))
 	}
-	f.books = []model.Book{}
 	for _, name := range list {
 		if strings.HasSuffix(name, ".epub") {
 			// find the corresponding .json file
@@ -53,7 +109,7 @@ func (f *FileDB) initBooks() {
 				fullname := filepath.Join(booksPath, jsonfile)
 				logger.Infof("Loading book meta: %s", fullname)
 				book := model.Book{}
-				err = read(fullname, &book)
+				err = util.ReadJsonFile(fullname, &book)
 				if err != nil {
 					logger.Errorf("Failed to load book meta %s", err)
 				} else {
@@ -87,7 +143,7 @@ func (f *FileDB) initUsers() {
 
 	filename := filepath.Join(util.GetConfiguration().LibraryPath, "users.json")
 	f.users = []model.User{}
-	err := read(filename, f.users)
+	err := util.ReadJsonFile(filename, f.users)
 	if err != nil || len(f.users) == 0 {
 		logger.Info("creating default users...")
 		err = f.SaveUser(model.User{Name: "admin", Roles: "administrator"})
@@ -134,7 +190,7 @@ func (f *FileDB) SaveUser(user model.User) error {
 	} else {
 		f.users = append(f.users, user)
 	}
-	return write(filename, f.users)
+	return util.WriteJsonFile(filename, f.users)
 }
 
 func (f *FileDB) DeleteUser(userName string) error {
@@ -146,7 +202,7 @@ func (f *FileDB) DeleteUser(userName string) error {
 			break
 		}
 	}
-	return write(filename, f.users)
+	return util.WriteJsonFile(filename, f.users)
 }
 
 func (f *FileDB) GetBook(id int32) model.Book {
@@ -193,6 +249,24 @@ func (f *FileDB) GetMaxBookId() (int32, error) {
 	return maxBookId, nil
 }
 
+func (f *FileDB) ReplaceBook(book *model.Book) error {
+	logger.Infof("Replacing book: %v", book)
+	foundIndex := -1
+	for i := 0; book.Id > 0 && i < len(f.books); i++ {
+		if f.books[i].Id == book.Id {
+			foundIndex = i
+			break
+		}
+	}
+	if foundIndex != -1 {
+		f.books[foundIndex] = *book
+	}
+	// write to the file
+	filename := GetBookMetaFilename(*book)
+	err := util.WriteJsonFile(filename, book)
+	return err
+}
+
 func (f *FileDB) SaveBook(book *model.Book) (retId int, retErr error) {
 	logger.Infof("Saving book: %v", book)
 	foundIndex := -1
@@ -216,9 +290,14 @@ func (f *FileDB) SaveBook(book *model.Book) (retId int, retErr error) {
 
 	// write to the file
 	filename := GetBookMetaFilename(*book)
-	err := write(filename, book)
-
+	err := util.WriteJsonFile(filename, book)
 	f.SaveSystemInfo(model.SystemInfo{BookLastUpdatedTime: book.LastUpdatedTime, SystemUpTime: f.info.SystemUpTime})
+
+	// save to google drive
+	if (f.drive != nil && f.drive.tusachFolderId != "") && (book.Status == model.BookStatusType_ABORTED ||
+		book.Status == model.BookStatusType_ERROR || book.Status == model.BookStatusType_COMPLETED) {
+		f.drive.StoreBook(*book)
+	}
 
 	return int(book.Id), err
 }
@@ -298,21 +377,4 @@ func (f *FileDB) SaveChapter(chapter model.Chapter) error {
 		return errors.New("Book " + strconv.Itoa(int(chapter.BookId)) + " not found!")
 	}
 	return WriteChapter(book, chapter)
-}
-
-func read(filename string, dest interface{}) error {
-	bytes, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(bytes, dest)
-}
-
-func write(filename string, source interface{}) error {
-	bytes, err := json.MarshalIndent(source, "", "  ")
-	if err != nil {
-		return err
-	}
-	logger.Debugf("write to %s: [%s]", filename, string(bytes))
-	return ioutil.WriteFile(filename, bytes, 0644)
 }

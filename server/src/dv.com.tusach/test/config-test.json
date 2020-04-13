@@ -8,6 +8,10 @@
 	"GrpcBindPort" : 9999,
   "createEpubCmd" : "../../../library/create-epub.cmd",
   "updateEpubCmd" : "../../../library/update-epub.cmd",
-  "extractEpubCmd" : "../../../library/extract-epub.cmd"  
+	"extractEpubCmd" : "../../../library/extract-epub.cmd",
+	"sslKey" : "../../../oauth2/tusach.key",
+	"sslCert" : "../../../oauth2/tusach.crt",
+	"oAuthServiceFile": "../../../oauth2/google.service.account.json",
+	"oAuthUserFile": "../../../oauth2/google.oauth.id.json"
 }
 	

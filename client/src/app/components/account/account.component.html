@@ -1,0 +1,15 @@
+<div class="accountdetails" layout="column" layout-align="center center">
+  <form>  
+  <h2>User Profile</h2>  
+  <mat-divider></mat-divider>
+  <mat-form-field flex layout="row" class="accountdetails-field">
+    <input matInput readonly placeholder="User Name" value="{{getUserName()}}">
+  </mat-form-field>
+  <mat-form-field flex layout="row" class="accountdetails-field">
+    <input matInput readonly placeholder="Email Address" value="{{getEmailAddress()}}">
+  </mat-form-field>
+  <mat-form-field flex layout="row" class="accountdetails-field">
+    <input matInput readonly placeholder="Role" value="{{getRole()}}">
+  </mat-form-field>
+  </form>
+</div>

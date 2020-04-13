@@ -56,7 +56,7 @@ func chain(arr ...MyHandlerFunc) middleware {
 	}
 }
 
-func Test(t *testing.T) {
+func Test_middleware1(t *testing.T) {
 	a := chain(f1, f2, nil)
 	//var h http.Handler
 	process("/tusach", a(f3))

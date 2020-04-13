@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -156,7 +157,24 @@ func String2Time(str string) (time.Time, error) {
 	return time.Parse(time.RFC3339, str)
 }
 
-func Time2String(t time.Time) (string, error) {
-	buffer, err := t.MarshalText()
-	return string(buffer), err
+func Time2String(t time.Time) string {
+	buffer, _ := t.MarshalText()
+	return string(buffer)
+}
+
+func ReadJsonFile(filename string, dest interface{}) error {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, dest)
+}
+
+func WriteJsonFile(filename string, source interface{}) error {
+	bytes, err := json.MarshalIndent(source, "", "  ")
+	if err != nil {
+		return err
+	}
+	logger.Debugf("write to %s: [%s]", filename, string(bytes))
+	return ioutil.WriteFile(filename, bytes, 0644)
 }

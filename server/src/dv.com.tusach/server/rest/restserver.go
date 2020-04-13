@@ -21,8 +21,9 @@ type IAuthHandler interface {
 }
 
 type JWTTokenClaims struct {
-	UserId string
-	Roles  []string
+	UserId       string
+	Role         string
+	EmailAddress string
 	jwt.StandardClaims
 }
 
@@ -45,9 +46,8 @@ func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	app.marshaler = JsonPbMarshaler{}
 
 	var authWrap HandlerFuncEx
-	oauthResource := util.GetOAuthResource("google.drive")
-	if oauthResource != nil {
-		authImpl := &OAuth2Impl{resource: oauthResource}
+	if len(util.GetConfiguration().OAuthUserFiles) > 0 {
+		authImpl := &OAuth2Impl{marshaler: app.marshaler}
 		authWrap = authImpl.Auth
 	}
 	logger.Infof("Register event listening on channel %s", "BOOK-CHANNEL")
@@ -57,10 +57,13 @@ func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	// you can enable trace by setting this to true
 	vestigo.AllowTrace = true
 
-	mware := chain(recoverWrap, traceWrap, authWrap)
+	mware := chain( /*recoverWrap,*/ enableCors, traceWrap, authWrap)
 	router.Get("/tusach/book/get/:id", mware(app.GetBook))
 	router.Get("/tusach/book/list/:timestamp", mware(app.GetBooks))
 	router.Post("/tusach/book/command/:cmd", mware(app.UpdateBook))
+	router.Get("/login/:provider", mware(app.Login))
+	router.Get("/oauth/google/callback", mware(app.OAuthCallback))
+	router.Get("/*", mware(app.Other))
 
 	// TODO handle CORS
 
@@ -123,6 +126,26 @@ func (app *RestServer) downloadBook(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+func (app *RestServer) Login(w http.ResponseWriter, r *http.Request) {
+	provider := vestigo.Param(r, "provider")
+	logger.Infof("Login - provider:%s", provider)
+	userRes := util.GetOAuthUserResource(provider)
+	if userRes == nil {
+		app.marshaler.SetResponseError(w, http.StatusBadRequest, "Invalid provider: '"+provider+"'")
+		return
+	}
+	// return the redirect url
+
+}
+
+func (app *RestServer) OAuthCallback(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *RestServer) Other(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (app *RestServer) GetBook(w http.ResponseWriter, r *http.Request) {
 	idstr := vestigo.Param(r, "id")
 	logger.Infof("GetBook - id:%s", idstr)
@@ -149,8 +172,8 @@ func (app *RestServer) GetBooks(w http.ResponseWriter, r *http.Request) {
 	}
 	systemInfo := app.bookMaker.GetSystemInfo()
 	systemTimestamp := util.Timestamp2UnixTime(systemInfo.SystemUpTime)
-	requestTimeStr, _ := util.Time2String(util.UnixTime2Time(timestamp))
-	systemTimeStr, _ := util.Time2String(util.UnixTime2Time(systemTimestamp))
+	requestTimeStr := util.Time2String(util.UnixTime2Time(timestamp))
+	systemTimeStr := util.Time2String(util.UnixTime2Time(systemTimestamp))
 	logger.Infof("GetBooks - timestamp:%d(%s), systemUpTime:%d(%s)",
 		timestamp, requestTimeStr, systemTimestamp, systemTimeStr)
 	bookList := model.BookList{}
@@ -248,7 +271,11 @@ func (app *RestServer) CreateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//newBook.CreatedBy = ctx.User.Name
+	newBook.CreatedBy = ""
+	userId := r.Context().Value("user")
+	if userId != nil {
+		newBook.CreatedBy = userId.(string)
+	}
 
 	// prevent too many concurrent books creation
 	numActive := 0

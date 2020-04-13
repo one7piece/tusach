@@ -1,0 +1,8 @@
+{
+	"name": "google",
+	"clientID": "11763800411-roc8crnnsk22i1nmmflefbokv6dukeel.apps.googleusercontent.com",
+	"clientSecret": "zi4VJDQdajcP6Oce0QA8fq-p",
+	"scope": "https://www.googleapis.com/auth/drive",
+	"redirect": "https://3570d312.ngrok.io/api/oauth/google/callback",
+	"endpoint" : ""
+}

@@ -83,8 +83,11 @@ export class TusachRest {
   updateBook(book: model.Book, cmd: string) : void {
     const url = this.tusachUrl + "/book/command/" + cmd;
     var jsonBook = model.toJsonBook(book);
+    let headers = new HttpHeaders({'Content-Type': 'application/json'});
+    // need to set withCredentials to auto set cookie in request
+    let options = { headers: headers, withCredentials: true };    
     this.log(url + " - " + JSON.stringify(jsonBook));
-    this.http.post(url, jsonBook).subscribe(
+    this.http.post(url, jsonBook, options).subscribe(
       data => {this.log("updateBook() - " + cmd + " book successfully. " + data)},
       error => {this.log("updateBook() - " + cmd + " book failed: " + error)}
     );
@@ -98,6 +101,19 @@ export class TusachRest {
     this.http.post(url, model.toJsonBook(book)).subscribe(
       data => {this.log("deleteBook() - book deleted successfully. " + data)},
       error => {this.log("deleteBook() - book deleted error: " + error)}
+    );
+  }
+
+  login(provider: string) : void {
+    const url = "/api/login/" + provider;
+    this.log(url);
+
+    this.http.get(url).subscribe(
+      data => {
+        this.log("login() - redirect url: " + data)
+        window.location.href = data["redirectUrl"];
+      },
+      error => {this.log("login() - login error: " + error)}
     );
   }
 

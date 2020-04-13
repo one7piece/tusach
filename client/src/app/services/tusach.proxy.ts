@@ -20,4 +20,6 @@ export interface ITusachProxy {
   deleteBook(id: number): void;
 
   enableChangeDetection(enable: boolean) : void;
+
+  login(provider: string) : void;
 }

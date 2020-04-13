@@ -9,6 +9,9 @@ import { IBookListener, ITusachProxy} from './tusach.proxy';
 import { TusachRest } from './tusach.rest';
 import { TusachGrpc } from './tusach.grpc';
 import { Message } from '@angular/compiler/src/i18n/i18n_ast';
+import { CookieService } from 'ngx-cookie-service';
+import { UserProfile } from './user.profile';
+import * as jwt_decode from 'jwt-decode';
 
 export enum ServiceType {
   GRPC = "grpc",
@@ -29,6 +32,7 @@ export class TusachService {
   constructor(
     //private location : Location,
     private http: HttpClient, 
+    private cookieService: CookieService,
     private messageService: MessageService) {  
 
     const url = window.location.href;
@@ -45,6 +49,21 @@ export class TusachService {
       }
     }
     this.setServiceType(serviceType);
+  }
+
+  getLogonUser() : UserProfile {
+    let jwt = this.cookieService.get("tusach.jwt");
+    if (jwt != null && jwt != "") {
+      let token = jwt_decode(jwt);
+      console.log("jwt: " + jwt + ", decoded token:");
+      console.log(token);
+      let userId = token['UserId'];
+      let role = token['Role'];
+      let emailAddress = token['EmailAddress'];
+      let expiresAt = token['ExpiresAt'];
+      return new UserProfile(userId, emailAddress, role, expiresAt);
+    }
+    return null;
   }
 
   setServiceType(type: ServiceType) {
@@ -113,6 +132,10 @@ export class TusachService {
 
   deleteBook(id: number) : void {
     this.proxy.deleteBook(id);
+  }
+
+  login(provider: string) : void {
+    this.proxy.login(provider);
   }
 
   /** Log a HeroService message with the MessageService */
