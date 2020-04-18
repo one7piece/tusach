@@ -31,7 +31,7 @@ export class RequestInterceptor implements HttpInterceptor {
       err => {
         console.log(err);
         // handle error        
-        let msg = `Response: ${request.method} "${request.urlWithParams}" ERROR: ${err.error.message}`;
+        let msg = `Response: ${request.method} "${request.urlWithParams}" FAILED: ${err.message}(${err.error})`;
         console.log(msg);
         this.messages.add(msg);
       })

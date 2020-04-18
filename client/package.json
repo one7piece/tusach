@@ -24,8 +24,8 @@
     "@angular/router": "~8.2.13",
     "@asymmetrik/ngx-leaflet": "^6.0.1",
     "core-js": "^3.3.6",
-    "google-protobuf": "^3.7.1",
-    "grpc-web": "^1.0.4",
+    "google-protobuf": "^3.11.4",
+    "grpc-web": "^1.0.7",
     "jwt-decode": "^2.2.0",
     "ngx-cookie-service": "^3.0.4",
     "rxjs": "~6.5.3",
@@ -33,7 +33,7 @@
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^0.803.24",
+    "@angular-devkit/build-angular": "^0.803.17",
     "@angular/cli": "~8.3.17",
     "@angular/compiler-cli": "~8.2.13",
     "@angular/language-service": "~8.2.13",

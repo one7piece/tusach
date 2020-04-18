@@ -3,16 +3,16 @@
   "status": 2,
   "title": "Kiem Lai (dich)",
   "author": "Phong Hoa Hi Chu Hau",
-  "created_time": {
-    "seconds": 1584780781,
+  "created_time": {					
+    "seconds": 1584781102,
     "nanos": 983816600
   },
   "start_page_url": "https://truyenyy.com/truyen/kiem-lai-phong-hoa-hi-chu-hau-ban-dich/chuong-1.html",
-  "current_page_url": "https://truyenyy.com/truyen/kiem-lai-phong-hoa-hi-chu-hau-ban-dich/chuong-200.html",
-  "current_page_no": 200,
-  "max_num_pages": 400,
+  "current_page_url": "https://truyenyy.com/truyen/kiem-lai-phong-hoa-hi-chu-hau-ban-dich/chuong-597.html",
+  "current_page_no": 597,
+  "max_num_pages": 0,
   "last_updated_time": {
-    "seconds": 1584781092,
+    "seconds": 1587081102,
     "nanos": 9742100
   },
   "epub_created": true

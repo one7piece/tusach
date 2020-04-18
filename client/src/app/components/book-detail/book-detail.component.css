@@ -4,3 +4,6 @@
 .bookdetail-field {
   width: 80%;
 }
+.status-field {
+  color: red;
+}

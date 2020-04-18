@@ -55,6 +55,9 @@ export class BooksComponent implements OnInit {
     return color;
   }
 
+  bookUpdateStatus(book: model.Book, cmd: string, success: boolean, errorMsg: string) {
+  }
+
   bookUpdated(book: model.Book) {
     let sortPending = false;
     let index = this.findBookIndex(book.getId());

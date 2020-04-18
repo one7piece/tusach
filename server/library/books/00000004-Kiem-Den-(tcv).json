@@ -1,0 +1,17 @@
+{
+  "id": 4,
+  "status": 2,
+  "title": "Kiem Den (tcv)",
+  "created_time": {
+    "seconds": 1586333450,
+    "nanos": 915600000
+  },
+  "start_page_url": "https://truyencv.com/kiem-den/chuong-1/",
+  "current_page_url": "https://truyencv.com/kiem-den/chuong-726/",
+  "current_page_no": 726,
+  "last_updated_time": {
+    "seconds": 1586334319,
+    "nanos": 74703100
+  },
+  "epub_created": true
+}

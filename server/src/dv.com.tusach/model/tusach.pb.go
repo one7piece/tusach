@@ -10,6 +10,8 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -823,6 +825,41 @@ type TusachServer interface {
 	AbortBook(context.Context, *BookID) (*empty.Empty, error)
 	ResumeBook(context.Context, *BookID) (*empty.Empty, error)
 	Login(context.Context, *LoginRequest) (*LoginReply, error)
+}
+
+// UnimplementedTusachServer can be embedded to have forward compatible implementations.
+type UnimplementedTusachServer struct {
+}
+
+func (*UnimplementedTusachServer) GetBooks(ctx context.Context, req *empty.Empty) (*BookList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBooks not implemented")
+}
+func (*UnimplementedTusachServer) QueryBooks(ctx context.Context, req *timestamp.Timestamp) (*BookList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryBooks not implemented")
+}
+func (*UnimplementedTusachServer) Subscribe(req *empty.Empty, srv Tusach_SubscribeServer) error {
+	return status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
+}
+func (*UnimplementedTusachServer) GetBook(ctx context.Context, req *BookID) (*Book, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBook not implemented")
+}
+func (*UnimplementedTusachServer) CreateBook(ctx context.Context, req *NewBookRequest) (*Book, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBook not implemented")
+}
+func (*UnimplementedTusachServer) UpdateBook(ctx context.Context, req *Book) (*Book, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateBook not implemented")
+}
+func (*UnimplementedTusachServer) DeleteBook(ctx context.Context, req *BookID) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBook not implemented")
+}
+func (*UnimplementedTusachServer) AbortBook(ctx context.Context, req *BookID) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AbortBook not implemented")
+}
+func (*UnimplementedTusachServer) ResumeBook(ctx context.Context, req *BookID) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResumeBook not implemented")
+}
+func (*UnimplementedTusachServer) Login(ctx context.Context, req *LoginRequest) (*LoginReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 
 func RegisterTusachServer(s *grpc.Server, srv TusachServer) {

@@ -57,7 +57,7 @@ func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	// you can enable trace by setting this to true
 	vestigo.AllowTrace = true
 
-	mware := chain( /*recoverWrap,*/ enableCors, traceWrap, authWrap)
+	mware := chain( /*recoverWrap,*/ traceWrap, enableCors, authWrap)
 	router.Get("/tusach/book/get/:id", mware(app.GetBook))
 	router.Get("/tusach/book/list/:timestamp", mware(app.GetBooks))
 	router.Post("/tusach/book/command/:cmd", mware(app.UpdateBook))
@@ -219,7 +219,7 @@ func (app *RestServer) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updateBook := model.Book{}
-	err := app.marshaler.GetRequestPayload(r, &updateBook)
+	_, err := app.marshaler.GetRequestPayload(r, &updateBook)
 	if err != nil {
 		logger.Errorf("Invalid request book payload [%s] %v\n", r.Body, err)
 		app.marshaler.SetResponseError(w, http.StatusBadRequest, "Invalid request book payload: "+err.Error())
@@ -254,7 +254,7 @@ func (app *RestServer) UpdateBook(w http.ResponseWriter, r *http.Request) {
 
 func (app *RestServer) CreateBook(w http.ResponseWriter, r *http.Request) {
 	newBook := model.Book{}
-	err := app.marshaler.GetRequestPayload(r, &newBook)
+	_, err := app.marshaler.GetRequestPayload(r, &newBook)
 	if err != nil {
 		logger.Errorf("Invalid request book payload: %v\n", err)
 		app.marshaler.SetResponseError(w, http.StatusInternalServerError, "Invalid request book payload: "+err.Error())

@@ -201,10 +201,13 @@ func (drv *GoogleDriveStore) uploadBook(book *model.Book, currentBooks []DriveBo
 		}
 	}()
 
-	jsonFile := &drive.File{Name: jsonFileName, Parents: []string{drv.tusachFolderId}, MimeType: "text/plain"}
-	epubFile := &drive.File{Name: epubFileName, Parents: []string{drv.tusachFolderId}, MimeType: "application/epub+zip"}
+	jsonFile := &drive.File{Name: jsonFileName, MimeType: "text/plain"}
+	epubFile := &drive.File{Name: epubFileName, MimeType: "application/epub+zip"}
 
 	if currentBook == nil {
+		jsonFile.Parents = []string{drv.tusachFolderId}
+		epubFile.Parents = []string{drv.tusachFolderId}
+
 		// create new Json file
 		logger.Infof("creating json file: %s\n", epubFile.Name)
 		createdFile, err := drv.service.Files.Create(jsonFile).Media(jsonMediaFile).Do()

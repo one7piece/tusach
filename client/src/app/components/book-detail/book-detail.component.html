@@ -1,4 +1,8 @@
 <div class="bookdetail-form" *ngIf="book" layout="column" layout-align="center center">
+  <div>
+    <p class="status-field">{{status}}</p>
+  </div>
+
   <form *ngIf="book.id == 0">
     <h2>New Book</h2>
     <mat-divider></mat-divider>
@@ -37,6 +41,9 @@
     <mat-form-field flex layout="row" class="bookdetail-field">
       <input type="number" matInput [readonly]="isBookInProgress()" placeholder="Number Of Chapters" [(ngModel)]="book.maxNumPages" name="maxNumPages">
     </mat-form-field>    
+    <mat-form-field class="bookdetail-field">
+      <input matInput readonly type="text" placeholder="Created By" value="{{book.createdBy}}">
+    </mat-form-field>
     <mat-form-field class="bookdetail-field">
       <input matInput readonly type="text" placeholder="Status" value={{getBookStatus()}}>
     </mat-form-field>

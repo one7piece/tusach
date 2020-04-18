@@ -6,9 +6,9 @@ set OUT_DIR=%PROTO_DIR%\generated\go
 
 echo Generating go files from .proto file
 echo Ensure that you've installed (via go get) the following:
-echo a) protoc compiler
+echo a) protoc compiler (download from 
 echo b) google.golang.org/grpc package
-echo c) github.com/golang/protobuf/protoc-gen-go
+echo c) go install github.com/golang/protobuf/protoc-gen-go (generate dev/go/bin/protoc-gen-go.exe)
 rem echo Note that the env PATH should include the path of protoc-gen-go.exe (default to $GOPATH\bin)
 echo proto directory: %PROTO_DIR%
 pause

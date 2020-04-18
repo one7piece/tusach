@@ -94,6 +94,12 @@ export class TusachService {
     }
   }
 
+  bookUpdateStatus(book: model.Book, cmd: string, success: boolean, errorMsg: string) {
+    for (var i=0; i<this.listeners.length; i++) {
+      this.listeners[i].bookUpdateStatus(book, cmd, success, errorMsg);
+    }
+  }
+
   subscribe(l: IBookListener): void {
     if (this.listeners.indexOf(l) == -1) {
       this.log("add subscriber: " + l);

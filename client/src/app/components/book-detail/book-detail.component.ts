@@ -13,6 +13,7 @@ import { filter } from 'rxjs/operators';
 export class BookDetailComponent implements OnInit {
   book: model.Book.AsObject;
   error: string;
+  status: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -115,13 +116,24 @@ export class BookDetailComponent implements OnInit {
 
   booksUpdated(list: model.BookList) {
     for (var book of list.getBooksList()) {
-      if (this.book.id == book.getId()) {
+      if (this.book != null && this.book.id == book.getId()) {
         this.book = book.toObject();        
         break;
       }
     }
-    if (this.book.deleted) {
+    if (this.book != null && this.book.deleted) {
       this.router.navigate(['books']);
+    }
+  }
+
+  bookUpdateStatus(book: model.Book, cmd: string, success: boolean, errorMsg: string) {
+    console.log("bookUpdateStatus() - " + book.getTitle() + ": " + cmd + (success ? " succeeded" : " failed: " + errorMsg));
+    if (book.getId() == 0 || (this.book.id > 0 && this.book.id == book.getId())) {      
+      if (success) {
+        this.status = "Book " + cmd + " executed successfully";
+      } else {
+        this.status = "Book " + cmd + " failed to execute. " + errorMsg;
+      }
     }
   }
 

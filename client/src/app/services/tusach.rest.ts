@@ -88,8 +88,15 @@ export class TusachRest {
     let options = { headers: headers, withCredentials: true };    
     this.log(url + " - " + JSON.stringify(jsonBook));
     this.http.post(url, jsonBook, options).subscribe(
-      data => {this.log("updateBook() - " + cmd + " book successfully. " + data)},
-      error => {this.log("updateBook() - " + cmd + " book failed: " + error)}
+      data => {
+        this.log("updateBook() - " + cmd + " book successfully. " + data);
+        this.listener.bookUpdateStatus(book, cmd, true, "");
+      },
+      err => {
+        this.log("updateBook() - " + cmd + " book failed: " + JSON.stringify(err));
+        // what type is this err!!!
+        this.listener.bookUpdateStatus(book, cmd, false, err.status + " - " + err.statusText);
+      }
     );
   }
 
@@ -98,7 +105,11 @@ export class TusachRest {
     this.log(url + " - " + id);
     let book = new model.Book();
     book.setId(id);
-    this.http.post(url, model.toJsonBook(book)).subscribe(
+
+    let headers = new HttpHeaders({'Content-Type': 'application/json'});
+    // need to set withCredentials to auto set cookie in request
+    let options = { headers: headers, withCredentials: true };    
+    this.http.post(url, model.toJsonBook(book), options).subscribe(
       data => {this.log("deleteBook() - book deleted successfully. " + data)},
       error => {this.log("deleteBook() - book deleted error: " + error)}
     );

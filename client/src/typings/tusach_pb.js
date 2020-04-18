@@ -1,3 +1,4 @@
+// source: tusach.proto
 /**
  * @fileoverview
  * @enhanceable
@@ -219,13 +220,15 @@ if (goog.DEBUG && !COMPILED) {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.LoginRequest.prototype.toObject = function(opt_includeInstance) {
@@ -235,15 +238,15 @@ proto.model.LoginRequest.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.LoginRequest} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.LoginRequest.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     provider: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
@@ -333,9 +336,12 @@ proto.model.LoginRequest.prototype.getProvider = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.LoginRequest} returns this
+ */
 proto.model.LoginRequest.prototype.setProvider = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -344,13 +350,15 @@ proto.model.LoginRequest.prototype.setProvider = function(value) {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.LoginReply.prototype.toObject = function(opt_includeInstance) {
@@ -360,15 +368,15 @@ proto.model.LoginReply.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.LoginReply} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.LoginReply.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     jwt: jspb.Message.getFieldWithDefault(msg, 1, "")
   };
 
@@ -458,9 +466,12 @@ proto.model.LoginReply.prototype.getJwt = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.LoginReply} returns this
+ */
 proto.model.LoginReply.prototype.setJwt = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -469,13 +480,15 @@ proto.model.LoginReply.prototype.setJwt = function(value) {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.User.prototype.toObject = function(opt_includeInstance) {
@@ -485,15 +498,15 @@ proto.model.User.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.User} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.User.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     name: jspb.Message.getFieldWithDefault(msg, 1, ""),
     roles: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
@@ -595,9 +608,12 @@ proto.model.User.prototype.getName = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.User} returns this
+ */
 proto.model.User.prototype.setName = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -610,9 +626,12 @@ proto.model.User.prototype.getRoles = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.User} returns this
+ */
 proto.model.User.prototype.setRoles = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -621,13 +640,15 @@ proto.model.User.prototype.setRoles = function(value) {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.SystemInfo.prototype.toObject = function(opt_includeInstance) {
@@ -637,15 +658,15 @@ proto.model.SystemInfo.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.SystemInfo} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.SystemInfo.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     systemUpTime: (f = msg.getSystemUpTime()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     bookLastUpdatedTime: (f = msg.getBookLastUpdatedTime()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f)
   };
@@ -752,17 +773,21 @@ proto.model.SystemInfo.prototype.getSystemUpTime = function() {
 };
 
 
-/** @param {?proto.google.protobuf.Timestamp|undefined} value */
+/**
+ * @param {?proto.google.protobuf.Timestamp|undefined} value
+ * @return {!proto.model.SystemInfo} returns this
+*/
 proto.model.SystemInfo.prototype.setSystemUpTime = function(value) {
-  jspb.Message.setWrapperField(this, 1, value);
+  return jspb.Message.setWrapperField(this, 1, value);
 };
 
 
 /**
  * Clears the message field making it undefined.
+ * @return {!proto.model.SystemInfo} returns this
  */
 proto.model.SystemInfo.prototype.clearSystemUpTime = function() {
-  this.setSystemUpTime(undefined);
+  return this.setSystemUpTime(undefined);
 };
 
 
@@ -785,17 +810,21 @@ proto.model.SystemInfo.prototype.getBookLastUpdatedTime = function() {
 };
 
 
-/** @param {?proto.google.protobuf.Timestamp|undefined} value */
+/**
+ * @param {?proto.google.protobuf.Timestamp|undefined} value
+ * @return {!proto.model.SystemInfo} returns this
+*/
 proto.model.SystemInfo.prototype.setBookLastUpdatedTime = function(value) {
-  jspb.Message.setWrapperField(this, 2, value);
+  return jspb.Message.setWrapperField(this, 2, value);
 };
 
 
 /**
  * Clears the message field making it undefined.
+ * @return {!proto.model.SystemInfo} returns this
  */
 proto.model.SystemInfo.prototype.clearBookLastUpdatedTime = function() {
-  this.setBookLastUpdatedTime(undefined);
+  return this.setBookLastUpdatedTime(undefined);
 };
 
 
@@ -813,13 +842,15 @@ proto.model.SystemInfo.prototype.hasBookLastUpdatedTime = function() {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.BookID.prototype.toObject = function(opt_includeInstance) {
@@ -829,15 +860,15 @@ proto.model.BookID.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.BookID} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.BookID.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     id: jspb.Message.getFieldWithDefault(msg, 1, 0)
   };
 
@@ -927,9 +958,12 @@ proto.model.BookID.prototype.getId = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.model.BookID} returns this
+ */
 proto.model.BookID.prototype.setId = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+  return jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
@@ -938,13 +972,15 @@ proto.model.BookID.prototype.setId = function(value) {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.Book.prototype.toObject = function(opt_includeInstance) {
@@ -954,15 +990,15 @@ proto.model.Book.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.Book} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.Book.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     id: jspb.Message.getFieldWithDefault(msg, 1, 0),
     status: jspb.Message.getFieldWithDefault(msg, 2, 0),
     title: jspb.Message.getFieldWithDefault(msg, 3, ""),
@@ -976,8 +1012,8 @@ proto.model.Book.toObject = function(includeInstance, msg) {
     maxNumPages: jspb.Message.getFieldWithDefault(msg, 11, 0),
     lastUpdatedTime: (f = msg.getLastUpdatedTime()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     errorMsg: jspb.Message.getFieldWithDefault(msg, 13, ""),
-    epubCreated: jspb.Message.getFieldWithDefault(msg, 14, false),
-    deleted: jspb.Message.getFieldWithDefault(msg, 15, false)
+    epubCreated: jspb.Message.getBooleanFieldWithDefault(msg, 14, false),
+    deleted: jspb.Message.getBooleanFieldWithDefault(msg, 15, false)
   };
 
   if (includeInstance) {
@@ -1224,9 +1260,12 @@ proto.model.Book.prototype.getId = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setId = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+  return jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
@@ -1239,9 +1278,12 @@ proto.model.Book.prototype.getStatus = function() {
 };
 
 
-/** @param {!proto.model.BookStatusType} value */
+/**
+ * @param {!proto.model.BookStatusType} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setStatus = function(value) {
-  jspb.Message.setProto3EnumField(this, 2, value);
+  return jspb.Message.setProto3EnumField(this, 2, value);
 };
 
 
@@ -1254,9 +1296,12 @@ proto.model.Book.prototype.getTitle = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setTitle = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -1269,9 +1314,12 @@ proto.model.Book.prototype.getAuthor = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setAuthor = function(value) {
-  jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
@@ -1285,17 +1333,21 @@ proto.model.Book.prototype.getCreatedTime = function() {
 };
 
 
-/** @param {?proto.google.protobuf.Timestamp|undefined} value */
+/**
+ * @param {?proto.google.protobuf.Timestamp|undefined} value
+ * @return {!proto.model.Book} returns this
+*/
 proto.model.Book.prototype.setCreatedTime = function(value) {
-  jspb.Message.setWrapperField(this, 5, value);
+  return jspb.Message.setWrapperField(this, 5, value);
 };
 
 
 /**
  * Clears the message field making it undefined.
+ * @return {!proto.model.Book} returns this
  */
 proto.model.Book.prototype.clearCreatedTime = function() {
-  this.setCreatedTime(undefined);
+  return this.setCreatedTime(undefined);
 };
 
 
@@ -1317,9 +1369,12 @@ proto.model.Book.prototype.getCreatedBy = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setCreatedBy = function(value) {
-  jspb.Message.setProto3StringField(this, 6, value);
+  return jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -1332,9 +1387,12 @@ proto.model.Book.prototype.getBuildTimeSec = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setBuildTimeSec = function(value) {
-  jspb.Message.setProto3IntField(this, 7, value);
+  return jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
@@ -1347,9 +1405,12 @@ proto.model.Book.prototype.getStartPageUrl = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setStartPageUrl = function(value) {
-  jspb.Message.setProto3StringField(this, 8, value);
+  return jspb.Message.setProto3StringField(this, 8, value);
 };
 
 
@@ -1362,9 +1423,12 @@ proto.model.Book.prototype.getCurrentPageUrl = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setCurrentPageUrl = function(value) {
-  jspb.Message.setProto3StringField(this, 9, value);
+  return jspb.Message.setProto3StringField(this, 9, value);
 };
 
 
@@ -1377,9 +1441,12 @@ proto.model.Book.prototype.getCurrentPageNo = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setCurrentPageNo = function(value) {
-  jspb.Message.setProto3IntField(this, 10, value);
+  return jspb.Message.setProto3IntField(this, 10, value);
 };
 
 
@@ -1392,9 +1459,12 @@ proto.model.Book.prototype.getMaxNumPages = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setMaxNumPages = function(value) {
-  jspb.Message.setProto3IntField(this, 11, value);
+  return jspb.Message.setProto3IntField(this, 11, value);
 };
 
 
@@ -1408,17 +1478,21 @@ proto.model.Book.prototype.getLastUpdatedTime = function() {
 };
 
 
-/** @param {?proto.google.protobuf.Timestamp|undefined} value */
+/**
+ * @param {?proto.google.protobuf.Timestamp|undefined} value
+ * @return {!proto.model.Book} returns this
+*/
 proto.model.Book.prototype.setLastUpdatedTime = function(value) {
-  jspb.Message.setWrapperField(this, 12, value);
+  return jspb.Message.setWrapperField(this, 12, value);
 };
 
 
 /**
  * Clears the message field making it undefined.
+ * @return {!proto.model.Book} returns this
  */
 proto.model.Book.prototype.clearLastUpdatedTime = function() {
-  this.setLastUpdatedTime(undefined);
+  return this.setLastUpdatedTime(undefined);
 };
 
 
@@ -1440,43 +1514,48 @@ proto.model.Book.prototype.getErrorMsg = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setErrorMsg = function(value) {
-  jspb.Message.setProto3StringField(this, 13, value);
+  return jspb.Message.setProto3StringField(this, 13, value);
 };
 
 
 /**
  * optional bool epub_created = 14;
- * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
- * You should avoid comparisons like {@code val === true/false} in those cases.
  * @return {boolean}
  */
 proto.model.Book.prototype.getEpubCreated = function() {
-  return /** @type {boolean} */ (jspb.Message.getFieldWithDefault(this, 14, false));
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 14, false));
 };
 
 
-/** @param {boolean} value */
+/**
+ * @param {boolean} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setEpubCreated = function(value) {
-  jspb.Message.setProto3BooleanField(this, 14, value);
+  return jspb.Message.setProto3BooleanField(this, 14, value);
 };
 
 
 /**
  * optional bool deleted = 15;
- * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
- * You should avoid comparisons like {@code val === true/false} in those cases.
  * @return {boolean}
  */
 proto.model.Book.prototype.getDeleted = function() {
-  return /** @type {boolean} */ (jspb.Message.getFieldWithDefault(this, 15, false));
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 15, false));
 };
 
 
-/** @param {boolean} value */
+/**
+ * @param {boolean} value
+ * @return {!proto.model.Book} returns this
+ */
 proto.model.Book.prototype.setDeleted = function(value) {
-  jspb.Message.setProto3BooleanField(this, 15, value);
+  return jspb.Message.setProto3BooleanField(this, 15, value);
 };
 
 
@@ -1492,13 +1571,15 @@ proto.model.BookList.repeatedFields_ = [1];
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.BookList.prototype.toObject = function(opt_includeInstance) {
@@ -1508,18 +1589,18 @@ proto.model.BookList.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.BookList} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.BookList.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     booksList: jspb.Message.toObjectList(msg.getBooksList(),
     proto.model.Book.toObject, includeInstance),
-    isFullList: jspb.Message.getFieldWithDefault(msg, 2, false)
+    isFullList: jspb.Message.getBooleanFieldWithDefault(msg, 2, false)
   };
 
   if (includeInstance) {
@@ -1622,9 +1703,12 @@ proto.model.BookList.prototype.getBooksList = function() {
 };
 
 
-/** @param {!Array<!proto.model.Book>} value */
+/**
+ * @param {!Array<!proto.model.Book>} value
+ * @return {!proto.model.BookList} returns this
+*/
 proto.model.BookList.prototype.setBooksList = function(value) {
-  jspb.Message.setRepeatedWrapperField(this, 1, value);
+  return jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
 
 
@@ -1640,26 +1724,28 @@ proto.model.BookList.prototype.addBooks = function(opt_value, opt_index) {
 
 /**
  * Clears the list making it empty but non-null.
+ * @return {!proto.model.BookList} returns this
  */
 proto.model.BookList.prototype.clearBooksList = function() {
-  this.setBooksList([]);
+  return this.setBooksList([]);
 };
 
 
 /**
  * optional bool is_full_list = 2;
- * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
- * You should avoid comparisons like {@code val === true/false} in those cases.
  * @return {boolean}
  */
 proto.model.BookList.prototype.getIsFullList = function() {
-  return /** @type {boolean} */ (jspb.Message.getFieldWithDefault(this, 2, false));
+  return /** @type {boolean} */ (jspb.Message.getBooleanFieldWithDefault(this, 2, false));
 };
 
 
-/** @param {boolean} value */
+/**
+ * @param {boolean} value
+ * @return {!proto.model.BookList} returns this
+ */
 proto.model.BookList.prototype.setIsFullList = function(value) {
-  jspb.Message.setProto3BooleanField(this, 2, value);
+  return jspb.Message.setProto3BooleanField(this, 2, value);
 };
 
 
@@ -1668,13 +1754,15 @@ proto.model.BookList.prototype.setIsFullList = function(value) {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.NewBookRequest.prototype.toObject = function(opt_includeInstance) {
@@ -1684,15 +1772,15 @@ proto.model.NewBookRequest.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.NewBookRequest} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.NewBookRequest.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     title: jspb.Message.getFieldWithDefault(msg, 1, ""),
     startPageUrl: jspb.Message.getFieldWithDefault(msg, 2, ""),
     author: jspb.Message.getFieldWithDefault(msg, 3, ""),
@@ -1818,9 +1906,12 @@ proto.model.NewBookRequest.prototype.getTitle = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.NewBookRequest} returns this
+ */
 proto.model.NewBookRequest.prototype.setTitle = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
@@ -1833,9 +1924,12 @@ proto.model.NewBookRequest.prototype.getStartPageUrl = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.NewBookRequest} returns this
+ */
 proto.model.NewBookRequest.prototype.setStartPageUrl = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -1848,9 +1942,12 @@ proto.model.NewBookRequest.prototype.getAuthor = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.NewBookRequest} returns this
+ */
 proto.model.NewBookRequest.prototype.setAuthor = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -1863,9 +1960,12 @@ proto.model.NewBookRequest.prototype.getMaxNumPages = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.model.NewBookRequest} returns this
+ */
 proto.model.NewBookRequest.prototype.setMaxNumPages = function(value) {
-  jspb.Message.setProto3IntField(this, 4, value);
+  return jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
@@ -1874,13 +1974,15 @@ proto.model.NewBookRequest.prototype.setMaxNumPages = function(value) {
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
 /**
- * Creates an object representation of this proto suitable for use in Soy templates.
+ * Creates an object representation of this proto.
  * Field names that are reserved in JavaScript and will be renamed to pb_name.
+ * Optional fields that are not set will be set to undefined.
  * To access a reserved field use, foo.pb_<name>, eg, foo.pb_default.
  * For the list of reserved names please see:
- *     com.google.apps.jspb.JsClassTemplate.JS_RESERVED_WORDS.
- * @param {boolean=} opt_includeInstance Whether to include the JSPB instance
- *     for transitional soy proto support: http://goto/soy-param-migration
+ *     net/proto2/compiler/js/internal/generator.cc#kKeyword.
+ * @param {boolean=} opt_includeInstance Deprecated. whether to include the
+ *     JSPB instance for transitional soy proto support:
+ *     http://goto/soy-param-migration
  * @return {!Object}
  */
 proto.model.Chapter.prototype.toObject = function(opt_includeInstance) {
@@ -1890,15 +1992,15 @@ proto.model.Chapter.prototype.toObject = function(opt_includeInstance) {
 
 /**
  * Static version of the {@see toObject} method.
- * @param {boolean|undefined} includeInstance Whether to include the JSPB
- *     instance for transitional soy proto support:
+ * @param {boolean|undefined} includeInstance Deprecated. Whether to include
+ *     the JSPB instance for transitional soy proto support:
  *     http://goto/soy-param-migration
  * @param {!proto.model.Chapter} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
 proto.model.Chapter.toObject = function(includeInstance, msg) {
-  var obj = {
+  var f, obj = {
     chapterNo: jspb.Message.getFieldWithDefault(msg, 1, 0),
     bookId: jspb.Message.getFieldWithDefault(msg, 2, 0),
     title: jspb.Message.getFieldWithDefault(msg, 3, ""),
@@ -2024,9 +2126,12 @@ proto.model.Chapter.prototype.getChapterNo = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.model.Chapter} returns this
+ */
 proto.model.Chapter.prototype.setChapterNo = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+  return jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
@@ -2039,9 +2144,12 @@ proto.model.Chapter.prototype.getBookId = function() {
 };
 
 
-/** @param {number} value */
+/**
+ * @param {number} value
+ * @return {!proto.model.Chapter} returns this
+ */
 proto.model.Chapter.prototype.setBookId = function(value) {
-  jspb.Message.setProto3IntField(this, 2, value);
+  return jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
@@ -2054,9 +2162,12 @@ proto.model.Chapter.prototype.getTitle = function() {
 };
 
 
-/** @param {string} value */
+/**
+ * @param {string} value
+ * @return {!proto.model.Chapter} returns this
+ */
 proto.model.Chapter.prototype.setTitle = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -2093,9 +2204,12 @@ proto.model.Chapter.prototype.getHtml_asU8 = function() {
 };
 
 
-/** @param {!(string|Uint8Array)} value */
+/**
+ * @param {!(string|Uint8Array)} value
+ * @return {!proto.model.Chapter} returns this
+ */
 proto.model.Chapter.prototype.setHtml = function(value) {
-  jspb.Message.setProto3BytesField(this, 4, value);
+  return jspb.Message.setProto3BytesField(this, 4, value);
 };
 
 

@@ -15,7 +15,7 @@ import (
 )
 
 type JsonMarshaler interface {
-	GetRequestPayload(r *http.Request, dest interface{}) error
+	GetRequestPayload(r *http.Request, dest interface{}) ([]byte, error)
 	SetResponseValue(w http.ResponseWriter, value interface{})
 	SetResponseError(w http.ResponseWriter, status int, message string)
 	SetResponseOK(w http.ResponseWriter)
@@ -24,19 +24,19 @@ type JsonMarshaler interface {
 type JsonPbMarshaler struct {
 }
 
-func (jpb JsonPbMarshaler) GetRequestPayload(r *http.Request, dest interface{}) error {
+func (jpb JsonPbMarshaler) GetRequestPayload(r *http.Request, dest interface{}) ([]byte, error) {
 	protoMsg, ok := dest.(proto.Message)
 	if !ok {
 		logger.Errorf("argument is NOT a proto.Message: %s", reflect.TypeOf(dest))
-		return errors.New("argument is not a proto.Message")
+		return nil, errors.New("argument is not a proto.Message")
 	}
-	bytes, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+	dataBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return err
+		return dataBytes, err
 	}
-	err = jsonpb.UnmarshalString(string(bytes), protoMsg)
-	return err
+	err = jsonpb.UnmarshalString(string(dataBytes), protoMsg)
+	return dataBytes, err
 }
 
 func (jpb JsonPbMarshaler) SetResponseOK(w http.ResponseWriter) {

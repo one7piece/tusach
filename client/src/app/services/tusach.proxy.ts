@@ -3,7 +3,8 @@ import * as model from '../../typings';
 
 export interface IBookListener {
   booksUpdated(list: model.BookList);
-  bookUpdated(list: model.Book);
+  bookUpdated(book: model.Book);
+  bookUpdateStatus(book: model.Book, cmd: string, success: boolean, errorMsg: string);
 }
 
 export interface ITusachProxy {
