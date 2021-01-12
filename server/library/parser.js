@@ -39,7 +39,11 @@ function js_downloadChapter() {
   goContext.Chapter.ChapterHtml = "<h2>" + goContext.Chapter.ChapterTitle + "</h2>" + goContext.Chapter.ChapterHtml;
   goContext.Chapter.ChapterHtml = goContext.Template.substr(0, index) + goContext.Chapter.ChapterHtml + "</body></html>"
   logInfo(goContext.Chapter.ChapterHtml);
-  logInfo(">>>>>>>> Next chapter: " + goContext.Chapter.NextChapterUrl + " <<<<<<<<<<<");  
+	if (chapterData.length < 500) {
+		logError("No chapter data downloaded.");  
+		goContext.Chapter.NextChapterUrl = "";
+	}
+	logInfo(">>>>>>>> Next chapter: " + goContext.Chapter.NextChapterUrl + " <<<<<<<<<<<");  
 }
 
 function js_begin() {
@@ -218,11 +222,14 @@ function getNextChapterURL(url) {
 
   result = "";
   if (isTruyenCuaTui()) {
-    var nextChapterPattern = "chuong-" + (goContext.Chapter.ChapterNo+1) + "-";
-    logDebug("parse url: " + fullURL + ", next chapter pattern: " + nextChapterPattern);
-    if (fullURL.indexOf(nextChapterPattern) != -1) {
+		if (goContext.ParentTagValues["class"] == "next") {
       result = fullURL;
-    }
+		}
+	} else if (isTangThuVien()) {																	
+		if (endsWith(goContext.Chapter.ChapterUrl, "/chuong-" + goContext.Chapter.ChapterNo)) {
+			var index = goContext.Chapter.ChapterUrl.lastIndexOf("/");
+			return goContext.Chapter.ChapterUrl.substring(0, index) + "/chuong-" + (goContext.Chapter.ChapterNo+1);
+		}
   } else {
     parent1 = getParentPath(goContext.Chapter.ChapterUrl);
     parent2 = getParentPath(fullURL);          
@@ -318,4 +325,8 @@ function endsWith(source, str) {
 
 function isTruyenCuaTui() {
   return fullPathPrefix.indexOf("truyencuatui") != -1;
+}
+
+function isTangThuVien() {
+  return fullPathPrefix.indexOf("tangthuvien") != -1;
 }

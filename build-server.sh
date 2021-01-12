@@ -11,12 +11,21 @@ cd $base_dir/server/src/dv.com.tusach
 echo go compile for $1, output: $output_path/tusach
 if [ "$1" == "arm" ]; then
 env GOOS=linux GOARM=7 GOARCH=$1 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
+elif [ "$1" == "arm64" ]; then
+env GOOS=linux GOARCH=$1 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
 elif [ "$1" == "amd64" ] || [ "$1" == "386" ]; then
 env GOOS=linux GOARCH=$1 go build -v -tags purego -o $output_path/tusach dv.com.tusach/app
 elif [ "$1" == "win" ]; then
 env GOOS=windows GOARCH=amd64 go build -v -tags purego -o $output_path/tusach.exe dv.com.tusach/app
-else 
-echo 'Usage: build-server.sh [arm|amd64|386|win]'
+elif [ "$1" == "all" ]; then
+echo go compile for linux AMD64
+env GOOS=linux GOARCH=amd64 go build -v -tags purego -o $output_path/tusach_amd64 dv.com.tusach/app
+echo go compile for linux ARM64
+env GOOS=linux GOARCH=arm64 go build -v -tags purego -o $output_path/tusach_arm64 dv.com.tusach/app
+echo go compile for windows
+env GOOS=windows GOARCH=amd64 go build -v -tags purego -o $output_path/tusach.exe dv.com.tusach/app
+else
+echo 'Usage: build-server.sh [arm|arm64|amd64|win|all]' 
 exit 1
 fi
 

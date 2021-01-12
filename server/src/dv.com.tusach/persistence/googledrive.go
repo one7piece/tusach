@@ -20,6 +20,7 @@ import (
 type DriveBookMeta struct {
 	FileId   string
 	FileName string
+	IsBinary bool
 }
 
 type DriveBook struct {
@@ -89,16 +90,16 @@ func (drv *GoogleDriveStore) LoadBooks() ([]DriveBook, error) {
 	for _, f := range fileList.Files {
 		if strings.HasSuffix(f.Name, ".json") {
 			book := DriveBook{Book: &model.Book{}}
-			book.JsonFile = &DriveBookMeta{FileId: f.Id, FileName: f.Name}
+			book.JsonFile = &DriveBookMeta{FileId: f.Id, FileName: f.Name, IsBinary: false}
 			data, err := drv.DownloadFile(book.JsonFile)
 			if err != nil {
 				logger.Infof("failed to download book meta %s: %v\n", f.Name, err)
-				return nil, err
+				continue
 			}
 			err = json.Unmarshal(data, &book.Book)
 			if err != nil {
 				logger.Infof("Error unmarshall book json file %s: %v\n", f.Name, err)
-				return nil, err
+				continue
 			}
 			// check for correct file name
 			expectedFilename := filepath.Base(GetBookMetaFilename(*book.Book))
@@ -117,7 +118,7 @@ func (drv *GoogleDriveStore) LoadBooks() ([]DriveBook, error) {
 		for _, f := range fileList.Files {
 			if epubFilename == f.Name {
 				logger.Infof("found epub file: %s/%s MimeType:%s\n", f.Name, f.Id, f.MimeType)
-				book.EpubFile = &DriveBookMeta{FileId: f.Id, FileName: f.Name}
+				book.EpubFile = &DriveBookMeta{FileId: f.Id, FileName: f.Name, IsBinary: true}
 				result = append(result, book)
 				break
 			}

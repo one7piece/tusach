@@ -2,7 +2,7 @@
 	"name": "google",
 	"clientID": "11763800411-roc8crnnsk22i1nmmflefbokv6dukeel.apps.googleusercontent.com",
 	"clientSecret": "zi4VJDQdajcP6Oce0QA8fq-p",
-	"scope": "https://www.googleapis.com/auth/userinfo.profile",
-	"redirect": "https://3b25ddd7.ngrok.io/api/oauth/google/callback",
+	"scope": " https://www.googleapis.com/auth/userinfo.email",
+	"redirect": "https://one7piece.ddns.net:8888/api/oauth/google/callback",
 	"endpoint" : ""
 }

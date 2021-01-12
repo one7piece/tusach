@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo service docker start
+#sudo service docker start
 
 # Absolute path to this script. /home/user/bin/foo.sh
 SCRIPT=$(readlink -f $0)
@@ -9,7 +9,8 @@ SCRIPTPATH=`dirname $SCRIPT`
 echo SCRIPTPATH=$SCRIPTPATH
 configFile=grpcenvoy.yaml
 containerId=grpcenvoy
-imageId=envoyproxy/envoy:latest
+imageId=envoyproxy/envoy:v1.14-latest
+
 #sudo docker stop $containerId
 #sudo docker rm $containerId
 # -P : publish all exposed ports to host interface 

@@ -103,13 +103,14 @@ export class TusachRest {
   deleteBook(id: number): void {
     const url = this.tusachUrl + "/book/command/delete";
     this.log(url + " - " + id);
-    let book = new model.Book();
-    book.setId(id);
+    let json = {id: id};
+    //let book = new model.Book();
+    //book.setId(id);
 
     let headers = new HttpHeaders({'Content-Type': 'application/json'});
     // need to set withCredentials to auto set cookie in request
     let options = { headers: headers, withCredentials: true };    
-    this.http.post(url, model.toJsonBook(book), options).subscribe(
+    this.http.post(url, json, options).subscribe(
       data => {this.log("deleteBook() - book deleted successfully. " + data)},
       error => {this.log("deleteBook() - book deleted error: " + error)}
     );

@@ -31,27 +31,20 @@ type OAuth2Impl struct {
 
 func (o *OAuth2Impl) Auth(w http.ResponseWriter, r *http.Request) (*context.Context, bool) {
 	//logger.Debugf("Authenticate URL: %s\n", r.URL.String())
-	// first check if it's a redirect
-	oauthResources := util.GetOAuthUserResources()
-	var userResource *util.OAuthUserResource
-	for _, res := range oauthResources {
-		if r.URL.Path == res.Redirect || strings.Contains(res.Redirect, r.URL.Path) {
-			userResource = res
-			break
-		}
-	}
 
-	if userResource != nil {
-		o.oauthProcessRedirect(userResource, w, r)
-	} else if index := strings.LastIndex(r.URL.Path, "/login/"); index != -1 {
-		provider := r.URL.Path[index+len("/login/"):]
-		logger.Infof("Login - provider:%s", provider)
-		userRes := util.GetOAuthUserResource(provider)
-		if userRes == nil {
-			o.marshaler.SetResponseError(w, http.StatusBadRequest, "Invalid provider: '"+provider+"'")
-		}
-		o.oauthLogin(userRes, w, r)
-		return nil, false
+	if strings.LastIndex(r.URL.Path, "/login/") != -1 || strings.LastIndex(r.URL.Path, "/oauth/") != -1 {
+		return nil, true
+		// if userResource != nil {
+		// 	o.oauthProcessRedirect(userResource, w, r)
+		// } else if index := strings.LastIndex(r.URL.Path, "/login/"); index != -1 {
+		// 	provider := r.URL.Path[index+len("/login/"):]
+		// 	logger.Infof("Login - provider:%s", provider)
+		// 	userRes := util.GetOAuthUserResource(provider)
+		// 	if userRes == nil {
+		// 		o.marshaler.SetResponseError(w, http.StatusBadRequest, "Invalid provider: '"+provider+"'")
+		// 	}
+		// 	o.oauthLogin(userRes, w, r)
+		// 	return nil, false
 	} else if r.Method != "GET" && util.GetConfiguration().CheckPermission != "false" {
 		errorMsg := ""
 		jwt := o.extractJwtToken(w, r)
@@ -75,6 +68,8 @@ func (o *OAuth2Impl) Auth(w http.ResponseWriter, r *http.Request) (*context.Cont
 		}
 		if errorMsg != "" {
 			logger.Error(errorMsg)
+			json := "{\"error\": \"" + errorMsg + "\"}"
+			fmt.Fprintf(w, "%s", json)
 			w.WriteHeader(http.StatusUnauthorized)
 			return nil, false
 		}
@@ -156,7 +151,9 @@ func (o *OAuth2Impl) authorize(w http.ResponseWriter, r *http.Request, token *JW
 	return true
 }
 
-func (o *OAuth2Impl) oauthLogin(userRes *util.OAuthUserResource, w http.ResponseWriter, r *http.Request) {
+func (o *OAuth2Impl) Login(userRes *util.OAuthUserResource, w http.ResponseWriter, r *http.Request) {
+	logger.Infof("Login - provider:%s", userRes.Name)
+
 	endpoint := google.Endpoint
 	if userRes.Name == "facebook" {
 		endpoint = facebook.Endpoint
@@ -190,15 +187,16 @@ func (o *OAuth2Impl) oauthLogin(userRes *util.OAuthUserResource, w http.Response
 	//w.Header().Set("Access-Control-Allow-Origin", "*")
 	//w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	//w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	logger.Infof("Redirect to provider login: %s\n", u)
+	logger.Infof("Redirect to provider auth url: %s\n", u)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "%s", "{\"redirectUrl\": \""+u+"\"}")
+
 	//http.Redirect(w, r, u, http.StatusTemporaryRedirect)
-	//http.Redirect(w, r, u, http.StatusFound)
 }
 
-func (o *OAuth2Impl) oauthProcessRedirect(userRes *util.OAuthUserResource, w http.ResponseWriter, r *http.Request) {
+func (o *OAuth2Impl) ProcessRedirect(userRes *util.OAuthUserResource, w http.ResponseWriter, r *http.Request) {
+	logger.Infof("ProcessRedirect - %s", r.URL.Path)
 	// get the authorization code
 	err := r.ParseForm()
 	if err != nil {
@@ -234,7 +232,7 @@ func (o *OAuth2Impl) oauthProcessRedirect(userRes *util.OAuthUserResource, w htt
 	// get the user information
 	client := googleOauthConfig.Client(context.Background(), token)
 
-	response, err := client.Get("https://www.googleapis.com/drive/v3/about?fields=user")
+	response, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
 		logger.Errorf("failed getting user info: %s", err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -249,23 +247,24 @@ func (o *OAuth2Impl) oauthProcessRedirect(userRes *util.OAuthUserResource, w htt
 	}
 	logger.Infof("logon user data: %s", string(contents))
 
-	var tokenData map[string]interface{}
-	if err = json.Unmarshal(contents, &tokenData); err != nil {
+	//var tokenData map[string]interface{}
+	userData := make(map[string]interface{})
+	if err = json.Unmarshal(contents, &userData); err != nil {
 		logger.Errorf("failed to unmarshal user data: %s", err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	userData := tokenData["user"].(map[string]interface{})
-	logger.Infof("token user name: %v", userData["displayName"])
+	//userData := tokenData["user"].(map[string]interface{})
+	logger.Infof("token user email: %v", userData["email"])
 
 	jwtExpiry := time.Now().Add(24 * 60 * time.Minute)
 	roleId := "guest"
-	if userData["emailAddress"] == "one7piece@gmail.com" {
+	if userData["email"] == "one7piece@gmail.com" {
 		roleId = "admin"
 	}
 
 	// store the access token & refresh token, and pass the JWT token back to the client
-	jwt, err := o.createJWTToken(jwtExpiry, userData["displayName"].(string), roleId, userData["emailAddress"].(string))
+	jwt, err := o.createJWTToken(jwtExpiry, userData["email"].(string), roleId, userData["email"].(string))
 	if err != nil {
 		logger.Errorf("failed to create jwt token: %s", err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -290,6 +289,7 @@ func (o *OAuth2Impl) oauthProcessRedirect(userRes *util.OAuthUserResource, w htt
 	w.WriteHeader(http.StatusFound)
 }
 
+/*
 func (o *OAuth2Impl) getGoogleEmailAddress(client *http.Client) (string, error) {
 	response, err := client.Get("https://www.googleapis.com/drive/v3/about?fields=user")
 	if err != nil {
@@ -301,7 +301,7 @@ func (o *OAuth2Impl) getGoogleEmailAddress(client *http.Client) (string, error) 
 	if err != nil {
 		logger.Errorf("failed reading user info response body: %s", err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
+		return "", err
 	}
 	logger.Infof("logon user data: %s", string(contents))
 
@@ -309,12 +309,13 @@ func (o *OAuth2Impl) getGoogleEmailAddress(client *http.Client) (string, error) 
 	if err = json.Unmarshal(contents, &tokenData); err != nil {
 		logger.Errorf("failed to unmarshal user data: %s", err.Error())
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
+		return "", err
 	}
 	userData := tokenData["user"].(map[string]interface{})
 	logger.Infof("token user name: %v", userData["displayName"])
+	return
 }
-
+*/
 func (o *OAuth2Impl) createJWTToken(expirationTime time.Time, userId string, role string, emailAddress string) (string, error) {
 	// Create the JWT claims, which includes the username and expiry time
 	claims := &JWTTokenClaims{

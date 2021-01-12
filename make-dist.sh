@@ -6,9 +6,9 @@ my_dir=$(cd `dirname $0` && pwd)
 # parent script (ie. this script). Use source to execute the script commands in the current shell environment
 source ./setenv.sh
 
-if [ -z "$1" ] || [ "$1" != "amd64" ] && [ "$1" != "386" ] && [ "$1" != "arm" ] && [ "$1" != "win" ]
+if [ -z "$1" ] || [ "$1" != "amd64" ] && [ "$1" != "arm" ] && [ "$1" != "win" ] && [ "$1" != "arm64" ] && [ "$1" != "all" ]
 then
-echo "Usage: make-dist [amd64|386|arm|win]"
+echo "Usage: make-dist [amd64|arm|arm64|win|all]"
 exit 1
 fi
 
@@ -22,11 +22,11 @@ rm -rf $output_path/*
 
 source ./build-server.sh $1
 
-source ./build-client.sh $1
+source ./build-client.sh
 
 echo "Creating tar file..."
 chmod +x $output_path/library/*.sh
 chmod +x $output_path/*.sh
-chmod +x $output_path/tusach
+chmod +x $output_path/tusach_*
 cd $output_path
-tar -czvf $my_dir/tusach-$1.tar.gz .
+# tar -czvf $my_dir/tusach-$1.tar.gz .

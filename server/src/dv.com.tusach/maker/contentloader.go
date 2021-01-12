@@ -267,12 +267,12 @@ func (loader *ContentLoader) Send(method string, url string, followRedirect bool
 		status = response.Status
 		logger.Infof("Received response status: %d, header: %v\n", response.Status, response.Header)
 	}
-
 	for name, value := range response.Cookies {
 		loader.Cookies[name] = value
-		//logger.Debugf("found cookie: &s=%s\n", name, value)
+		logger.Debugf("found cookie: %s=%s\n", name, value)
 	}
 	loader.Params["lastResponseBody"] = string(response.Body)
+	//logger.Debugf("lastResponseBody: &s\n", string(response.Body))
 	return status
 }
 

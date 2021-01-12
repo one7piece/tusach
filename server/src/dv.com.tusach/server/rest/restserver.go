@@ -6,6 +6,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"strconv"
+	"strings"
 
 	"dv.com.tusach/logger"
 	"dv.com.tusach/maker"
@@ -28,8 +29,9 @@ type JWTTokenClaims struct {
 }
 
 type RestServer struct {
-	bookMaker *maker.BookMaker
-	marshaler JsonMarshaler
+	bookMaker  *maker.BookMaker
+	marshaler  JsonMarshaler
+	oauth2Impl *OAuth2Impl
 }
 
 func (app *RestServer) ProcessEvent(event util.EventData) {
@@ -44,12 +46,8 @@ func (app *RestServer) ProcessEvent(event util.EventData) {
 func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	app.bookMaker = bookMaker
 	app.marshaler = JsonPbMarshaler{}
+	app.oauth2Impl = &OAuth2Impl{marshaler: app.marshaler}
 
-	var authWrap HandlerFuncEx
-	if len(util.GetConfiguration().OAuthUserFiles) > 0 {
-		authImpl := &OAuth2Impl{marshaler: app.marshaler}
-		authWrap = authImpl.Auth
-	}
 	logger.Infof("Register event listening on channel %s", "BOOK-CHANNEL")
 	util.GetEventManager().StartListening("BOOK-CHANNEL", app)
 
@@ -57,7 +55,7 @@ func (app *RestServer) Start(bookMaker *maker.BookMaker) error {
 	// you can enable trace by setting this to true
 	vestigo.AllowTrace = true
 
-	mware := chain( /*recoverWrap,*/ traceWrap, enableCors, authWrap)
+	mware := chain( /*recoverWrap,*/ traceWrap, enableCors, app.oauth2Impl.Auth)
 	router.Get("/tusach/book/get/:id", mware(app.GetBook))
 	router.Get("/tusach/book/list/:timestamp", mware(app.GetBooks))
 	router.Post("/tusach/book/command/:cmd", mware(app.UpdateBook))
@@ -129,17 +127,31 @@ func (app *RestServer) downloadBook(w http.ResponseWriter, r *http.Request) {
 func (app *RestServer) Login(w http.ResponseWriter, r *http.Request) {
 	provider := vestigo.Param(r, "provider")
 	logger.Infof("Login - provider:%s", provider)
+
 	userRes := util.GetOAuthUserResource(provider)
 	if userRes == nil {
+		logger.Errorf("Ïnvalid provider: %s", provider)
 		app.marshaler.SetResponseError(w, http.StatusBadRequest, "Invalid provider: '"+provider+"'")
 		return
 	}
-	// return the redirect url
-
+	app.oauth2Impl.Login(userRes, w, r)
 }
 
 func (app *RestServer) OAuthCallback(w http.ResponseWriter, r *http.Request) {
-
+	oauthResources := util.GetOAuthUserResources()
+	var userRes *util.OAuthUserResource
+	for _, res := range oauthResources {
+		if r.URL.Path == res.Redirect || strings.Contains(res.Redirect, r.URL.Path) {
+			userRes = res
+			break
+		}
+	}
+	if userRes == nil {
+		logger.Errorf("Ïnvalid callback url: %s", r.URL.Path)
+		app.marshaler.SetResponseError(w, http.StatusBadRequest, "Invalid callback url: '"+r.URL.Path+"'")
+		return
+	}
+	app.oauth2Impl.ProcessRedirect(userRes, w, r)
 }
 
 func (app *RestServer) Other(w http.ResponseWriter, r *http.Request) {
