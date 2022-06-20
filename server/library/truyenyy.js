@@ -5,10 +5,10 @@ chapContentPrefix = "/web-api/novel/chapter-content-get/";
 parsingState = "";
 csrfToken = "";
 sessionId = "";
-fullPathPrefix = "https://truyenyy.vn";
-originUrl = "https://truyenyy.vn";
-loginUrl = "https://truyenyy.vn/login/";
-refererUrl = "https://truyenyy.vn/login/";
+fullPathPrefix = "https://truyenyy.vip";
+originUrl = "https://truyenyy.vip";
+loginUrl = "https://truyenyy.vip/login/";
+refererUrl = "https://truyenyy.vip/login/";
 buffer = "";
 titleBuffer = "";
 divDepth = 0;
@@ -46,7 +46,7 @@ function js_downloadChapter() {
     if (str.indexOf(chapContentPrefix, 0) != -1) {
       downloadParts(headers, formdata);
     } else if (str.indexOf("Mua Chương Này") != -1 && str.indexOf("id=\"btn_buy\"") != -1) {
-      var pattern = "/account/vip/chapter/buy/api/\",{chap_id:'";
+      var pattern = "/account/vip/chapter/buy/api/\", {chap_id: '";
       var index = str.indexOf(pattern);
       var index2 = str.indexOf("'}", index+pattern.length);
       if (index != -1 && index2 != -1) {
@@ -148,7 +148,7 @@ function downloadParts(headers, formdata) {
 
 function login() {
   //formdata = {}
-  logInfo("sending loginGet to truyenyy.vn ...");
+  logInfo("sending loginGet to truyenyy.vip ...");
   csrfToken = "";
   parsingState = "loginGet"
   if (!sendRequest("GET", loginUrl, 20, 1, {}, {}, false)) {
@@ -156,7 +156,7 @@ function login() {
   }
 /*
   // send second loginGet to get cookie
-  logInfo("second loginGet to truyenyy.vn ...");
+  logInfo("second loginGet to truyenyy.vip ...");
   csrfToken = "";
   parsingState = "loginGet"
   if (!sendRequest("GET", loginUrl, 20, 1, {}, {}, false)) {
@@ -169,7 +169,7 @@ function login() {
   }
   logInfo("loginGet x-crsfToken: " + csrfToken);
 
-  logInfo("sending loginPost to truyenyy.vn ...");
+  logInfo("sending loginPost to truyenyy.vip ...");
   var formdata = {username: "one777piece", password: "Song0vui", next: ""};
   var headers = {Origin: originUrl, Referer: refererUrl};
   headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -180,7 +180,7 @@ function login() {
     return;
   }  
 /*
-  logInfo("second loginPost (GET) to truyenyy.vn ...");
+  logInfo("second loginPost (GET) to truyenyy.vip ...");
   parsingState = "loginPost";
   if (!sendRequest("GET", loginUrl, 20, 1, headers, formdata, true)) {
     return;
@@ -188,11 +188,11 @@ function login() {
 */
   sessionId = goContext.Cookies["truyenyy_sessionid"];
   if (sessionId && sessionId != "") {
-    logInfo("loginPost to truyenyy.vn succeeded, truyenyy_sessionid=" + sessionId);
+    logInfo("loginPost to truyenyy.vip succeeded, truyenyy_sessionid=" + sessionId);
     return true;
   }
   sessionId = "";
-  logError("loginPost to truyenyy.vn failed, no truyenyy_sessionid cookie found");
+  logError("loginPost to truyenyy.vip failed, no truyenyy_sessionid cookie found");
   return false;
 }
 

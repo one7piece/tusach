@@ -1,0 +1,26 @@
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+[req_distinguished_name]
+countryName = AU
+countryName_default = AU
+stateOrProvinceName = NSW
+stateOrProvinceName_default = NSW
+localityName = Sydney
+localityName_default = Sydney
+organizationalUnitName = one7piece
+organizationalUnitName_default = one7piece
+commonName = tusach.com
+commonName_max = 64
+
+[ v3_req ]
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = one7piece.com
+DNS.2 = one7piece.*.org
+DNS.3 = one7piece.*.net
+DNS.4 = one7piece.*.com
+DNS.5 = *.ngrok.io
