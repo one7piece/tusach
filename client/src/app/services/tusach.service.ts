@@ -27,7 +27,7 @@ export class TusachService {
   private proxy : ITusachProxy;
   private grpcService : TusachGrpc;
   private restService : TusachRest;
-  private host : String;
+  //private host : String;
   
   constructor(
     //private location : Location,
@@ -36,8 +36,8 @@ export class TusachService {
     private messageService: MessageService) {  
 
     const url = window.location.href;
-    this.host = url.substr(0, url.indexOf(":", "http://".length))
-    console.log("current url:" + url + ", host:" + this.host);
+    //this.host = url.substr(0, url.indexOf(":", "http://".length))
+    console.log("current url:" + url + ", host:" + window.location.host);
 
     var serviceType = ServiceType.REST;
     const search = window.location.search;
@@ -68,7 +68,7 @@ export class TusachService {
 
   setServiceType(type: ServiceType) {
     if (type == ServiceType.GRPC && this.grpcService == null) {
-      this.grpcService = new TusachGrpc(this.host, this.messageService, this);
+      this.grpcService = new TusachGrpc(this.messageService, this);
     } else if (type == ServiceType.REST && this.restService == null) {
       this.restService = new TusachRest(this.http, this.messageService, this);
     }

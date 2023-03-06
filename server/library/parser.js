@@ -35,13 +35,23 @@ function js_downloadChapter() {
   if (goContext.Chapter.ChapterTitle == "") {
     goContext.Chapter.ChapterTitle = "Chapter " + goContext.Chapter.ChapterNo;
   }
-  logInfo(">>>>>>>> chapter: " + goContext.Chapter.ChapterTitle + " <<<<<<<<<<<");
+  logInfo(">>>>>>>> chapter: " + goContext.Chapter.ChapterTitle + " <<<<<<<<<<< (" + goContext.Params["downloadSecondAttempt"] + ")");
   goContext.Chapter.ChapterHtml = "<h2>" + goContext.Chapter.ChapterTitle + "</h2>" + goContext.Chapter.ChapterHtml;
   goContext.Chapter.ChapterHtml = goContext.Template.substr(0, index) + goContext.Chapter.ChapterHtml + "</body></html>"
-  logInfo(goContext.Chapter.ChapterHtml);
+  logDebug(goContext.Chapter.ChapterHtml);
 	if (chapterData.length < 500) {
 		logError("No chapter data downloaded.");  
 		goContext.Chapter.NextChapterUrl = "";
+		if (goContext.Params["downloadSecondAttempt"] != "true") {
+			goContext.Params["downloadSecondAttempt"] = "true";
+			var url = getNextChapterURL(goContext.Chapter.ChapterUrl);
+			if (url != "") {
+				logInfo("download second attempt with url: " + url);  
+				goContext.Chapter.ChapterUrl = url;
+				js_downloadChapter();
+			}
+			goContext.Params["downloadSecondAttempt"] = "";
+		}
 	}
 	logInfo(">>>>>>>> Next chapter: " + goContext.Chapter.NextChapterUrl + " <<<<<<<<<<<");  
 }
@@ -215,20 +225,41 @@ function getNextChapterURL(url) {
     return "";
   }
   fullURL = getFullPath(url);
-  //logDebug("getNextChapterURL - " + url + " [" + fullURL + "]");
+  logDebug("getNextChapterURL - " + url + " downloadSecondAttempt:" 
+		+ goContext.Params["downloadSecondAttempt"]
+		+ " chapterUrl:" + goContext.Chapter.ChapterUrl
+		+ " chapterNo:" + goContext.Chapter.ChapterNo);
+		
   if (fullURL == "") {
     return "";
   }
+
+	if (goContext.Params["downloadSecondAttempt"] == "true") {
+    if (isDaoQuan()) {
+      var pattern = "\/[0-9]+\/chuong\-";
+      var arr = url.match(pattern);
+      if (arr.length == 1) {
+        var index1 = url.indexOf(arr[0]);
+        var index2 = url.lastIndexOf("/chuong-");
+        var n = parseInt(url.substr(index1+1, index2-index1-1), 10);
+        return goContext.Chapter.ChapterUrl.substring(0, index1+1) + (n+1) + "/chuong-" + goContext.Chapter.ChapterNo;
+      }		
+      return "";
+	  } else {
+		  return "";
+    }
+	}
 
   result = "";
   if (isTruyenCuaTui()) {
 		if (goContext.ParentTagValues["class"] == "next") {
       result = fullURL;
 		}
-	} else if (isTangThuVien()) {																	
-		if (endsWith(goContext.Chapter.ChapterUrl, "/chuong-" + goContext.Chapter.ChapterNo)) {
-			var index = goContext.Chapter.ChapterUrl.lastIndexOf("/");
-			return goContext.Chapter.ChapterUrl.substring(0, index) + "/chuong-" + (goContext.Chapter.ChapterNo+1);
+	} else if (isTangThuVien() || isDaoQuan()) {																	
+		var index = goContext.Chapter.ChapterUrl.lastIndexOf("/");
+		if (index != -1 && goContext.Chapter.ChapterUrl.substring(index).indexOf("/chuong-") != -1) {
+			var n = parseInt(goContext.Chapter.ChapterUrl.substring(index+"/chuong-".length), 10);
+			result = goContext.Chapter.ChapterUrl.substring(0, index) + "/chuong-" + (n+1);
 		}
   } else {
     parent1 = getParentPath(goContext.Chapter.ChapterUrl);
@@ -238,7 +269,7 @@ function getNextChapterURL(url) {
     if (parent1 == parent2 && currentChapterNo != -1 && (nextChapterNo == currentChapterNo+1 || nextChapterNo == currentChapterNo+2)) {
       result = fullURL;
     }
-    //logInfo("nextChapterURL - " + result + ", currentChapterNo:" + currentChapterNo + ", nextChapterNo:" + nextChapterNo);  
+    logDebug("nextChapterURL - " + result + ", currentChapterNo:" + currentChapterNo + ", nextChapterNo:" + nextChapterNo);  
   }
   
 	return result
@@ -329,4 +360,8 @@ function isTruyenCuaTui() {
 
 function isTangThuVien() {
   return fullPathPrefix.indexOf("tangthuvien") != -1;
+}
+
+function isDaoQuan() {
+  return fullPathPrefix.indexOf("daoquan") != -1;
 }

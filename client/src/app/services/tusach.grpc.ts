@@ -14,12 +14,11 @@ export class TusachGrpc {
   private stream: grpcWeb.ClientReadableStream<model.Book>;
 
   constructor(
-    private host: String,
     private messageService: MessageService,
     private listener: IBookListener) {
-
     this.detectChanges = false;
-    this.service = new model.TusachClient(host + ":8899", null, null);
+    this.service = new model.TusachClient(window.location.host, null, null);
+    //this.service = new model.TusachClient(host + ":8899", null, null);
     this.stream = null;
     this.subscribe();
   }

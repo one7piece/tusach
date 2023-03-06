@@ -57,6 +57,10 @@ func (bookMaker *BookMaker) AbortBook(bookId int32) error {
 		logger.Infof("aborting book: '%s'", current.Title)
 		current.Status = model.BookStatusType_ABORTED
 		bookMaker.abortedBooks[bookId] = true
+		_, err := bookMaker.saveBook(&current)
+		if err != nil {
+			return err
+		}
 	} else {
 		logger.Warnf("cannot abort book: '%s' due to unexpected status %d", current.Title, current.Status)
 	}
@@ -76,7 +80,7 @@ func (bookMaker *BookMaker) ResumeBook(bookId int32) error {
 	current.Status = model.BookStatusType_IN_PROGRESS
 	_, err := bookMaker.saveBook(&current)
 	if err != nil {
-		return nil
+		return err
 	}
 	return bookMaker.CreateBook(current)
 }
@@ -112,12 +116,14 @@ func (bookMaker *BookMaker) CreateBook(book model.Book) error {
 	current.CreatedTime = util.TimestampNow()
 	bookId, err := bookMaker.saveBook(&current)
 	if err != nil {
+		current.Status = model.BookStatusType_ERROR;
 		return err
 	}
 	current.Id = int32(bookId)
 
 	loader, err := bookMaker.CreateContentLoader(current.StartPageUrl)
 	if err != nil {
+		current.Status = model.BookStatusType_ERROR;
 		logger.Errorf("Error compiling parser.js: %s\n", err.Error())
 		return err
 	}

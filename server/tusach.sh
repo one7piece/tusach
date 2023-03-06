@@ -15,4 +15,4 @@ ABSPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 export ABSPATH
 echo ABSPATH=$ABSPATH
 echo "Starting $APP_NAME..."
-$ABSPATH/$APP_NAME -configFile=$ABSPATH/config.json
+$ABSPATH/$APP_NAME -configFile=$ABSPATH/$1

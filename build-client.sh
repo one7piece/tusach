@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# *** NOTE: this script must be run from within the windows GIT shell ***
 # 'export' export the variable to child processes of the shell, so variables exported in setenv.sh is not visible in the
 # parent script (ie. this script). Use source to execute the script commands in the current shell environment
 source ./setenv.sh
