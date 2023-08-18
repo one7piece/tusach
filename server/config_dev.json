@@ -1,0 +1,15 @@
+{
+	"serverPath" : "./html",
+	"libraryPath" : "./library",
+	"dbFilename" : "./library/tusach.ql",
+	"logLevel" : "info",
+	"logFile" : "./log/tusach.log",
+	"serverBindPort" : 8801,
+	"grpcBindPort" : 8802,
+	"sslKey" : "./oauth2/tusach.key",
+	"sslCert" : "./oauth2/tusach.crt",
+	"oAuthServiceFile": "./oauth2/google.service.account.json",
+	"oAuthUserFiles": ["./oauth2/google.oauth.id.json"],
+	"checkPermission": "false"
+}
+	

@@ -1,0 +1,22 @@
+[Unit]
+Description=EnvoyProxy service
+After=docker.service
+Requires=docker.service
+
+[Service]
+# systemd gives up restarting service if it fails to start more than 5 times within a 10s interval.
+# by default, systemd attempts to restart after 100ms, override with RestartSec parameter. If you 
+# set RestartSec=3, then the 5 failed attempts within 10s limit will never be met, and hence systemd 
+# will keep on trying to restart
+# override using the pair: StartLimitBurst and StartLimitIntervalSec, note that StartLimitIntervalSec must
+# be greater than RestartSec*StartLimitBurst otherwise the service will be restarted indefinitely
+Restart=always
+StartLimitIntervalSec=60
+StartLimitBurst=3
+RestartSec=10
+ExecStartPre=/bin/bash -c "/usr/bin/docker run --rm -d --name grpcenvoy -e ENVOY_UID=0 --net=host -P --privileged --mount type=bind,source=/opt/tusach,target=/envoy envoyproxy/envoy-dev:latest /usr/local/bin/envoy -c /envoy/grpcenvoy.yaml -l debug"
+ExecStart=/usr/bin/docker start -a grpcenvoy
+ExecStop=/usr/bin/docker stop -t 10 grpcenvoy
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,13 @@
+[Unit]
+Description=Tusach service
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+ExecStartPre=/bin/bash -c "/usr/bin/docker run -d --name tusach -e ENVOY_UID=0 --net=host -P --privileged --mount type=bind,source=/var/lib/tusach,target=/tusachmnt one7piece/tusach:buildx-latest"
+ExecStart=/usr/bin/docker start -a tusach
+ExecStop=/usr/bin/docker stop -t 10 tusach
+
+[Install]
+WantedBy=default.target

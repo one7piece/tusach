@@ -1,0 +1,29 @@
+* Docker buildx with multi-CPU arch 
+---------------------------------------------
+- Setup docker desktop (windows) with wsl-2
+- Enable Docker Experimental
+	{
+  "builder": {
+    "gc": {
+      "defaultKeepStorage": "20GB",
+      "enabled": true
+    }
+  },
+  "debug": true,
+		"experimental": true
+	}
+
+- Run "docker buildx ls" command to list the existing builders
+
+- Create a new builder which gives access to the new multi-architecture features
+	$ docker buildx create --name mybuilder --use
+	
+- Build docker image with multiple architectures
+	$ docker buildx build --platform linux/amd64,linux/arm64 --tag one7piece/tusach:latest --push .
+
+- A note regarding Dockerfile COPY/ADD:
+	The <src> for the COPY/ADD commands must be the current directory (where Dockerfile is) or 
+	one of its subdirectories. see https://docs.docker.com/engine/reference/builder/
+	
+	
+	
